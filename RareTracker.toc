@@ -1,6 +1,7 @@
 ## Interface: 80200
-## Title: RareCouncil
+## Title: RareTracker
 ## Author: Melroy van Nijnatten
 ## Version: 0.0.0
 
-RareCouncil.lua
+RareTrackerGlobals.lua
+RareTracker.lua
