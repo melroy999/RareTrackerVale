@@ -1,0 +1,6 @@
+## Interface: 80200
+## Title: RareCouncil
+## Author: Melroy van Nijnatten
+## Version: 0.0.0
+
+RareCouncil.lua
