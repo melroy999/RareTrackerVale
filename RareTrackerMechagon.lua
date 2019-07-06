@@ -52,7 +52,7 @@ local function InitializeInterfaceEntityNameFrame(parent)
 	for i=1, #rare_ids do
 		local npc_id = rare_ids[i]
 		f.strings[npc_id] = f:CreateFontString(nil, nil, "GameFontNormal")
-		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -i * 12)
+		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
 		f.strings[npc_id]:SetText(rare_names_localized["enUS"][npc_id])
 	end
 	
@@ -72,7 +72,7 @@ local function InitializeInterfaceEntityStatusFrame(parent)
 	for i=1, #rare_ids do
 		local npc_id = rare_ids[i]
 		f.strings[npc_id] = f:CreateFontString(nil, nil,"GameFontNormal")
-		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -i * 12)
+		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
 		f.strings[npc_id]:SetText("--")
 	end
 	
@@ -81,7 +81,7 @@ local function InitializeInterfaceEntityStatusFrame(parent)
 end
 
 local function InitializeInterface(f)
-	f:SetSize(300, 200)
+	f:SetSize(300, #rare_ids * 12 + 10 + 8)
 	local texture = f:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, 0.4)
 	texture:SetAllPoints(f)
