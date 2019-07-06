@@ -9,14 +9,13 @@ local rare_names_localized = data.rare_names_localized
 -- ##                              Core                              ##
 -- ####################################################################
 
-local RareTracker = CreateFrame("Frame", "RareTracker", UIParent);
---local RareTracker = CreateFrame("Frame", "RareTracker", UIParent, "BasicFrameTemplateWithInset");
+local RareTrackerMechagon = CreateFrame("Frame", "RareTrackerMechagon", UIParent);
 
 -- ####################################################################
 -- ##                        Helper functions                        ##
 -- ####################################################################
 
-function RareTracker:GetTargetHealthPercentage()
+function RareTrackerMechagon:GetTargetHealthPercentage()
 	-- Find the current and maximum health of the current target.
 	local current_hp = UnitHealth("target")
 	local max_hp = UnitHealthMax("target")
@@ -42,7 +41,7 @@ last_recorded_death = {}
 -- ####################################################################
 
 local function InitializeInterfaceEntityNameFrame(parent)
-	local f = CreateFrame("Frame", "RareTracker.entity_name_frame", parent)
+	local f = CreateFrame("Frame", "RareTrackerMechagon.entity_name_frame", parent)
 	f:SetSize(200, parent:GetHeight() - 10)
 	local texture = f:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, 0.3)
@@ -62,7 +61,7 @@ local function InitializeInterfaceEntityNameFrame(parent)
 end
 
 local function InitializeInterfaceEntityStatusFrame(parent)
-	local f = CreateFrame("Frame", "RareTracker.entity_status_frame", parent)
+	local f = CreateFrame("Frame", "RareTrackerMechagon.entity_status_frame", parent)
 	f:SetSize(85, parent:GetHeight() - 10)
 	local texture = f:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, 0.3)
@@ -96,19 +95,21 @@ local function InitializeInterface(f)
 	f:Hide()
 end
 
-function RareTracker:UpdateStatus(npc_id)
+function RareTrackerMechagon:UpdateStatus(npc_id)
 	if is_alive[npc_id] then
-		RareTracker.entity_status_frame.strings[npc_id]:SetText(current_health[npc_id].."%")
+		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText(current_health[npc_id].."%")
 	elseif last_recorded_death[npc_id] ~= nil then
-		RareTracker.entity_status_frame.strings[npc_id]:SetText("dead")
+		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText(math.floor(time() - last_recorded_death[npc_id]).."s")
+	else
+		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText("--")
 	end
 end
 
-function RareTracker:StartInterface()
+function RareTrackerMechagon:StartInterface()
 	self:Show()
 end
 
-function RareTracker:CloseInterface()
+function RareTrackerMechagon:CloseInterface()
 	-- reset the data, since we cannot guarantee its correctness.
 	is_alive = {}
 	current_health = {}
@@ -116,14 +117,14 @@ function RareTracker:CloseInterface()
 	self:Hide()
 end
 
-InitializeInterface(RareTracker)
+InitializeInterface(RareTrackerMechagon)
 
 -- ####################################################################
 -- ##                        Event Listeners                         ##
 -- ####################################################################
 
 -- Listen to a given set of events and handle them accordingly.
-function RareTracker:OnEvent(event, ...)
+function RareTrackerMechagon:OnEvent(event, ...)
 	if event == "PLAYER_TARGET_CHANGED" then
 		self:OnTargetChanged(...)
 	elseif event == "UNIT_HEALTH" then
@@ -137,7 +138,7 @@ function RareTracker:OnEvent(event, ...)
 	end
 end
 
-function RareTracker:OnTargetChanged(...)
+function RareTrackerMechagon:OnTargetChanged(...)
 	if UnitGUID("target") ~= nil then
 		-- Get information about the target.
 		local guid, name = UnitGUID("target"), UnitName("target")
@@ -152,7 +153,6 @@ function RareTracker:OnTargetChanged(...)
 				is_alive[npc_id] = true
 				current_health[npc_id] = self:GetTargetHealthPercentage()
 				last_recorded_death[npc_id] = nil
-				self:UpdateStatus(npc_id)
 			else 
 				is_alive[npc_id] = false
 				current_health[npc_id] = nil
@@ -161,13 +161,13 @@ function RareTracker:OnTargetChanged(...)
 					last_recorded_death[npc_id] = time()
 				end
 				
-				self:UpdateStatus(npc_id)
+				
 			end
 		end
 	end
 end
 
-function RareTracker:OnUnitHealth(unit)
+function RareTrackerMechagon:OnUnitHealth(unit)
 	-- If the unit is not the target, skip.
 	if unit ~= "target" then 
 		return 
@@ -182,12 +182,11 @@ function RareTracker:OnUnitHealth(unit)
 		if rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
 			current_health[npc_id] = self:GetTargetHealthPercentage()
-			self:UpdateStatus(npc_id)
 		end
 	end
 end
 
-function RareTracker:OnCombatLogEvent(...)
+function RareTrackerMechagon:OnCombatLogEvent(...)
 	-- The event itself does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
 	local timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
@@ -198,21 +197,15 @@ function RareTracker:OnCombatLogEvent(...)
 			last_recorded_death[npc_id] = timestamp
 			is_alive[npc_id] = false
 			current_health[npc_id] = nil
-			self:UpdateStatus(npc_id)
-			
-			print(is_alive[npc_id], current_health[npc_id], last_recorded_death[npc_id])
 		end
 	end
 end	
 
-function RareTracker:OnZoneTransition()
+function RareTrackerMechagon:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 	
-	if zone_id == 1355 and not disable then
-		-- Enable the Nazjatar rares.
-		self:StartInterface()
-	elseif zone_id == 1462 and not disable then
+	if zone_id == 1462 and not disable then
 		-- Enable the Mechagon rares.
 		self:StartInterface()
 	else 
@@ -221,10 +214,26 @@ function RareTracker:OnZoneTransition()
 	end
 end	
 
+RareTrackerMechagon.LastDisplayUpdate = 0
+
+function RareTrackerMechagon:OnUpdate()
+	if (RareTrackerMechagon.LastDisplayUpdate + 1.0 < time()) and not disable then
+		for i=1, #rare_ids do
+			local npc_id = rare_ids[i]
+			RareTrackerMechagon:UpdateStatus(npc_id)
+		end
+		
+		RareTrackerMechagon.LastDisplayUpdate = time();
+	end
+end	
+
+RareTrackerMechagon.updateHandler = CreateFrame("Frame", "RareTrackerMechagon.updateHandler", RareTrackerMechagon)
+RareTrackerMechagon.updateHandler:SetScript("OnUpdate", RareTrackerMechagon.OnUpdate)
+
 -- Register the event handling of the frame.
-RareTracker:SetScript("OnEvent", RareTracker.OnEvent)
-RareTracker:RegisterEvent("PLAYER_TARGET_CHANGED")
-RareTracker:RegisterEvent("UNIT_HEALTH")
-RareTracker:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-RareTracker:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-RareTracker:RegisterEvent("PLAYER_ENTERING_WORLD")
+RareTrackerMechagon:SetScript("OnEvent", RareTrackerMechagon.OnEvent)
+RareTrackerMechagon:RegisterEvent("PLAYER_TARGET_CHANGED")
+RareTrackerMechagon:RegisterEvent("UNIT_HEALTH")
+RareTrackerMechagon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+RareTrackerMechagon:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+RareTrackerMechagon:RegisterEvent("PLAYER_ENTERING_WORLD")

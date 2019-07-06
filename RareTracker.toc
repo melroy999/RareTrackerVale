@@ -1,7 +1,0 @@
-## Interface: 80200
-## Title: RareTracker
-## Author: Melroy van Nijnatten
-## Version: 0.0.0
-
-RareTrackerGlobals.lua
-RareTracker.lua
