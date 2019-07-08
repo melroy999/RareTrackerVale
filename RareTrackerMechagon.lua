@@ -1,6 +1,5 @@
 local _, data = ...
 
-local disable = true
 local rare_ids = data.rare_ids
 local rare_ids_set = data.rare_ids_set
 local rare_names_localized = data.rare_names_localized
@@ -35,6 +34,12 @@ end
 is_alive = {}
 current_health = {}
 last_recorded_death = {}
+
+-- The zone_uid can be used to distinguish different shards of the zone.
+current_shard_id = nil
+
+-- The identity of the communication channel.
+comm_channel_id = nil
 
 -- ####################################################################
 -- ##                              GUI                               ##
@@ -99,21 +104,72 @@ function RareTrackerMechagon:UpdateStatus(npc_id)
 	if is_alive[npc_id] then
 		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText(current_health[npc_id].."%")
 	elseif last_recorded_death[npc_id] ~= nil then
-		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText(math.floor(time() - last_recorded_death[npc_id]).."s")
+		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText(math.floor((time() - last_recorded_death[npc_id]) / 60).."m")
 	else
 		RareTrackerMechagon.entity_status_frame.strings[npc_id]:SetText("--")
 	end
 end
 
-function RareTrackerMechagon:StartInterface()
-	self:Show()
+function RareTrackerMechagon:findChannelID()
+	local n_channels = GetNumDisplayChannels()
+	
+	for i=1, n_channels do
+		SetSelectedDisplayChannel(i)
+		name = select(1, GetChannelDisplayInfo(i))
+		if name == "RTM" then
+			return i
+		end
+	end
+	
+	return -1
 end
 
-function RareTrackerMechagon:CloseInterface()
+function RareTrackerMechagon:StartInterface()
 	-- reset the data, since we cannot guarantee its correctness.
 	is_alive = {}
 	current_health = {}
 	last_recorded_death = {}
+	current_shard_id = nil
+	
+	print("enabling RTM")
+	
+	self:RegisterEvent("PLAYER_TARGET_CHANGED")
+	self:RegisterEvent("UNIT_HEALTH")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	
+	JoinChannelByName("RTM")
+	
+	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
+		print("RareTrackerMechagon: Couldn't register AddonPrefix")
+	end
+	
+	--channel_id = self:findChannelID()
+	--count = select(5, GetChannelDisplayInfo(channel_id))
+	--
+	--SetSelectedDisplayChannel(channel_id)
+	--
+	--for i=1, count do
+	--	name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channel_id, i)
+	--	print(name, owner, moderator, guid)
+	--end
+	--
+	--print(channel_id)
+	
+	
+	self:Show()
+	
+	if hide_override then self:Hide() end
+end
+
+function RareTrackerMechagon:CloseInterface()
+	print("disabling RTM")
+	
+	LeaveChannelByName("RTM")
+	
+	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+	self:UnregisterEvent("UNIT_HEALTH")
+	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	
 	self:Hide()
 end
 
@@ -135,6 +191,8 @@ function RareTrackerMechagon:OnEvent(event, ...)
 		self:OnZoneTransition()
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		self:OnZoneTransition()
+	elseif event == "CHANNEL_ROSTER_UPDATE" then
+		self:OnChannelRosterUpdate(...)
 	end
 end
 
@@ -144,6 +202,11 @@ function RareTrackerMechagon:OnTargetChanged(...)
 		local guid, name = UnitGUID("target"), UnitName("target")
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
+		
+		if current_shard_id ~= zone_uid and zone_uid ~= nil then
+			print("Changing from shard", current_shard_id, "to", zone_uid..".")
+			current_shard_id = zone_uid
+		end
 		
 		if rare_ids_set[npc_id] then
 			-- Find the health of the entity.
@@ -205,7 +268,7 @@ function RareTrackerMechagon:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 	
-	if zone_id == 1462 and not disable then
+	if zone_id == 1462 then
 		-- Enable the Mechagon rares.
 		self:StartInterface()
 	else 
@@ -214,10 +277,29 @@ function RareTrackerMechagon:OnZoneTransition()
 	end
 end	
 
+function RareTrackerMechagon:OnChannelRosterUpdate(id)
+	--print("aa")
+	--print(id)
+
+	--if comm_channel_id == nil then
+	--	comm_channel_id = self:findChannelID()
+	--	if channel_id == -1 then return end
+	--	
+	--	count = select(5, GetChannelDisplayInfo(comm_channel_id))
+	--	
+	--	for i=1, count do
+	--		name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(comm_channel_id, i)
+	--		print(name, owner, moderator, guid)
+	--	end
+	--	
+	--	print(comm_channel_id)
+	--end
+end	
+
 RareTrackerMechagon.LastDisplayUpdate = 0
 
 function RareTrackerMechagon:OnUpdate()
-	if (RareTrackerMechagon.LastDisplayUpdate + 1.0 < time()) and not disable then
+	if (RareTrackerMechagon.LastDisplayUpdate + 0.5 < time()) then
 		for i=1, #rare_ids do
 			local npc_id = rare_ids[i]
 			RareTrackerMechagon:UpdateStatus(npc_id)
@@ -232,8 +314,42 @@ RareTrackerMechagon.updateHandler:SetScript("OnUpdate", RareTrackerMechagon.OnUp
 
 -- Register the event handling of the frame.
 RareTrackerMechagon:SetScript("OnEvent", RareTrackerMechagon.OnEvent)
-RareTrackerMechagon:RegisterEvent("PLAYER_TARGET_CHANGED")
-RareTrackerMechagon:RegisterEvent("UNIT_HEALTH")
-RareTrackerMechagon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 RareTrackerMechagon:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 RareTrackerMechagon:RegisterEvent("PLAYER_ENTERING_WORLD")
+RareTrackerMechagon:RegisterEvent("CHANNEL_ROSTER_UPDATE")
+
+function CommandHandler(msg, editbox)
+	-- pattern matching that skips leading whitespace and whitespace between cmd and args
+	-- any whitespace at end of args is retained
+	print(msg)
+	local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
+   
+	if cmd == "show" then
+		print("showing interface")
+		RareTrackerMechagon:Show()
+		-- Handle adding of the contents of rest... to something.
+	elseif cmd == "hide" then
+		print("hiding interface")
+		RareTrackerMechagon:Hide()
+		-- Handle removing of the contents of rest... to something.   
+	elseif cmd == "channel" then
+		channel_id = RareTrackerMechagon:findChannelID()
+		if channel_id == -1 then return end
+		
+		count = select(5, GetChannelDisplayInfo(channel_id))
+		print(channel_id, count)
+		SetSelectedDisplayChannel(channel_id)
+
+		for i=1, count do
+			print(channel_id, i)
+			name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channel_id, i)
+			print(name, owner, moderator, guid)
+		end
+	end
+end
+
+SLASH_RT1 = "/rt"
+SLASH_RT2 = "/raretracker"
+SlashCmdList["RT"] = CommandHandler
+
+hide_override = true

@@ -51,12 +51,14 @@ local rare_ids = {
 	150937,
 	153000,
 	153226,
+	154342
 }
 
 local rare_ids_set = Set(rare_ids)
 
 local rare_names_localized = {}
 rare_names_localized["enUS"] = {}
+rare_names_localized["enUS"][154342] = "Arachnoid Harvester (Future)"
 rare_names_localized["enUS"][151934] = "Arachnoid Harvester"
 rare_names_localized["enUS"][155060] = "Doppel Ganger"
 rare_names_localized["enUS"][152113] = "The Kleptoboss"
@@ -68,7 +70,7 @@ rare_names_localized["enUS"][153200] = "Boilburn"
 rare_names_localized["enUS"][151308] = "Boggac Skullbash"
 rare_names_localized["enUS"][152001] = "Bonepicker"
 rare_names_localized["enUS"][154739] = "Caustic Mechaslime"
-rare_names_localized["enUS"][149847] = "Crazed Trogg (1)"
+rare_names_localized["enUS"][149847] = "Crazed Trogg (Orange)"
 rare_names_localized["enUS"][152569] = "Crazed Trogg (2)"
 rare_names_localized["enUS"][152570] = "Crazed Trogg (3)"
 rare_names_localized["enUS"][151569] = "Deepwater Maw"
