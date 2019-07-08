@@ -1,5 +1,7 @@
 local _, data = ...
 
+local RTM = data.RTM;
+
 -- ####################################################################
 -- ##                          Static Data                           ##
 -- ####################################################################
@@ -12,7 +14,7 @@ function Set (list)
 end
 
 -- The ids of the rares the addon monitors.
-local rare_ids = {
+RTM.rare_ids = {
 	151934,
 	155060,
 	152113,
@@ -54,50 +56,46 @@ local rare_ids = {
 	154342
 }
 
-local rare_ids_set = Set(rare_ids)
+RTM.rare_ids_set = Set(RTM.rare_ids)
 
-local rare_names_localized = {}
-rare_names_localized["enUS"] = {}
-rare_names_localized["enUS"][154342] = "Arachnoid Harvester (Future)"
-rare_names_localized["enUS"][151934] = "Arachnoid Harvester"
-rare_names_localized["enUS"][155060] = "Doppel Ganger"
-rare_names_localized["enUS"][152113] = "The Kleptoboss"
-rare_names_localized["enUS"][154225] = "The Rusty Prince"
-rare_names_localized["enUS"][151625] = "The Scrap King"
-rare_names_localized["enUS"][151940] = "Uncle T'Rogg"
-rare_names_localized["enUS"][150394] = "Armored Vaultbot"
-rare_names_localized["enUS"][153200] = "Boilburn"
-rare_names_localized["enUS"][151308] = "Boggac Skullbash"
-rare_names_localized["enUS"][152001] = "Bonepicker"
-rare_names_localized["enUS"][154739] = "Caustic Mechaslime"
-rare_names_localized["enUS"][149847] = "Crazed Trogg (Orange)"
-rare_names_localized["enUS"][152569] = "Crazed Trogg (2)"
-rare_names_localized["enUS"][152570] = "Crazed Trogg (3)"
-rare_names_localized["enUS"][151569] = "Deepwater Maw"
-rare_names_localized["enUS"][150342] = "Earthbreaker Gulroc"
-rare_names_localized["enUS"][154153] = "Enforcer KX-T57"
-rare_names_localized["enUS"][151202] = "Foul Manifestation"
-rare_names_localized["enUS"][151884] = "Fungarian Furor"
-rare_names_localized["enUS"][153228] = "Gear Checker Cogstar"
-rare_names_localized["enUS"][153205] = "Gemicide"
-rare_names_localized["enUS"][154701] = "Gorged Gear-Cruncher"
-rare_names_localized["enUS"][151684] = "Jawbreaker"
-rare_names_localized["enUS"][152007] = "Killsaw"
-rare_names_localized["enUS"][151933] = "Malfunctioning Beastbot"
-rare_names_localized["enUS"][151124] = "Mechagonian Nullifier"
-rare_names_localized["enUS"][151672] = "Mecharantula"
-rare_names_localized["enUS"][151627] = "Mr. Fixthis"
-rare_names_localized["enUS"][151296] = "OOX-Avenger/MG"
-rare_names_localized["enUS"][153206] = "Ol' Big Tusk"
-rare_names_localized["enUS"][152764] = "Oxidized Leachbeast"
-rare_names_localized["enUS"][151702] = "Paol Pondwader"
-rare_names_localized["enUS"][150575] = "Rumblerocks"
-rare_names_localized["enUS"][152182] = "Rustfeather"
-rare_names_localized["enUS"][155583] = "Scrapclaw"
-rare_names_localized["enUS"][150937] = "Seaspit"
-rare_names_localized["enUS"][153000] = "Sparkqueen P'Emp"
-rare_names_localized["enUS"][153226] = "Steel Singer Freza"
-
-data.rare_ids = rare_ids
-data.rare_ids_set = rare_ids_set
-data.rare_names_localized = rare_names_localized
+RTM.rare_names_localized = {}
+RTM.rare_names_localized["enUS"] = {}
+RTM.rare_names_localized["enUS"][154342] = "Arachnoid Harvester (Future)"
+RTM.rare_names_localized["enUS"][151934] = "Arachnoid Harvester"
+RTM.rare_names_localized["enUS"][155060] = "Doppel Ganger"
+RTM.rare_names_localized["enUS"][152113] = "The Kleptoboss"
+RTM.rare_names_localized["enUS"][154225] = "The Rusty Prince"
+RTM.rare_names_localized["enUS"][151625] = "The Scrap King"
+RTM.rare_names_localized["enUS"][151940] = "Uncle T'Rogg"
+RTM.rare_names_localized["enUS"][150394] = "Armored Vaultbot"
+RTM.rare_names_localized["enUS"][153200] = "Boilburn"
+RTM.rare_names_localized["enUS"][151308] = "Boggac Skullbash"
+RTM.rare_names_localized["enUS"][152001] = "Bonepicker"
+RTM.rare_names_localized["enUS"][154739] = "Caustic Mechaslime"
+RTM.rare_names_localized["enUS"][149847] = "Crazed Trogg (Orange)"
+RTM.rare_names_localized["enUS"][152569] = "Crazed Trogg (2)"
+RTM.rare_names_localized["enUS"][152570] = "Crazed Trogg (3)"
+RTM.rare_names_localized["enUS"][151569] = "Deepwater Maw"
+RTM.rare_names_localized["enUS"][150342] = "Earthbreaker Gulroc"
+RTM.rare_names_localized["enUS"][154153] = "Enforcer KX-T57"
+RTM.rare_names_localized["enUS"][151202] = "Foul Manifestation"
+RTM.rare_names_localized["enUS"][151884] = "Fungarian Furor"
+RTM.rare_names_localized["enUS"][153228] = "Gear Checker Cogstar"
+RTM.rare_names_localized["enUS"][153205] = "Gemicide"
+RTM.rare_names_localized["enUS"][154701] = "Gorged Gear-Cruncher"
+RTM.rare_names_localized["enUS"][151684] = "Jawbreaker"
+RTM.rare_names_localized["enUS"][152007] = "Killsaw"
+RTM.rare_names_localized["enUS"][151933] = "Malfunctioning Beastbot"
+RTM.rare_names_localized["enUS"][151124] = "Mechagonian Nullifier"
+RTM.rare_names_localized["enUS"][151672] = "Mecharantula"
+RTM.rare_names_localized["enUS"][151627] = "Mr. Fixthis"
+RTM.rare_names_localized["enUS"][151296] = "OOX-Avenger/MG"
+RTM.rare_names_localized["enUS"][153206] = "Ol' Big Tusk"
+RTM.rare_names_localized["enUS"][152764] = "Oxidized Leachbeast"
+RTM.rare_names_localized["enUS"][151702] = "Paol Pondwader"
+RTM.rare_names_localized["enUS"][150575] = "Rumblerocks"
+RTM.rare_names_localized["enUS"][152182] = "Rustfeather"
+RTM.rare_names_localized["enUS"][155583] = "Scrapclaw"
+RTM.rare_names_localized["enUS"][150937] = "Seaspit"
+RTM.rare_names_localized["enUS"][153000] = "Sparkqueen P'Emp"
+RTM.rare_names_localized["enUS"][153226] = "Steel Singer Freza"

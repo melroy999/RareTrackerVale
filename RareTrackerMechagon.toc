@@ -3,5 +3,9 @@
 ## Author: Melroy van Nijnatten
 ## Version: 0.0.0
 
-RareTrackerMechagonGlobals.lua
 RareTrackerMechagon.lua
+RareTrackerMechagonGlobals.lua
+RareTrackerMechagonGUI.lua
+RareTrackerMechagonCommunication.lua
+RareTrackerMechagonEventHandler.lua
+RareTrackerMechagonCommands.lua
