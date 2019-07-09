@@ -18,6 +18,10 @@ function RTM:OnEvent(event, ...)
 		self:OnZoneTransition()
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		self:OnZoneTransition()
+	elseif event == "CHAT_MSG_CHANNEL" then
+		self:OnChatMsgChannel(...)
+	elseif event == "CHAT_MSG_ADDON" then
+		self:OnChatMsgAddon(...)
 	end
 end
 
@@ -48,8 +52,6 @@ function RTM:OnTargetChanged(...)
 				if RTM.last_recorded_death[npc_id] == nil then
 					RTM.last_recorded_death[npc_id] = time()
 				end
-				
-				
 			end
 		end
 	end
@@ -93,12 +95,27 @@ function RTM:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 	
-	if zone_id == 1462 then
+	if zone_id == 1462 or zone_id == 37 then
 		-- Enable the Mechagon rares.
 		self:StartInterface()
 	else 
 		-- Disable the addon.
+		print(zone_id)
 		self:CloseInterface()
+	end
+end	
+
+function RTM:OnChatMsgChannel(...)
+	text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+	
+	print(text)
+end	
+
+function RTM:OnChatMsgAddon(...)
+	prefix, message, channel, sender = ...
+	
+	if prefix == "RTM" then
+		print(message)
 	end
 end	
 
@@ -114,6 +131,24 @@ function RTM:OnUpdate()
 		RTM.LastDisplayUpdate = time();
 	end
 end	
+
+function RTM:RegisterEvents()
+	print("Registering events")
+	self:RegisterEvent("PLAYER_TARGET_CHANGED")
+	self:RegisterEvent("UNIT_HEALTH")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:RegisterEvent("CHAT_MSG_CHANNEL")
+	self:RegisterEvent("CHAT_MSG_ADDON")
+end
+
+function RTM:UnregisterEvents()
+	print("Unregistering events")
+	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+	self:UnregisterEvent("UNIT_HEALTH")
+	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:UnregisterEvent("CHAT_MSG_CHANNEL")
+	self:UnregisterEvent("CHAT_MSG_ADDON")
+end
 
 RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)
 RTM.updateHandler:SetScript("OnUpdate", RTM.OnUpdate)

@@ -43,15 +43,8 @@ function RTM:StartInterface()
 	
 	print("enabling RTM")
 	
-	self:RegisterEvent("PLAYER_TARGET_CHANGED")
-	self:RegisterEvent("UNIT_HEALTH")
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	
-	JoinChannelByName("RTM")
-	
-	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
-		print("RTM: Couldn't register AddonPrefix")
-	end
+	self:RegisterEvents()
+	self:RegisterToRTMChannel()
 	
 	self:Show()
 	
@@ -63,9 +56,7 @@ function RTM:CloseInterface()
 	
 	LeaveChannelByName("RTM")
 	
-	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-	self:UnregisterEvent("UNIT_HEALTH")
-	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:UnregisterEvents()
 	
 	self:Hide()
 end

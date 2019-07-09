@@ -21,18 +21,18 @@ function CommandHandler(msg, editbox)
 		RTM:Hide()
 		-- Handle removing of the contents of rest... to something.   
 	elseif cmd == "channel" then
-		channel_id = RTM:findChannelID()
-		if channel_id == -1 then return end
 		
-		SetSelectedDisplayChannel(channel_id)
-		count = select(5, GetChannelDisplayInfo(channel_id))
-		print(channel_id, count)
-
-		for i=1, count do
-			print(channel_id, i)
-			name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channel_id, i)
-			print(name, owner, moderator, guid)
-		end
+		-- print(RTM.channel_id)
+		-- 
+		-- SetSelectedDisplayChannel(RTM.channel_id)
+		-- count = select(5, GetChannelDisplayInfo(RTM.channel_id))
+		-- print(RTM.channel_id, count)
+		-- print(GetChannelName("RTM"))
+		-- 
+		-- id, name = GetChannelName("RTM")
+		-- print(id, name)
+		
+		C_ChatInfo.SendAddonMessage("RTM", "Test", "CHANNEL", select(1, GetChannelName("RTM")))
 	end
 end
 
