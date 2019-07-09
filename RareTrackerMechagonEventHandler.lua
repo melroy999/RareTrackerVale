@@ -32,25 +32,33 @@ function RTM:OnTargetChanged(...)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if RTM.current_shard_id ~= zone_uid and zone_uid ~= nil then
-			print("Changing from shard", RTM.current_shard_id, "to", zone_uid..".")
-			RTM.current_shard_id = zone_uid
+		if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
+			print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
+			
+			if self.current_shard_id == nil then
+				-- Register yourself for the given shard.
+				self:RegisterArrival(zone_uid)
+			else
+				-- Changed shard. Remove yourself from the original shard and register to new shard.
+			end
+			
+			self.current_shard_id = zone_uid
 		end
 		
-		if RTM.rare_ids_set[npc_id] then
+		if self.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
 			local health = UnitHealth("target")
 			
 			if health > 0 then
-				RTM.is_alive[npc_id] = true
-				RTM.current_health[npc_id] = self:GetTargetHealthPercentage()
-				RTM.last_recorded_death[npc_id] = nil
+				self.is_alive[npc_id] = true
+				self.current_health[npc_id] = self:GetTargetHealthPercentage()
+				self.last_recorded_death[npc_id] = nil
 			else 
-				RTM.is_alive[npc_id] = false
-				RTM.current_health[npc_id] = nil
+				self.is_alive[npc_id] = false
+				self.current_health[npc_id] = nil
 				
-				if RTM.last_recorded_death[npc_id] == nil then
-					RTM.last_recorded_death[npc_id] = time()
+				if self.last_recorded_death[npc_id] == nil then
+					self.last_recorded_death[npc_id] = time()
 				end
 			end
 		end
@@ -108,14 +116,18 @@ end
 function RTM:OnChatMsgChannel(...)
 	text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
 	
-	print(text)
+	--print(text)
 end	
 
 function RTM:OnChatMsgAddon(...)
-	prefix, message, channel, sender = ...
+	local prefix, message, channel, sender = ...
 	
 	if prefix == "RTM" then
-		print(message)
+		local header, payload = strsplit(":", message)
+		local prefix, shard_id = strsplit("-", header)
+		print(prefix, message, channel, sender)
+	
+		self:OnChatMessageReceived(sender, prefix, shard_id, payload)
 	end
 end	
 

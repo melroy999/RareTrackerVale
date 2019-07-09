@@ -13,17 +13,28 @@ RTM.registered_players = {}
 -- The time stamp of the last presence declaration.
 RTM.registered_players_arrival_time = {}
 
--- The assigned leader of the shard.
-RTM.leader = nil
+-- The name and realm of the player.
+local player_name = UnitName("player").."-"..GetRealmName()
 
--- Which channel are we registered to?
-RTM.channel_id = nil
+function RTM:PrintRegisteredPlayers()
+	print("Player", player_name)
+	for key, value in pairs(self.registered_players) do 
+		print(key, value)
+	end
+end
+
+function RTM:PrintRegisteredPlayersArrivalTimes()
+	for key, value in pairs(self.registered_players_arrival_time) do 
+		print(key, value)
+	end
+end
 
 -- Get the minimal value in the list.
-function RTM:findMinArrivalTime()
+function RTM:FindMinArrivalTime()
+	print(#self.registered_players_arrival_time)
 	local min_player, min_time = nil, nil
 
-	for key, value in ipairs(RTM.registered_players_arrival_time) do 
+	for key, value in ipairs(self.registered_players_arrival_time) do 
 		if min_time == nil or value < min_time then
 			min_player, min_time = key, value
 		end
@@ -33,7 +44,7 @@ function RTM:findMinArrivalTime()
 end
 
 -- Find the ID of the RTM channel.
-function RTM:findChannelID()
+function RTM:FindChannelID()
 	local n_channels = GetNumDisplayChannels()
 	
 	for i=1, n_channels do
@@ -54,54 +65,96 @@ function RTM:RegisterToRTMChannel()
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
 		print("RTM: Couldn't register AddonPrefix")
 	end
-	
-	RTM.channel_id = self:findChannelID()
 end
 
+
+
+
+
 -- Inform other clients of your arrival.
-function RTM:registerArrival(shard_id)
-	-- Generate a time stamp for the client's arrival.
-	local player, time_stamp = select(1, UnitName("player")), time()
-	registered_players[player] = time_stamp
-	registered_players_arrival_time[player] = time_stamp
-	
+function RTM:RegisterArrival(shard_id)
 	-- Announce to the others that you have arrived.
-	C_ChatInfo.SendAddonMessage("RTM", "Test", "CHANNEL", RTM.channel_id)
+	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id..":"..time(), "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others that you are still present.
-function RTM:registerPresence(shard_id)
-	
+function RTM:RegisterPresence(shard_id)
+	-- Announce to the others that you are still present on the shard.
+	C_ChatInfo.SendAddonMessage("RTM", "P-"..shard_id..":"..time(), "CHANNEL", select(1, GetChannelName("RTM")))
+end
+
+-- Inform the others that you are still present.
+function RTM:RegisterPresenceWhisper(shard_id, target)
+	-- Announce to the others that you are still present on the shard.
+	local last_update, arrival = self.registered_players[player_name], self.registered_players_arrival_time[player_name]
+	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..last_update.."-"..arrival, "WHISPER", target)
 end
 
 -- Inform other clients of your departure.
-function RTM:registerDeparture(shard_id)
+function RTM:RegisterDeparture(shard_id)
+	-- Announce to the others that you have departed the shard.
+	C_ChatInfo.SendAddonMessage("RTM", "D-"..shard_id, "CHANNEL", select(1, GetChannelName("RTM")))
+end
+
+
+
+
+
+function RTM:AcknowledgeArrival(player, time_stamp)
+	self.registered_players[player] = time_stamp
+	self.registered_players_arrival_time[player] = time_stamp
 	
-end
-
-function RTM:registerLeadership(shard_id)
+	-- Notify the newly arrived user of your presence through a whisper.
+	if player_name ~= player then
+		self:RegisterPresenceWhisper(self.current_shard_id, player)
+	end	
 	
+	--self:PrintRegisteredPlayers()
 end
 
-function RTM:acknowledgeArrival(player, time_stamp)
-	RTM.registered_players[player] = time_stamp
-	RTM.registered_players_arrival_time[player] = time_stamp
-end
-
-function RTM:acknowledgePresence(player, time_stamp)
-	RTM.registered_players[player] = time_stamp
-end
-
-function RTM:acknowledgeDeparture(player)
-	RTM.registered_players[player] = nil
-	RTM.registered_players_arrival_time[player] = nil
+function RTM:AcknowledgePresence(player, time_stamp)
+	self.registered_players[player] = time_stamp
 	
-	if player == leader then
-		-- find a new leader.
-		local player, _ = RTM:findMinArrivalTime()
+	--self:PrintRegisteredPlayers()
+end
+
+function RTM:AcknowledgePresenceWhisper(player, last_update, arrival)
+	self.registered_players[player] = last_update
+	self.registered_players_arrival_time[player] = arrival
+	
+	--self:PrintRegisteredPlayers()
+end
+
+function RTM:AcknowledgeDeparture(player)
+	self.registered_players[player] = nil
+	self.registered_players_arrival_time[player] = nil
+	
+	--self:PrintRegisteredPlayers()
+end
+
+
+
+
+
+function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
+	print(player, prefix, shard_id, payload)
+	
+	if self.current_shard_id == nil then
+		--print("Shard id is nil. Will not receive messages.")
+		return
 	end
-end
-
-function RTM:acknowledgeLeadership(player)
-	RTM.leader = player
+	
+	if prefix == "A" then
+		time_stamp = tonumber(payload)
+		self:AcknowledgeArrival(player, time_stamp)
+	elseif prefix == "P" then
+		time_stamp = tonumber(payload)
+		self:AcknowledgePresence(player, time_stamp)
+	elseif prefix == "PW" then
+		local last_update_str, arrival_str = strsplit("-", payload)
+		local last_update, arrival = tonumber(last_update_str), tonumber(arrival_str)
+		self:AcknowledgePresence(player, last_update, arrival)
+	elseif prefix == "D" then
+		self:AcknowledgeDeparture(player)
+	end
 end
