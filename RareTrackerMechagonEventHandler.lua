@@ -60,7 +60,9 @@ function RTM:OnTargetChanged(...)
 				self.is_alive[npc_id] = false
 				self.current_health[npc_id] = nil
 				
+				print(self.last_recorded_death[npc_id])
 				if self.last_recorded_death[npc_id] == nil then
+					print("Registering death")
 					self.last_recorded_death[npc_id] = time()
 					self:RegisterEntityDeath(self.current_shard_id, npc_id)
 				end
@@ -83,7 +85,12 @@ function RTM:OnUnitHealth(unit)
 		
 		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
-			self.current_health[npc_id] = self:GetTargetHealthPercentage()
+			local percentage = self:GetTargetHealthPercentage()
+			self.current_health[npc_id] = percentage
+			
+			if self.current_shard_id ~= nil then
+				self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
+			end
 		end
 	end
 end
@@ -96,11 +103,14 @@ function RTM:OnCombatLogEvent(...)
 		
 	if subevent == "UNIT_DIED" then
 		if self.rare_ids_set[npc_id] then
-			self.last_recorded_death[npc_id] = timestamp
+			--self.last_recorded_death[npc_id] = timestamp
 			self.is_alive[npc_id] = false
 			self.current_health[npc_id] = nil
 			
-			if self.current_shard_id ~= nil then
+			print(self.last_recorded_death[npc_id])
+			if self.current_shard_id ~= nil and self.last_recorded_death[npc_id] == nil then
+				print("Registering death")
+				self.last_recorded_death[npc_id] = time()
 				self:RegisterEntityDeath(self.current_shard_id, npc_id)
 			end
 		end
@@ -143,9 +153,9 @@ function RTM:OnChatMsgChannel(...)
 end	
 
 function RTM:OnChatMsgAddon(...)
-	local prefix, message, channel, sender = ...
+	local addon_prefix, message, channel, sender = ...
 	
-	if prefix == "RTM" then
+	if addon_prefix == "RTM" then
 		local header, payload = strsplit(":", message)
 		local prefix, shard_id = strsplit("-", header)
 		print(prefix, message, channel, sender)

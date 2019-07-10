@@ -69,7 +69,19 @@ function RTM:RegisterToRTMChannel()
 	end
 end
 
+-- ####################################################################
+-- ##            Shard Group Management Register Functions           ##
+-- ####################################################################
 
+RTM.last_message_sent = 0
+-- A function that acts as a rate limiter for channel messages.
+function RTM:SendRateLimitedAddonMessage(message, target, target_id)
+	-- We only allow one message to be sent every ~4 seconds.
+	if RTM.last_message_sent + 2 < time() then
+		C_ChatInfo.SendAddonMessage("RTM", message, target, target_id)
+		RTM.last_message_sent = time()
+	end
+end
 
 -- ####################################################################
 -- ##            Shard Group Management Register Functions           ##
@@ -109,7 +121,7 @@ end
 -- Inform the others that you are still present.
 function RTM:RegisterEntityHealth(shard_id, npc_id, percentage)
 	-- Announce to the others that you are still present on the shard.
-	C_ChatInfo.SendAddonMessage("RTM", "EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
+	self:SendRateLimitedAddonMessage("EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- ####################################################################
