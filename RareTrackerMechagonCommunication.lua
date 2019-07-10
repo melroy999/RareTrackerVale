@@ -89,6 +89,10 @@ end
 
 -- Inform other clients of your arrival.
 function RTM:RegisterArrival(shard_id)
+	-- Reset your communication lists.
+	RTM.registered_players = {}
+	RTM.registered_players_arrival_time = {}
+
 	-- Announce to the others that you have arrived.
 	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id..":"..time(), "CHANNEL", select(1, GetChannelName("RTM")))
 end
@@ -110,6 +114,10 @@ end
 function RTM:RegisterDeparture(shard_id)
 	-- Announce to the others that you have departed the shard.
 	C_ChatInfo.SendAddonMessage("RTM", "D-"..shard_id, "CHANNEL", select(1, GetChannelName("RTM")))
+	
+	-- Reset your communication lists.
+	RTM.registered_players = {}
+	RTM.registered_players_arrival_time = {}
 end
 
 -- Inform the others that you are still present.
@@ -193,11 +201,11 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
 		elseif prefix == "D" then
 			self:AcknowledgeDeparture(player)
 		elseif prefix == "ED" then
-			self:RegisterEntityDeath(player, payload)
+			self:AcknowledgeEntityDeath(player, payload)
 		elseif prefix == "EH" then
 			local npc_id_str, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
-			self:RegisterEntityHealth(player, npc_id, percentage)
+			self:AcknowledgeEntityHealth(player, npc_id, percentage)
 		end
 	end
 end

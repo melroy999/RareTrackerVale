@@ -23,7 +23,73 @@ function RTM:OnEvent(event, ...)
 	end
 end
 
+function RTM:ChangeShard(new_zone_uid, old_zone_uid)
+	-- Notify the users in your old shard that you have moved on to another shard.
+	self:RegisterDeparture(old_zone_uid)
+	
+	-- Reset all the data we have, since it has all become useless.
+	RTM.is_alive = {}
+	RTM.current_health = {}
+	RTM.last_recorded_death = {}
+	RTM.recorded_entity_death_ids = {}
+	
+	-- Announce your arrival in the new shard.
+	self:RegisterArrival(new_zone_uid)
+end
+
 function RTM:OnTargetChanged(...)
+	if UnitGUID("target") ~= nil then
+		-- Get information about the target.
+		local guid, name = UnitGUID("target"), UnitName("target")
+		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
+		npc_id = tonumber(npc_id)
+		
+		if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
+			print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
+			
+			if self.current_shard_id == nil then
+				-- Register yourself for the given shard.
+				self:RegisterArrival(zone_uid)
+			else
+				-- Move from one shard to another.
+				RTM:ChangeShard(self.current_shard_id, zone_uid)
+			end
+			
+			self.current_shard_id = zone_uid
+		end
+		
+		if self.rare_ids_set[npc_id] then
+			-- Find the health of the entity.
+			local health = UnitHealth("target")
+			
+			if health > 0 then
+				self.is_alive[npc_id] = true
+				local percentage = self:GetTargetHealthPercentage()
+				self.current_health[npc_id] = percentage
+				self.last_recorded_death[npc_id] = nil
+				
+				self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
+			else 
+				self.is_alive[npc_id] = false
+				self.current_health[npc_id] = nil
+				self.last_recorded_death[npc_id] = time()
+				
+				if self.recorded_entity_death_ids[spawn_uid] == nil then
+					print("Registering death")
+					self.recorded_entity_death_ids[spawn_uid] = true
+					self:RegisterEntityDeath(self.current_shard_id, npc_id)
+				end
+			end
+		end
+	end
+end
+
+function RTM:OnUnitHealth(unit)
+	-- If the unit is not the target, skip.
+	if unit ~= "target" then 
+		return 
+	end
+	
 	if UnitGUID("target") ~= nil then
 		-- Get information about the target.
 		local guid, name = UnitGUID("target"), UnitName("target")
@@ -46,51 +112,10 @@ function RTM:OnTargetChanged(...)
 		end
 		
 		if self.rare_ids_set[npc_id] then
-			-- Find the health of the entity.
-			local health = UnitHealth("target")
-			
-			if health > 0 then
-				self.is_alive[npc_id] = true
-				local percentage = self:GetTargetHealthPercentage()
-				self.current_health[npc_id] = percentage
-				self.last_recorded_death[npc_id] = nil
-				
-				self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
-			else 
-				self.is_alive[npc_id] = false
-				self.current_health[npc_id] = nil
-				
-				print(self.last_recorded_death[npc_id])
-				if self.last_recorded_death[npc_id] == nil then
-					print("Registering death")
-					self.last_recorded_death[npc_id] = time()
-					self:RegisterEntityDeath(self.current_shard_id, npc_id)
-				end
-			end
-		end
-	end
-end
-
-function RTM:OnUnitHealth(unit)
-	-- If the unit is not the target, skip.
-	if unit ~= "target" then 
-		return 
-	end
-	
-	if UnitGUID("target") ~= nil then
-		-- Get information about the target.
-		local guid, name = UnitGUID("target"), UnitName("target")
-		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
-		npc_id = tonumber(npc_id)
-		
-		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
 			local percentage = self:GetTargetHealthPercentage()
 			self.current_health[npc_id] = percentage
-			
-			if self.current_shard_id ~= nil then
-				self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
-			end
+			self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
 		end
 	end
 end
@@ -106,11 +131,26 @@ function RTM:OnCombatLogEvent(...)
 			--self.last_recorded_death[npc_id] = timestamp
 			self.is_alive[npc_id] = false
 			self.current_health[npc_id] = nil
+			self.last_recorded_death[npc_id] = time()
 			
-			print(self.last_recorded_death[npc_id])
-			if self.current_shard_id ~= nil and self.last_recorded_death[npc_id] == nil then
+			if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
+				print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
+				
+				if self.current_shard_id == nil then
+					-- Register yourself for the given shard.
+					self:RegisterArrival(zone_uid)
+				else
+					-- Changed shard. Remove yourself from the original shard and register to new shard.
+					self:RegisterDeparture(self.current_shard_id)
+					self:RegisterArrival(zone_uid)
+				end
+				
+				self.current_shard_id = zone_uid
+			end
+			
+			if self.recorded_entity_death_ids[spawn_uid] == nil then
 				print("Registering death")
-				self.last_recorded_death[npc_id] = time()
+				self.recorded_entity_death_ids[spawn_uid] = true
 				self:RegisterEntityDeath(self.current_shard_id, npc_id)
 			end
 		end
