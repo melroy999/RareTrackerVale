@@ -7,11 +7,8 @@ local RTM = data.RTM;
 -- ####################################################################
 
 -- The players that have been registered in the communication pool. 
--- The key is the player name and the value is the time of last presence declaration.
+-- The key is the player name and the value is the time of joining the channel.
 RTM.registered_players = {}
-
--- The time stamp of the last presence declaration.
-RTM.registered_players_arrival_time = {}
 
 -- The name and realm of the player.
 local player_name = UnitName("player").."-"..GetRealmName()
@@ -25,18 +22,12 @@ function RTM:PrintRegisteredPlayers()
 	print("We have", count, "registered players.")
 end
 
-function RTM:PrintRegisteredPlayersArrivalTimes()
-	for key, value in pairs(self.registered_players_arrival_time) do 
-		print(key, value)
-	end
-end
-
 -- Get the minimal value in the list.
 function RTM:FindMinArrivalTime()
-	print(#self.registered_players_arrival_time)
+	print(#self.registered_players)
 	local min_player, min_time = nil, nil
 
-	for key, value in ipairs(self.registered_players_arrival_time) do 
+	for key, value in ipairs(self.registered_players) do 
 		if min_time == nil or value < min_time then
 			min_player, min_time = key, value
 		end
@@ -91,23 +82,16 @@ end
 function RTM:RegisterArrival(shard_id)
 	-- Reset your communication lists.
 	RTM.registered_players = {}
-	RTM.registered_players_arrival_time = {}
 
 	-- Announce to the others that you have arrived.
 	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id..":"..time(), "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others that you are still present.
-function RTM:RegisterPresence(shard_id)
-	-- Announce to the others that you are still present on the shard.
-	C_ChatInfo.SendAddonMessage("RTM", "P-"..shard_id..":"..time(), "CHANNEL", select(1, GetChannelName("RTM")))
-end
-
--- Inform the others that you are still present.
 function RTM:RegisterPresenceWhisper(shard_id, target)
 	-- Announce to the others that you are still present on the shard.
-	local last_update, arrival = self.registered_players[player_name], self.registered_players_arrival_time[player_name]
-	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..last_update.."-"..arrival, "WHISPER", target)
+	local arrival = self.registered_players[player_name]
+	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..arrival, "WHISPER", target)
 end
 
 -- Inform other clients of your departure.
@@ -117,7 +101,6 @@ function RTM:RegisterDeparture(shard_id)
 	
 	-- Reset your communication lists.
 	RTM.registered_players = {}
-	RTM.registered_players_arrival_time = {}
 end
 
 -- Inform the others that you are still present.
@@ -138,7 +121,6 @@ end
 
 function RTM:AcknowledgeArrival(player, time_stamp)
 	self.registered_players[player] = time_stamp
-	self.registered_players_arrival_time[player] = time_stamp
 	
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
@@ -154,16 +136,14 @@ function RTM:AcknowledgePresence(player, time_stamp)
 	self:PrintRegisteredPlayers()
 end
 
-function RTM:AcknowledgePresenceWhisper(player, last_update, arrival)
-	self.registered_players[player] = last_update
-	self.registered_players_arrival_time[player] = arrival
+function RTM:AcknowledgePresenceWhisper(player, arrival)
+	self.registered_players[player] = arrival
 	
 	self:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgeDeparture(player)
 	self.registered_players[player] = nil
-	self.registered_players_arrival_time[player] = nil
 	
 	self:PrintRegisteredPlayers()
 end
@@ -195,9 +175,8 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
 			time_stamp = tonumber(payload)
 			self:AcknowledgePresence(player, time_stamp)
 		elseif prefix == "PW" then
-			local last_update_str, arrival_str = strsplit("-", payload)
-			local last_update, arrival = tonumber(last_update_str), tonumber(arrival_str)
-			self:AcknowledgePresence(player, last_update, arrival)
+			local arrival = tonumber(payload)
+			self:AcknowledgePresence(player, arrival)
 		elseif prefix == "D" then
 			self:AcknowledgeDeparture(player)
 		elseif prefix == "ED" then

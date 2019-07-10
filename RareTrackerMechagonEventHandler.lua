@@ -20,6 +20,8 @@ function RTM:OnEvent(event, ...)
 		self:OnChatMsgChannel(...)
 	elseif event == "CHAT_MSG_ADDON" then
 		self:OnChatMsgAddon(...)
+	elseif event == "CHAT_MSG_CHANNEL_LEAVE" then
+		self:OnChatMsgChannelLeave(...)
 	end
 end
 
@@ -169,11 +171,11 @@ function RTM:OnZoneTransition()
 		
 	if (zone_id == 1462 or zone_id == 37) and not (self.last_zone_id == 1462 or self.last_zone_id == 37) then
 		-- Enable the Mechagon rares.
-		print("Enabling addon")
+		print("Enabling addon", zone_id)
 		self:StartInterface()
 	elseif (self.last_zone_id == 1462 or self.last_zone_id == 37) and not (zone_id == 1462 or zone_id == 37) then
 		-- Disable the addon.
-		print("Disabling addon")
+		print("Disabling addon", zone_id)
 		
 		-- If we do not have a shard ID, we are not subscribed to one of the channels.
 		if self.current_shard_id ~= nil then
@@ -187,7 +189,7 @@ function RTM:OnZoneTransition()
 end	
 
 function RTM:OnChatMsgChannel(...)
-	text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+	local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
 	
 	--print(text)
 end	
@@ -201,6 +203,17 @@ function RTM:OnChatMsgAddon(...)
 		print(prefix, message, channel, sender)
 	
 		self:OnChatMessageReceived(sender, prefix, shard_id, payload)
+	end
+end	
+
+function RTM:OnChatMsgChannelLeave(...)
+	--local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+	
+	local player, channel = select(2, ...), select(9, ...)
+	
+	if channel == "RTM" then
+		print("Player", player, "has left the channel")
+		self:AcknowledgeDeparture(player)
 	end
 end	
 
@@ -223,6 +236,7 @@ function RTM:RegisterEvents()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("CHAT_MSG_CHANNEL")
 	self:RegisterEvent("CHAT_MSG_ADDON")
+	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 end
 
 function RTM:UnregisterEvents()
@@ -231,6 +245,7 @@ function RTM:UnregisterEvents()
 	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:UnregisterEvent("CHAT_MSG_CHANNEL")
 	self:UnregisterEvent("CHAT_MSG_ADDON")
+	self:UnregisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 end
 
 RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)
