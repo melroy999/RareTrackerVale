@@ -1,0 +1,3 @@
+/run print(GetChannelDisplayInfo(7))
+/run SetSelectedDisplayChannel(7); print(C_ChatInfo.GetChannelRosterInfo(7, 1))
+/run SetSelectedDisplayChannel(7); print(C_ChatInfo.GetChannelRosterInfo(7, 1))

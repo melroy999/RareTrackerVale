@@ -41,8 +41,6 @@ function RTM:StartInterface()
 	RTM.last_recorded_death = {}
 	RTM.current_shard_id = nil
 	
-	print("enabling RTM")
-	
 	self:RegisterEvents()
 	self:RegisterToRTMChannel()
 	
@@ -52,8 +50,6 @@ function RTM:StartInterface()
 end
 
 function RTM:CloseInterface()
-	print("disabling RTM")
-	
 	LeaveChannelByName("RTM")
 	
 	self:UnregisterEvents()

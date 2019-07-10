@@ -14,9 +14,7 @@ function RTM:OnEvent(event, ...)
 		self:OnUnitHealth(...)
 	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		self:OnCombatLogEvent(...)
-	elseif event == "ZONE_CHANGED_NEW_AREA" then
-		self:OnZoneTransition()
-	elseif event == "PLAYER_ENTERING_WORLD" then
+	elseif event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED" then
 		self:OnZoneTransition()
 	elseif event == "CHAT_MSG_CHANNEL" then
 		self:OnChatMsgChannel(...)
@@ -40,6 +38,8 @@ function RTM:OnTargetChanged(...)
 				self:RegisterArrival(zone_uid)
 			else
 				-- Changed shard. Remove yourself from the original shard and register to new shard.
+				self:RegisterDeparture(self.current_shard_id)
+				self:RegisterArrival(zone_uid)
 			end
 			
 			self.current_shard_id = zone_uid
@@ -51,14 +51,18 @@ function RTM:OnTargetChanged(...)
 			
 			if health > 0 then
 				self.is_alive[npc_id] = true
-				self.current_health[npc_id] = self:GetTargetHealthPercentage()
+				local percentage = self:GetTargetHealthPercentage()
+				self.current_health[npc_id] = percentage
 				self.last_recorded_death[npc_id] = nil
+				
+				self:RegisterEntityHealth(self.current_shard_id, npc_id, percentage)
 			else 
 				self.is_alive[npc_id] = false
 				self.current_health[npc_id] = nil
 				
 				if self.last_recorded_death[npc_id] == nil then
 					self.last_recorded_death[npc_id] = time()
+					self:RegisterEntityDeath(self.current_shard_id, npc_id)
 				end
 			end
 		end
@@ -77,9 +81,9 @@ function RTM:OnUnitHealth(unit)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if RTM.rare_ids_set[npc_id] then
+		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
-			RTM.current_health[npc_id] = self:GetTargetHealthPercentage()
+			self.current_health[npc_id] = self:GetTargetHealthPercentage()
 		end
 	end
 end
@@ -91,26 +95,45 @@ function RTM:OnCombatLogEvent(...)
 	npc_id = tonumber(npc_id)
 		
 	if subevent == "UNIT_DIED" then
-		if RTM.rare_ids_set[npc_id] then
-			RTM.last_recorded_death[npc_id] = timestamp
-			RTM.is_alive[npc_id] = false
-			RTM.current_health[npc_id] = nil
+		if self.rare_ids_set[npc_id] then
+			self.last_recorded_death[npc_id] = timestamp
+			self.is_alive[npc_id] = false
+			self.current_health[npc_id] = nil
+			
+			if self.current_shard_id ~= nil then
+				self:RegisterEntityDeath(self.current_shard_id, npc_id)
+			end
 		end
 	end
 end	
 
+RTM.last_zone_id = nil
+
 function RTM:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
+	--print("Entering zone", zone_id)
 	
-	if zone_id == 1462 or zone_id == 37 then
+	-- 
+	
+		
+	if (zone_id == 1462 or zone_id == 37) and not (self.last_zone_id == 1462 or self.last_zone_id == 37) then
 		-- Enable the Mechagon rares.
+		print("Enabling addon")
 		self:StartInterface()
-	else 
+	elseif (self.last_zone_id == 1462 or self.last_zone_id == 37) and not (zone_id == 1462 or zone_id == 37) then
 		-- Disable the addon.
-		print(zone_id)
+		print("Disabling addon")
+		
+		-- If we do not have a shard ID, we are not subscribed to one of the channels.
+		if self.current_shard_id ~= nil then
+			self:RegisterDeparture(self.current_shard_id)
+		end
+		
 		self:CloseInterface()
 	end
+	
+	self.last_zone_id = zone_id
 end	
 
 function RTM:OnChatMsgChannel(...)
@@ -131,21 +154,20 @@ function RTM:OnChatMsgAddon(...)
 	end
 end	
 
-RTM.LastDisplayUpdate = 0
+RTM.last_display_update = 0
 
 function RTM:OnUpdate()
-	if (RTM.LastDisplayUpdate + 0.5 < time()) then
+	if (RTM.last_display_update + 0.5 < time()) then
 		for i=1, #RTM.rare_ids do
 			local npc_id = RTM.rare_ids[i]
 			RTM:UpdateStatus(npc_id)
 		end
 		
-		RTM.LastDisplayUpdate = time();
+		RTM.last_display_update = time();
 	end
 end	
 
 function RTM:RegisterEvents()
-	print("Registering events")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -154,7 +176,6 @@ function RTM:RegisterEvents()
 end
 
 function RTM:UnregisterEvents()
-	print("Unregistering events")
 	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
 	self:UnregisterEvent("UNIT_HEALTH")
 	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -168,4 +189,5 @@ RTM.updateHandler:SetScript("OnUpdate", RTM.OnUpdate)
 -- Register the event handling of the frame.
 RTM:SetScript("OnEvent", RTM.OnEvent)
 RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")

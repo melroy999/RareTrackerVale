@@ -17,10 +17,12 @@ RTM.registered_players_arrival_time = {}
 local player_name = UnitName("player").."-"..GetRealmName()
 
 function RTM:PrintRegisteredPlayers()
-	print("Player", player_name)
+	local count = 0
 	for key, value in pairs(self.registered_players) do 
 		print(key, value)
+		count = count + 1
 	end
+	print("We have", count, "registered players.")
 end
 
 function RTM:PrintRegisteredPlayersArrivalTimes()
@@ -69,7 +71,9 @@ end
 
 
 
-
+-- ####################################################################
+-- ##            Shard Group Management Register Functions           ##
+-- ####################################################################
 
 -- Inform other clients of your arrival.
 function RTM:RegisterArrival(shard_id)
@@ -96,9 +100,21 @@ function RTM:RegisterDeparture(shard_id)
 	C_ChatInfo.SendAddonMessage("RTM", "D-"..shard_id, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
+-- Inform the others that you are still present.
+function RTM:RegisterEntityDeath(shard_id, npc_id)
+	-- Announce to the others that you are still present on the shard.
+	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
+end
 
+-- Inform the others that you are still present.
+function RTM:RegisterEntityHealth(shard_id, npc_id, percentage)
+	-- Announce to the others that you are still present on the shard.
+	C_ChatInfo.SendAddonMessage("RTM", "EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
+end
 
-
+-- ####################################################################
+-- ##          Shard Group Management Acknowledge Functions          ##
+-- ####################################################################
 
 function RTM:AcknowledgeArrival(player, time_stamp)
 	self.registered_players[player] = time_stamp
@@ -109,27 +125,39 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 		self:RegisterPresenceWhisper(self.current_shard_id, player)
 	end	
 	
-	--self:PrintRegisteredPlayers()
+	self:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgePresence(player, time_stamp)
 	self.registered_players[player] = time_stamp
 	
-	--self:PrintRegisteredPlayers()
+	self:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgePresenceWhisper(player, last_update, arrival)
 	self.registered_players[player] = last_update
 	self.registered_players_arrival_time[player] = arrival
 	
-	--self:PrintRegisteredPlayers()
+	self:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgeDeparture(player)
 	self.registered_players[player] = nil
 	self.registered_players_arrival_time[player] = nil
 	
-	--self:PrintRegisteredPlayers()
+	self:PrintRegisteredPlayers()
+end
+
+function RTM:AcknowledgeEntityDeath(player, npc_id)
+	self.is_alive[npc_id] = false
+	self.current_health[npc_id] = nil
+	self.last_recorded_death[npc_id] = time()
+end
+
+function RTM:AcknowledgeEntityHealth(player, npc_id, percentage)
+	self.is_alive[npc_id] = true
+	self.current_health[npc_id] = percentage
+	self.last_recorded_death[npc_id] = nil
 end
 
 
@@ -137,24 +165,27 @@ end
 
 
 function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
-	print(player, prefix, shard_id, payload)
+	--print(player, prefix, shard_id, payload)
 	
-	if self.current_shard_id == nil then
-		--print("Shard id is nil. Will not receive messages.")
-		return
-	end
-	
-	if prefix == "A" then
-		time_stamp = tonumber(payload)
-		self:AcknowledgeArrival(player, time_stamp)
-	elseif prefix == "P" then
-		time_stamp = tonumber(payload)
-		self:AcknowledgePresence(player, time_stamp)
-	elseif prefix == "PW" then
-		local last_update_str, arrival_str = strsplit("-", payload)
-		local last_update, arrival = tonumber(last_update_str), tonumber(arrival_str)
-		self:AcknowledgePresence(player, last_update, arrival)
-	elseif prefix == "D" then
-		self:AcknowledgeDeparture(player)
+	if self.current_shard_id == shard_id then
+		if prefix == "A" then
+			time_stamp = tonumber(payload)
+			self:AcknowledgeArrival(player, time_stamp)
+		elseif prefix == "P" then
+			time_stamp = tonumber(payload)
+			self:AcknowledgePresence(player, time_stamp)
+		elseif prefix == "PW" then
+			local last_update_str, arrival_str = strsplit("-", payload)
+			local last_update, arrival = tonumber(last_update_str), tonumber(arrival_str)
+			self:AcknowledgePresence(player, last_update, arrival)
+		elseif prefix == "D" then
+			self:AcknowledgeDeparture(player)
+		elseif prefix == "ED" then
+			self:RegisterEntityDeath(player, payload)
+		elseif prefix == "EH" then
+			local npc_id_str, percentage_str = strsplit("-", payload)
+			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
+			self:RegisterEntityHealth(player, npc_id, percentage)
+		end
 	end
 end

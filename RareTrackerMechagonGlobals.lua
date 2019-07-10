@@ -53,7 +53,8 @@ RTM.rare_ids = {
 	150937,
 	153000,
 	153226,
-	154342
+	154342,
+	153293 -- Testing
 }
 
 RTM.rare_ids_set = Set(RTM.rare_ids)
@@ -99,3 +100,4 @@ RTM.rare_names_localized["enUS"][155583] = "Scrapclaw"
 RTM.rare_names_localized["enUS"][150937] = "Seaspit"
 RTM.rare_names_localized["enUS"][153000] = "Sparkqueen P'Emp"
 RTM.rare_names_localized["enUS"][153226] = "Steel Singer Freza"
+RTM.rare_names_localized["enUS"][153293] = "Rustwing Scavenger"
