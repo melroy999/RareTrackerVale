@@ -34,6 +34,17 @@ function CommandHandler(msg, editbox)
 			name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channel_id, i)
 			print(name, owner, moderator, guid)
 		end
+	elseif cmd == "test" then
+		local data = ""
+		local data_compressed = ""
+		for i=1, #RTM.rare_ids do
+			local npc_id = RTM.rare_ids[i]
+			data = data..":"..npc_id.."-"..tostring(100)
+			data_compressed = data_compressed..":"..RTM:toBase64(npc_id).."-"..RTM:toBase64(100)
+		end
+		
+		print(data)
+		print(data_compressed)
 	end
 end
 

@@ -70,7 +70,7 @@ function RTM:RegisterToRTMChannel()
 end
 
 -- ####################################################################
--- ##            Shard Group Management Register Functions           ##
+-- ##                        Helper Functions                        ##
 -- ####################################################################
 
 RTM.last_message_sent = 0

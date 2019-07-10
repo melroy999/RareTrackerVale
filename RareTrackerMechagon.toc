@@ -4,6 +4,7 @@
 ## Version: 0.0.0
 
 RareTrackerMechagon.lua
+Base64.lua
 RareTrackerMechagonGlobals.lua
 RareTrackerMechagonGUI.lua
 RareTrackerMechagonCommunication.lua
