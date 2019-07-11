@@ -47,12 +47,16 @@ function RTM:InitializeInterfaceEntityStatusFrame()
 end
 
 function RTM:UpdateStatus(npc_id)
+	local frame_target = RTM.entity_status_frame.strings[npc_id]
+
 	if RTM.is_alive[npc_id] then
-		RTM.entity_status_frame.strings[npc_id]:SetText(RTM.current_health[npc_id].."%")
+		frame_target:SetText(RTM.current_health[npc_id].."%")
 	elseif RTM.last_recorded_death[npc_id] ~= nil then
-		RTM.entity_status_frame.strings[npc_id]:SetText(math.floor((time() - RTM.last_recorded_death[npc_id]) / 60).."m")
+		local last_death = RTM.last_recorded_death[npc_id]
+	
+		frame_target:SetText(math.floor((time() - last_death) / 60).."m")
 	else
-		RTM.entity_status_frame.strings[npc_id]:SetText("--")
+		frame_target:SetText("--")
 	end
 end
 

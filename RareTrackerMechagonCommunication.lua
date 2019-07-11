@@ -22,7 +22,7 @@ local player_name = UnitName("player").."-"..GetRealmName()
 
 function RTM:PrintRegisteredPlayers()
 	local count = 0
-	for key, value in pairs(self.registered_players) do 
+	for key, value in pairs(RTM.registered_players) do 
 		print(key, value)
 		count = count + 1
 	end
@@ -31,10 +31,10 @@ end
 
 -- Get the minimal value in the list.
 function RTM:FindMinArrivalTime()
-	print(#self.registered_players)
+	print(#RTM.registered_players)
 	local min_player, min_time = nil, nil
 
-	for key, value in ipairs(self.registered_players) do 
+	for key, value in ipairs(RTM.registered_players) do 
 		if min_time == nil or value < min_time then
 			min_player, min_time = key, value
 		end
@@ -82,7 +82,7 @@ function RTM:GetCompressedSpawnData(time_stamp)
 	
 	for i=1, #RTM.rare_ids do
 		local npc_id = RTM.rare_ids[i]
-		local kill_time = self.last_recorded_death[npc_id]
+		local kill_time = RTM.last_recorded_death[npc_id]
 		
 		if kill_time ~= nil then
 			data = data..RTM:toBase64(time_stamp - kill_time)..","
@@ -103,7 +103,7 @@ function RTM:DecompressSpawnData(spawn_data, time_stamp)
 		local kill_time = RTM:toBase10(spawn_data_entries[i])
 		
 		if kill_time ~= 0 then
-			self.last_recorded_death[npc_id] = time_stamp - kill_time
+			RTM.last_recorded_death[npc_id] = time_stamp - kill_time
 		end
 	end
 end
@@ -125,8 +125,8 @@ end
 -- Inform the others that you are still present.
 function RTM:RegisterPresenceWhisper(shard_id, target, time_stamp)
 	-- Announce to the others that you are still present on the shard.
-	local arrival = self.registered_players[player_name]
-	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..arrival.."-"..self:GetCompressedSpawnData(time_stamp), "WHISPER", target)
+	local arrival = RTM.registered_players[player_name]
+	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..arrival.."-"..RTM:GetCompressedSpawnData(time_stamp), "WHISPER", target)
 end
 
 -- Inform other clients of your departure.
@@ -144,28 +144,28 @@ end
 -- ####################################################################
 
 function RTM:AcknowledgeArrival(player, time_stamp)
-	self.registered_players[player] = time_stamp
+	RTM.registered_players[player] = time_stamp
 	
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
-		self:RegisterPresenceWhisper(self.current_shard_id, player, time_stamp)
+		RTM:RegisterPresenceWhisper(RTM.current_shard_id, player, time_stamp)
 	end	
 	
-	self:PrintRegisteredPlayers()
+	RTM:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgePresenceWhisper(player, arrival, spawn_data)
-	self.registered_players[player] = arrival
+	RTM.registered_players[player] = arrival
 	
-	self:DecompressSpawnData(spawn_data, self.arrival_register_time)
+	RTM:DecompressSpawnData(spawn_data, RTM.arrival_register_time)
 	
-	self:PrintRegisteredPlayers()
+	RTM:PrintRegisteredPlayers()
 end
 
 function RTM:AcknowledgeDeparture(player)
-	self.registered_players[player] = nil
+	RTM.registered_players[player] = nil
 	
-	self:PrintRegisteredPlayers()
+	RTM:PrintRegisteredPlayers()
 end
 
 
@@ -183,18 +183,19 @@ end
 -- Inform the others that you are still present.
 function RTM:RegisterEntityHealth(shard_id, npc_id, percentage)
 	-- Announce to the others that you are still present on the shard.
-	self:SendRateLimitedAddonMessage("EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
+	RTM:SendRateLimitedAddonMessage("EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
-function RTM:AcknowledgeEntityDeath(player, npc_id)
+function RTM:AcknowledgeEntityDeath(npc_id)
 	RTM.last_recorded_death[npc_id] = time()
-	--print("Acknowledge death", npc_id, RTM.is_alive[npc_id], RTM.current_health[npc_id], RTM.last_recorded_death[npc_id])
+	RTM.is_alive[npc_id] = false
+	RTM.current_health[npc_id] = nil
 end
 
-function RTM:AcknowledgeEntityHealth(player, npc_id, percentage)
+function RTM:AcknowledgeEntityHealth(npc_id, percentage)
+	RTM.last_recorded_death[npc_id] = nil
 	RTM.is_alive[npc_id] = true
 	RTM.current_health[npc_id] = percentage
-	--print("Acknowledge health", npc_id, RTM.is_alive[npc_id], RTM.current_health[npc_id], RTM.last_recorded_death[npc_id])
 end
 
 
@@ -203,24 +204,25 @@ end
 
 
 function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
-	--print(player, prefix, shard_id, payload)
+	print(player, prefix, shard_id, payload)
 	
-	if self.current_shard_id == shard_id then
+	if RTM.current_shard_id == shard_id then
 		if prefix == "A" then
 			time_stamp = tonumber(payload)
-			self:AcknowledgeArrival(player, time_stamp)
+			RTM:AcknowledgeArrival(player, time_stamp)
 		elseif prefix == "PW" then
 			local arrival_str, spawn_data = strsplit("-", payload)
 			local arrival = tonumber(arrival_str)
-			self:AcknowledgePresenceWhisper(player, arrival, spawn_data)
+			RTM:AcknowledgePresenceWhisper(player, arrival, spawn_data)
 		elseif prefix == "D" then
-			self:AcknowledgeDeparture(player)
+			RTM:AcknowledgeDeparture(player)
 		elseif prefix == "ED" then
-			self:AcknowledgeEntityDeath(player, payload)
+			local npc_id = tonumber(payload)
+			RTM:AcknowledgeEntityDeath(npc_id)
 		elseif prefix == "EH" then
 			local npc_id_str, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
-			self:AcknowledgeEntityHealth(player, npc_id, percentage)
+			RTM:AcknowledgeEntityHealth(npc_id, percentage)
 		end
 	end
 end

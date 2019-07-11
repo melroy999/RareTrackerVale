@@ -35,16 +35,7 @@ function CommandHandler(msg, editbox)
 			print(name, owner, moderator, guid)
 		end
 	elseif cmd == "test" then
-		local data_compressed_time = ""
-		for i=1, #RTM.rare_ids do
-			local npc_id = RTM.rare_ids[i]
-			data_compressed_time = data_compressed_time..","..RTM:toBase64(60 * 60 * 60)
-		end
-		print(#data_compressed_time)
-		
-		local time_stamp = time()
-		response = RTM:GetCompressedSpawnData(time())
-		print(response)
+		print(RTM.is_alive[524], RTM.current_health[524], RTM.last_recorded_death[524])
 	end
 end
 

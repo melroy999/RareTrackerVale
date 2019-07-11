@@ -44,20 +44,20 @@ function RTM:StartInterface()
 	RTM.last_recorded_death = {}
 	RTM.current_shard_id = nil
 	
-	self:RegisterEvents()
-	self:RegisterToRTMChannel()
+	RTM:RegisterEvents()
+	RTM:RegisterToRTMChannel()
 	
-	self:Show()
+	RTM:Show()
 	
-	if RTM.hide_override then self:Hide() end
+	if RTM.hide_override then RTM:Hide() end
 end
 
 function RTM:CloseInterface()
 	LeaveChannelByName("RTM")
 	
-	self:UnregisterEvents()
+	RTM:UnregisterEvents()
 	
-	self:Hide()
+	RTM:Hide()
 end
 
 
