@@ -9,7 +9,6 @@ local RTM = data.RTM;
 function CommandHandler(msg, editbox)
 	-- pattern matching that skips leading whitespace and whitespace between cmd and args
 	-- any whitespace at end of args is retained
-	print(msg)
 	local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
    
 	if cmd == "show" then

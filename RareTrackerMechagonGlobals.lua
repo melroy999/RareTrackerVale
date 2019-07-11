@@ -15,58 +15,57 @@ end
 
 -- The ids of the rares the addon monitors.
 RTM.rare_ids = {
-	151934,
-	155060,
-	152113,
-	154225,
-	151625,
-	151940,
-	150394,
-	153200,
-	151308,
-	152001,
-	154739,
-	149847,
-	152569,
-	152570,
-	151569,
-	150342,
-	154153,
-	151202,
-	151884,
-	153228,
-	153205,
-	154701,
-	151684,
-	152007,
-	151933,
-	151124,
-	151672,
-	151627,
-	151296,
-	153206,
-	152764,
-	151702,
-	150575,
-	152182,
-	155583,
-	150937,
-	153000,
-	153226,
-	154342,
-	--153293 -- Testing
-	524 -- Boar
+	151934, -- "Arachnoid Harvester"
+	154342, -- "Arachnoid Harvester (F)"
+	--155060, -- "Doppel Ganger"
+	152113, -- "The Kleptoboss"
+	154225, -- "The Rusty Prince (F)"
+	151625, -- "The Scrap King"
+	151940, -- "Uncle T'Rogg"
+	150394, -- "Armored Vaultbot"
+	153200, -- "Boilburn"
+	151308, -- "Boggac Skullbash"
+	152001, -- "Bonepicker"
+	154739, -- "Caustic Mechaslime"
+	149847, -- "Crazed Trogg (Orange)"
+	152569, -- "Crazed Trogg (Green)"
+	152570, -- "Crazed Trogg (Blue)"
+	151569, -- "Deepwater Maw"
+	150342, -- "Earthbreaker Gulroc"
+	154153, -- "Enforcer KX-T57"
+	151202, -- "Foul Manifestation"
+	151884, -- "Fungarian Furor"
+	153228, -- "Gear Checker Cogstar"
+	153205, -- "Gemicide"
+	154701, -- "Gorged Gear-Cruncher"
+	151684, -- "Jawbreaker"
+	152007, -- "Killsaw"
+	151933, -- "Malfunctioning Beastbot"
+	151124, -- "Mechagonian Nullifier"
+	151672, -- "Mecharantula"
+	151627, -- "Mr. Fixthis"
+	151296, -- "OOX-Avenger/MG"
+	153206, -- "Ol' Big Tusk"
+	152764, -- "Oxidized Leachbeast"
+	151702, -- "Paol Pondwader"
+	150575, -- "Rumblerocks"
+	152182, -- "Rustfeather"
+	155583, -- "Scrapclaw"
+	150937, -- "Seaspit"
+	153000, -- "Sparkqueen P'Emp"
+	153226, -- "Steel Singer Freza"
+	--524, -- "Boar"
 }
 
 RTM.rare_ids_set = Set(RTM.rare_ids)
 
 RTM.rare_names_localized = {}
 RTM.rare_names_localized["enUS"] = {}
-RTM.rare_names_localized["enUS"][154342] = "Arachnoid Harvester (Future)"
 RTM.rare_names_localized["enUS"][151934] = "Arachnoid Harvester"
+RTM.rare_names_localized["enUS"][154342] = "Arachnoid Harvester (F)"
 RTM.rare_names_localized["enUS"][155060] = "Doppel Ganger"
 RTM.rare_names_localized["enUS"][152113] = "The Kleptoboss"
-RTM.rare_names_localized["enUS"][154225] = "The Rusty Prince"
+RTM.rare_names_localized["enUS"][154225] = "The Rusty Prince (F)"
 RTM.rare_names_localized["enUS"][151625] = "The Scrap King"
 RTM.rare_names_localized["enUS"][151940] = "Uncle T'Rogg"
 RTM.rare_names_localized["enUS"][150394] = "Armored Vaultbot"
@@ -75,8 +74,8 @@ RTM.rare_names_localized["enUS"][151308] = "Boggac Skullbash"
 RTM.rare_names_localized["enUS"][152001] = "Bonepicker"
 RTM.rare_names_localized["enUS"][154739] = "Caustic Mechaslime"
 RTM.rare_names_localized["enUS"][149847] = "Crazed Trogg (Orange)"
-RTM.rare_names_localized["enUS"][152569] = "Crazed Trogg (2)"
-RTM.rare_names_localized["enUS"][152570] = "Crazed Trogg (3)"
+RTM.rare_names_localized["enUS"][152569] = "Crazed Trogg (Green)"
+RTM.rare_names_localized["enUS"][152570] = "Crazed Trogg (Blue)"
 RTM.rare_names_localized["enUS"][151569] = "Deepwater Maw"
 RTM.rare_names_localized["enUS"][150342] = "Earthbreaker Gulroc"
 RTM.rare_names_localized["enUS"][154153] = "Enforcer KX-T57"

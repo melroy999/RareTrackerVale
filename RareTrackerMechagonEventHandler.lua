@@ -22,6 +22,8 @@ function RTM:OnEvent(event, ...)
 		RTM:OnChatMsgAddon(...)
 	elseif event == "CHAT_MSG_CHANNEL_LEAVE" then
 		RTM:OnChatMsgChannelLeave(...)
+	elseif event == "VIGNETTE_MINIMAP_UPDATED" then
+		RTM:OnVignetteMinimapUpdated(...)
 	end
 end
 
@@ -42,6 +44,7 @@ end
 function RTM:CheckForShardChange(zone_uid)
 	if RTM.current_shard_id ~= zone_uid and zone_uid ~= nil then
 		print("Changing from shard", RTM.current_shard_id, "to", zone_uid..".")
+		RTM:UpdateShardNumber(zone_uid)
 		
 		if RTM.current_shard_id == nil then
 			-- Register yourRTM for the given shard.
@@ -137,15 +140,12 @@ RTM.last_zone_id = nil
 function RTM:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
-	--print("Entering zone", zone_id)
-	
-	-- 
-	
 		
 	if (zone_id == 1462 or zone_id == 37) and not (RTM.last_zone_id == 1462 or RTM.last_zone_id == 37) then
 		-- Enable the Mechagon rares.
 		print("Enabling addon", zone_id)
 		RTM:StartInterface()
+		
 	elseif (RTM.last_zone_id == 1462 or RTM.last_zone_id == 37) and not (zone_id == 1462 or zone_id == 37) then
 		-- Disable the addon.
 		print("Disabling addon", zone_id)
@@ -184,10 +184,18 @@ function RTM:OnChatMsgChannelLeave(...)
 	local player, channel = select(2, ...), select(9, ...)
 	
 	if channel == "RTM" then
-		print("Player", player, "has left the channel")
+		--print("Player", player, "has left the channel")
 		RTM:AcknowledgeDeparture(player)
 	end
 end	
+
+function RTM:OnVignetteMinimapUpdated(...)
+	vignetteGUID, onMinimap = ...
+	print(vignetteGUID, onMinimap)
+	local unittype, zero, server_id, instance_id, zone_uid, zero, spawn_uid = strsplit("-", vignetteGUID);
+	
+	
+end
 
 RTM.last_display_update = 0
 
@@ -210,6 +218,7 @@ function RTM:RegisterEvents()
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL")
 	RTM:RegisterEvent("CHAT_MSG_ADDON")
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
+	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 function RTM:UnregisterEvents()
@@ -219,6 +228,7 @@ function RTM:UnregisterEvents()
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL")
 	RTM:UnregisterEvent("CHAT_MSG_ADDON")
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL_LEAVE")
+	RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)

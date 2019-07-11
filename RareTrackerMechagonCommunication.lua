@@ -204,7 +204,7 @@ end
 
 
 function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
-	print(player, prefix, shard_id, payload)
+	--print(player, prefix, shard_id, payload)
 	
 	if RTM.current_shard_id == shard_id then
 		if prefix == "A" then
