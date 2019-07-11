@@ -39,6 +39,22 @@ function RTM:ChangeShard(new_zone_uid, old_zone_uid)
 	self:RegisterArrival(new_zone_uid)
 end
 
+function RTM:CheckForShardChange(zone_uid)
+	if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
+		print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
+		
+		if self.current_shard_id == nil then
+			-- Register yourself for the given shard.
+			self:RegisterArrival(zone_uid)
+		else
+			-- Move from one shard to another.
+			RTM:ChangeShard(self.current_shard_id, zone_uid)
+		end
+		
+		self.current_shard_id = zone_uid
+	end
+end
+
 function RTM:OnTargetChanged(...)
 	if UnitGUID("target") ~= nil then
 		-- Get information about the target.
@@ -46,19 +62,7 @@ function RTM:OnTargetChanged(...)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-			print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
-			
-			if self.current_shard_id == nil then
-				-- Register yourself for the given shard.
-				self:RegisterArrival(zone_uid)
-			else
-				-- Move from one shard to another.
-				RTM:ChangeShard(self.current_shard_id, zone_uid)
-			end
-			
-			self.current_shard_id = zone_uid
-		end
+		self:CheckForShardChange(zone_uid)
 		
 		if self.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
@@ -76,6 +80,8 @@ function RTM:OnTargetChanged(...)
 				self.current_health[npc_id] = nil
 				self.last_recorded_death[npc_id] = time()
 				
+				print("Registering death", npc_id, self.is_alive[npc_id], self.current_health[npc_id], self.last_recorded_death[npc_id])
+			
 				if self.recorded_entity_death_ids[spawn_uid] == nil then
 					print("Registering death")
 					self.recorded_entity_death_ids[spawn_uid] = true
@@ -98,20 +104,7 @@ function RTM:OnUnitHealth(unit)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-			print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
-			
-			if self.current_shard_id == nil then
-				-- Register yourself for the given shard.
-				self:RegisterArrival(zone_uid)
-			else
-				-- Changed shard. Remove yourself from the original shard and register to new shard.
-				self:RegisterDeparture(self.current_shard_id)
-				self:RegisterArrival(zone_uid)
-			end
-			
-			self.current_shard_id = zone_uid
-		end
+		self:CheckForShardChange(zone_uid)
 		
 		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
@@ -130,28 +123,17 @@ function RTM:OnCombatLogEvent(...)
 		
 	if subevent == "UNIT_DIED" then
 		if self.rare_ids_set[npc_id] then
-			--self.last_recorded_death[npc_id] = timestamp
+		
+			self:CheckForShardChange(zone_uid)
+		
+			print(npc_id)
 			self.is_alive[npc_id] = false
 			self.current_health[npc_id] = nil
 			self.last_recorded_death[npc_id] = time()
-			
-			if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-				print("Changing from shard", self.current_shard_id, "to", zone_uid..".")
-				
-				if self.current_shard_id == nil then
-					-- Register yourself for the given shard.
-					self:RegisterArrival(zone_uid)
-				else
-					-- Changed shard. Remove yourself from the original shard and register to new shard.
-					self:RegisterDeparture(self.current_shard_id)
-					self:RegisterArrival(zone_uid)
-				end
-				
-				self.current_shard_id = zone_uid
-			end
+			--print("Registering death", npc_id, self.is_alive[npc_id], self.current_health[npc_id], self.last_recorded_death[npc_id])
 			
 			if self.recorded_entity_death_ids[spawn_uid] == nil then
-				print("Registering death")
+				--print("Registering death")
 				self.recorded_entity_death_ids[spawn_uid] = true
 				self:RegisterEntityDeath(self.current_shard_id, npc_id)
 			end
@@ -200,8 +182,7 @@ function RTM:OnChatMsgAddon(...)
 	if addon_prefix == "RTM" then
 		local header, payload = strsplit(":", message)
 		local prefix, shard_id = strsplit("-", header)
-		print(prefix, message, channel, sender)
-	
+
 		self:OnChatMessageReceived(sender, prefix, shard_id, payload)
 	end
 end	
@@ -223,7 +204,14 @@ function RTM:OnUpdate()
 	if (RTM.last_display_update + 0.5 < time()) then
 		for i=1, #RTM.rare_ids do
 			local npc_id = RTM.rare_ids[i]
+			
 			RTM:UpdateStatus(npc_id)
+			
+			if RTM.last_recorded_death[npc_ida] ~= nil and RTM.last_recorded_death[npc_id] + 10 > time() then
+				RTM.is_alive[npc_id] = false
+				RTM.current_health[npc_id] = nil
+				--print("Overwriting health.")
+			end
 		end
 		
 		RTM.last_display_update = time();
