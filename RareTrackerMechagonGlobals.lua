@@ -22,7 +22,7 @@ RTM.rare_ids = {
 	154225, -- "The Rusty Prince (F)"
 	151625, -- "The Scrap King"
 	151940, -- "Uncle T'Rogg"
-	150394, -- "Armored Vaultbot"
+	--150394, -- "Armored Vaultbot"
 	153200, -- "Boilburn"
 	151308, -- "Boggac Skullbash"
 	152001, -- "Bonepicker"

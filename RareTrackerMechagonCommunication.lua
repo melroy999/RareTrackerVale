@@ -174,22 +174,30 @@ end
 -- ##               Entity Information Share Functions               ##
 -- ####################################################################
 
--- Inform the others that you are still present.
+-- Inform the others that a specific entity has died.
 function RTM:RegisterEntityDeath(shard_id, npc_id)
-	-- Announce to the others that you are still present on the shard.
 	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
--- Inform the others that you are still present.
+-- Inform the others that you have spotted an alive entity.
+function RTM:RegisterEntityAlive(shard_id, npc_id)
+	RTM:SendRateLimitedAddonMessage("EA-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
+end
+
+-- Inform the others the health of a specific entity.
 function RTM:RegisterEntityHealth(shard_id, npc_id, percentage)
-	-- Announce to the others that you are still present on the shard.
 	RTM:SendRateLimitedAddonMessage("EH-"..shard_id..":"..npc_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
 end
+
 
 function RTM:AcknowledgeEntityDeath(npc_id)
 	RTM.last_recorded_death[npc_id] = time()
 	RTM.is_alive[npc_id] = false
 	RTM.current_health[npc_id] = nil
+end
+
+function RTM:AcknowledgeEntityAlive(npc_id, percentage)
+	RTM.is_alive[npc_id] = true
 end
 
 function RTM:AcknowledgeEntityHealth(npc_id, percentage)
@@ -200,11 +208,8 @@ end
 
 
 
-
-
-
 function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
-	--print(player, prefix, shard_id, payload)
+	print(player, prefix, shard_id, payload)
 	
 	if RTM.current_shard_id == shard_id then
 		if prefix == "A" then
@@ -219,6 +224,9 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
 		elseif prefix == "ED" then
 			local npc_id = tonumber(payload)
 			RTM:AcknowledgeEntityDeath(npc_id)
+		elseif prefix == "EA" then
+			local npc_id = tonumber(payload)
+			RTM:AcknowledgeEntityAlive(npc_id)
 		elseif prefix == "EH" then
 			local npc_id_str, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)

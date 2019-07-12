@@ -27,7 +27,7 @@ function RTM:OnEvent(event, ...)
 	end
 end
 
-function RTM:ChangeShard(new_zone_uid, old_zone_uid)
+function RTM:ChangeShard(old_zone_uid, new_zone_uid)
 	-- Notify the users in your old shard that you have moved on to another shard.
 	RTM:RegisterDeparture(old_zone_uid)
 	
@@ -137,16 +137,21 @@ end
 
 RTM.last_zone_id = nil
 
+RTM.target_zones = {}
+RTM.target_zones[1462] = true
+RTM.target_zones[37] = true
+RTM.target_zones[1522] = true
+
 function RTM:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 		
-	if (zone_id == 1462 or zone_id == 37) and not (RTM.last_zone_id == 1462 or RTM.last_zone_id == 37) then
+	if RTM.target_zones[zone_id] and not RTM.target_zones[RTM.last_zone_id] then
 		-- Enable the Mechagon rares.
 		print("Enabling addon", zone_id)
 		RTM:StartInterface()
 		
-	elseif (RTM.last_zone_id == 1462 or RTM.last_zone_id == 37) and not (zone_id == 1462 or zone_id == 37) then
+	elseif RTM.target_zones[RTM.last_zone_id] and not RTM.target_zones[zone_id] then
 		-- Disable the addon.
 		print("Disabling addon", zone_id)
 		
@@ -189,12 +194,35 @@ function RTM:OnChatMsgChannelLeave(...)
 	end
 end	
 
+
+
 function RTM:OnVignetteMinimapUpdated(...)
 	vignetteGUID, onMinimap = ...
 	print(vignetteGUID, onMinimap)
-	local unittype, zero, server_id, instance_id, zone_uid, zero, spawn_uid = strsplit("-", vignetteGUID);
+	vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	
-	
+	if vignetteInfo == nil and RTM.current_shard_id ~= nil then
+		-- An entity we saw earlier might have died.
+		if RTM.reported_vignettes[vignetteGUID] then
+			print("Reporting vignette death")
+			RTM:RegisterEntityDeath(RTM.current_shard_id, RTM.reported_vignettes[vignetteGUID])
+		end
+	else
+		-- Report the entity.
+		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID);
+		local npc_id = tonumber(npc_id)
+		
+		if unittype == "Creature" then
+			RTM:CheckForShardChange(zone_uid)
+			
+			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
+				RTM.is_alive[npc_id] = true
+				RTM.reported_vignettes[vignetteGUID] = npc_id
+				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id)
+				print("Reporting vignette alive")
+			end
+		end
+	end
 end
 
 RTM.last_display_update = 0
@@ -218,7 +246,7 @@ function RTM:RegisterEvents()
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL")
 	RTM:RegisterEvent("CHAT_MSG_ADDON")
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
-	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	--RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 function RTM:UnregisterEvents()
@@ -228,7 +256,7 @@ function RTM:UnregisterEvents()
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL")
 	RTM:UnregisterEvent("CHAT_MSG_ADDON")
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL_LEAVE")
-	RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	--RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)
@@ -239,3 +267,4 @@ RTM:SetScript("OnEvent", RTM.OnEvent)
 RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
+	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")

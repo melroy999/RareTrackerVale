@@ -20,6 +20,12 @@ RTM.hide_override = true
 -- A table containing all UID deaths reported by the player.
 RTM.recorded_entity_death_ids = {}
 
+-- A table containing all vignette UIDs reported by the player.
+RTM.reported_vignettes = {}
+
+-- The rares marked as favorites by the player.
+RTM.favorite_rares = {}
+
 -- ####################################################################
 -- ##                        Helper functions                        ##
 -- ####################################################################

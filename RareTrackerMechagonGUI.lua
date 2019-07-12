@@ -60,7 +60,7 @@ function RTM:InitializeInterfaceEntityStatusFrame()
 	for i=1, #RTM.rare_ids do
 		local npc_id = RTM.rare_ids[i]
 		f.strings[npc_id] = f:CreateFontString(nil, nil,"GameFontNormal")
-		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
+		f.strings[npc_id]:SetPoint("TOP", 2, -(i - 1) * 12 - 4)
 		f.strings[npc_id]:SetText("--")
 	end
 	
