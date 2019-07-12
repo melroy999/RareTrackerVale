@@ -18,16 +18,16 @@ front_opacity = 0.6
 
 function RTM:InitializeShardNumberFrame()
 	local f = CreateFrame("Frame", "RTM.shard_id_frame", self)
-	f:SetSize(entity_name_width + entity_status_width + frame_padding, shard_id_frame_height)
+	f:SetSize(entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width, shard_id_frame_height)
 	local texture = f:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
 	texture:SetAllPoints(f)
 	f.texture = texture
 	
 	f.status_text = f:CreateFontString(nil, nil, "GameFontNormal")
-	f.status_text:SetPoint("TOPLEFT", 10, -2)
+	f.status_text:SetPoint("TOPLEFT", 10 + 2 * favorite_rares_width + 2 * frame_padding, -2)
 	f.status_text:SetText("Shard ID: Unknown")
-	f:SetPoint("TOPLEFT", self, 3 * frame_padding + 2 * favorite_rares_width, -frame_padding)
+	f:SetPoint("TOPLEFT", self, frame_padding, -frame_padding)
 	
 	return f
 end

@@ -220,7 +220,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	end
 end
 
-function RTM:OnChatMessageReceived(player, prefix, addon_version, shard_id, payload)
+function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
 	print(player, prefix, shard_id, addon_version, payload)
 	
 	if RTM.current_shard_id == shard_id and RTM.version == addon_version then
