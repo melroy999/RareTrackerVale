@@ -181,7 +181,7 @@ end
 
 -- Inform the others that you have spotted an alive entity.
 function RTM:RegisterEntityAlive(shard_id, npc_id)
-	RTM:SendRateLimitedAddonMessage("EA-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
+	C_ChatInfo.SendAddonMessage("EA-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others the health of a specific entity.
