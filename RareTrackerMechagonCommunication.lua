@@ -119,20 +119,20 @@ function RTM:RegisterArrival(shard_id)
 
 	-- Announce to the others that you have arrived.
 	RTM.arrival_register_time = time()
-	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName("RTM")))
+	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others that you are still present.
 function RTM:RegisterPresenceWhisper(shard_id, target, time_stamp)
 	-- Announce to the others that you are still present on the shard.
 	local arrival = RTM.registered_players[player_name]
-	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id..":"..arrival.."-"..RTM:GetCompressedSpawnData(time_stamp), "WHISPER", target)
+	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id.."-"..RTM.version..":"..arrival.."-"..RTM:GetCompressedSpawnData(time_stamp), "WHISPER", target)
 end
 
 -- Inform other clients of your departure.
 function RTM:RegisterDeparture(shard_id)
 	-- Announce to the others that you have departed the shard.
-	C_ChatInfo.SendAddonMessage("RTM", "D-"..shard_id, "CHANNEL", select(1, GetChannelName("RTM")))
+	C_ChatInfo.SendAddonMessage("RTM", "D-"..shard_id.."-"..RTM.version, "CHANNEL", select(1, GetChannelName("RTM")))
 	
 	-- Reset your communication lists.
 	RTM.registered_players = {}
@@ -176,17 +176,17 @@ end
 
 -- Inform the others that a specific entity has died.
 function RTM:RegisterEntityDeath(shard_id, npc_id)
-	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
+	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others that you have spotted an alive entity.
 function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_id)
-	C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id..":"..npc_id.."-"..spawn_id, "CHANNEL", select(1, GetChannelName("RTM")))
+	C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 -- Inform the others the health of a specific entity.
 function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_id, percentage)
-	RTM:SendRateLimitedAddonMessage("EH-"..shard_id..":"..npc_id.."-"..spawn_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
+	RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id.."-"..percentage, "CHANNEL", select(1, GetChannelName("RTM")))
 end
 
 
@@ -220,12 +220,10 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	end
 end
 
-
-
-function RTM:OnChatMessageReceived(player, prefix, shard_id, payload)
-	print(player, prefix, shard_id, payload)
+function RTM:OnChatMessageReceived(player, prefix, addon_version, shard_id, payload)
+	print(player, prefix, shard_id, addon_version, payload)
 	
-	if RTM.current_shard_id == shard_id then
+	if RTM.current_shard_id == shard_id and RTM.version == addon_version then
 		if prefix == "A" then
 			time_stamp = tonumber(payload)
 			RTM:AcknowledgeArrival(player, time_stamp)

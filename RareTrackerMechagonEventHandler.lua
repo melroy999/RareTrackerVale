@@ -124,11 +124,7 @@ function RTM:OnCombatLogEvent(...)
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
 	npc_id = tonumber(npc_id)
 		
-	if subevent == "UNIT_DIED" or subevent == "UNIT_DESTROYED" then
-	
-		if npc_id == 150394 then
-			print("Detecting Vaultbot Death")
-		end
+	if subevent == "UNIT_DIED" then
 	
 		if RTM.rare_ids_set[npc_id] then
 		
@@ -175,8 +171,7 @@ end
 
 function RTM:OnChatMsgChannel(...)
 	local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
-	
-	--print(text)
+
 end	
 
 function RTM:OnChatMsgAddon(...)
@@ -184,9 +179,10 @@ function RTM:OnChatMsgAddon(...)
 	
 	if addon_prefix == "RTM" then
 		local header, payload = strsplit(":", message)
-		local prefix, shard_id = strsplit("-", header)
+		local prefix, shard_id, addon_version_str = strsplit("-", header)
+		local addon_version = tonumber(addon_version_str)
 
-		RTM:OnChatMessageReceived(sender, prefix, shard_id, payload)
+		RTM:OnChatMessageReceived(sender, prefix, shard_id, addon_version, payload)
 	end
 end	
 
@@ -196,7 +192,6 @@ function RTM:OnChatMsgChannelLeave(...)
 	local player, channel = select(2, ...), select(9, ...)
 	
 	if channel == "RTM" then
-		--print("Player", player, "has left the channel")
 		RTM:AcknowledgeDeparture(player)
 	end
 end	
@@ -205,13 +200,11 @@ end
 
 function RTM:OnVignetteMinimapUpdated(...)
 	vignetteGUID, onMinimap = ...
-	print(vignetteGUID, onMinimap)
 	vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	
 	if vignetteInfo == nil and RTM.current_shard_id ~= nil then
 		-- An entity we saw earlier might have died.
 		if RTM.reported_vignettes[vignetteGUID] then
-			print("Reporting vignette death")
 			RTM:RegisterEntityDeath(RTM.current_shard_id, RTM.reported_vignettes[vignetteGUID])
 		end
 	else
@@ -226,7 +219,6 @@ function RTM:OnVignetteMinimapUpdated(...)
 				RTM.is_alive[npc_id] = true
 				RTM.reported_vignettes[vignetteGUID] = npc_id
 				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid)
-				print("Reporting vignette alive")
 			end
 		end
 	end

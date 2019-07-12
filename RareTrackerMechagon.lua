@@ -31,7 +31,8 @@ local sound_options = {}
 sound_options['none'] = -1
 sound_options['Algalon: Beware!'] = 543587
 
-
+-- The version of the addon.
+RTM.version = 1
 
 -- Setting saved in the saved variables.
 RTMDB = {}

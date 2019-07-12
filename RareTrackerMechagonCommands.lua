@@ -19,22 +19,6 @@ function CommandHandler(msg, editbox)
 		print("hiding interface")
 		RTM:Hide()
 		-- Handle removing of the contents of rest... to something.   
-	elseif cmd == "channel" then
-		channel_id = RTM:FindChannelID()
-		if channel_id == -1 then return end
-		
-		SetSelectedDisplayChannel(channel_id)
-		count = select(5, GetChannelDisplayInfo(channel_id))
-		print(channel_id, count)
-
-		for i=1, count do
-			print(channel_id, i)
-			SetSelectedDisplayChannel(channel_id)
-			name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channel_id, i)
-			print(name, owner, moderator, guid)
-		end
-	elseif cmd == "test" then
-		print(RTM.is_alive[524], RTM.current_health[524], RTM.last_recorded_death[524])
 	end
 end
 
