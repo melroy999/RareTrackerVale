@@ -24,6 +24,8 @@ function RTM:OnEvent(event, ...)
 		RTM:OnChatMsgChannelLeave(...)
 	elseif event == "VIGNETTE_MINIMAP_UPDATED" then
 		RTM:OnVignetteMinimapUpdated(...)
+	elseif event == "ADDON_LOADED" then
+		RTM:OnAddonLoaded()
 	end
 end
 
@@ -78,7 +80,7 @@ function RTM:OnTargetChanged(...)
 				RTM.current_health[npc_id] = percentage
 				RTM:UpdateStatus(npc_id)
 				
-				RTM:RegisterEntityHealth(RTM.current_shard_id, npc_id, percentage)
+				RTM:RegisterEntityHealth(RTM.current_shard_id, npc_id, spawn_uid, percentage)
 			else 
 				if RTM.recorded_entity_death_ids[spawn_uid] == nil then
 					RTM.recorded_entity_death_ids[spawn_uid] = true
@@ -111,7 +113,7 @@ function RTM:OnUnitHealth(unit)
 			RTM.current_health[npc_id] = percentage
 			RTM:UpdateStatus(npc_id)
 			
-			RTM:RegisterEntityHealth(RTM.current_shard_id, npc_id, percentage)
+			RTM:RegisterEntityHealth(RTM.current_shard_id, npc_id, spawn_uid, percentage)
 		end
 	end
 end
@@ -122,7 +124,12 @@ function RTM:OnCombatLogEvent(...)
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
 	npc_id = tonumber(npc_id)
 		
-	if subevent == "UNIT_DIED" then
+	if subevent == "UNIT_DIED" or subevent == "UNIT_DESTROYED" then
+	
+		if npc_id == 150394 then
+			print("Detecting Vaultbot Death")
+		end
+	
 		if RTM.rare_ids_set[npc_id] then
 		
 			RTM:CheckForShardChange(zone_uid)
@@ -218,7 +225,7 @@ function RTM:OnVignetteMinimapUpdated(...)
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
 				RTM.is_alive[npc_id] = true
 				RTM.reported_vignettes[vignetteGUID] = npc_id
-				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id)
+				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid)
 				print("Reporting vignette alive")
 			end
 		end
@@ -239,6 +246,10 @@ function RTM:OnUpdate()
 	end
 end	
 
+function RTM:OnAddonLoaded()
+	self:CorrectFavoriteMarks()
+end	
+
 function RTM:RegisterEvents()
 	RTM:RegisterEvent("PLAYER_TARGET_CHANGED")
 	RTM:RegisterEvent("UNIT_HEALTH")
@@ -246,7 +257,7 @@ function RTM:RegisterEvents()
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL")
 	RTM:RegisterEvent("CHAT_MSG_ADDON")
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
-	--RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 function RTM:UnregisterEvents()
@@ -256,7 +267,7 @@ function RTM:UnregisterEvents()
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL")
 	RTM:UnregisterEvent("CHAT_MSG_ADDON")
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL_LEAVE")
-	--RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)
@@ -267,4 +278,4 @@ RTM:SetScript("OnEvent", RTM.OnEvent)
 RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
-	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
+RTM:RegisterEvent("ADDON_LOADED")

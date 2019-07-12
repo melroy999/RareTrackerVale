@@ -23,8 +23,22 @@ RTM.recorded_entity_death_ids = {}
 -- A table containing all vignette UIDs reported by the player.
 RTM.reported_vignettes = {}
 
--- The rares marked as favorites by the player.
-RTM.favorite_rares = {}
+-- A table containing all spawn UIDs that have been reported through a sound warning.
+RTM.reported_spawn_uids = {}
+
+-- Sound file options.
+local sound_options = {}
+sound_options['none'] = -1
+sound_options['Algalon: Beware!'] = 543587
+
+
+
+-- Setting saved in the saved variables.
+RTMDB = {}
+
+-- The rares marked as RTMDB.favorite_rares by the player.
+RTMDB.favorite_rares = {}
+
 
 -- ####################################################################
 -- ##                        Helper functions                        ##
