@@ -156,6 +156,7 @@ function RTM:AcknowledgeEntityDeath(npc_id)
 	RTM.is_alive[npc_id] = nil
 	RTM.current_health[npc_id] = nil
 	RTM.current_coordinates[npc_id] = nil
+	RTM:UpdateDailyKillMark(npc_id)
 	
 	if RTM.waypoints[npc_id] and TomTom then
 		TomTom:RemoveWaypoint(RTM.waypoints[npc_id])

@@ -87,6 +87,7 @@ function RTM:StartInterface()
 	RTM.waypoints = {}
 	RTM.current_shard_id = nil
 	RTM:UpdateShardNumber(nil)
+	RTM:UpdateAllDailyKillMarks()
 	
 	RTM:RegisterEvents()
 	RTM.icon:Show("RTM_icon")

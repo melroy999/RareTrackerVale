@@ -2,7 +2,7 @@ local _, data = ...
 
 local RTM = data.RTM;
 
-local entity_name_width = 170
+local entity_name_width = 180
 local entity_status_width = 50 
 local frame_padding = 4
 local favorite_rares_width = 10
@@ -133,6 +133,8 @@ function RTM:InitializeInterfaceEntityNameFrame()
 	for i=1, #RTM.rare_ids do
 		local npc_id = RTM.rare_ids[i]
 		f.strings[npc_id] = f:CreateFontString(nil, nil, "GameFontNormal")
+		f.strings[npc_id]:SetJustifyH("LEFT")
+		f.strings[npc_id]:SetJustifyV("TOP")
 		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
 		f.strings[npc_id]:SetText(RTM.rare_names_localized["enUS"][npc_id])
 	end
@@ -155,6 +157,8 @@ function RTM:InitializeInterfaceEntityStatusFrame()
 		f.strings[npc_id] = f:CreateFontString(nil, nil,"GameFontNormal")
 		f.strings[npc_id]:SetPoint("TOP", 0, -(i - 1) * 12 - 4)
 		f.strings[npc_id]:SetText("--")
+		f.strings[npc_id]:SetJustifyH("LEFT")
+		f.strings[npc_id]:SetJustifyV("TOP")
 	end
 	
 	f:SetPoint("TOPRIGHT", self, -frame_padding, -(2 * frame_padding + shard_id_frame_height))
@@ -199,6 +203,112 @@ function RTM:CorrectFavoriteMarks()
 	end
 end
 
+function RTM:UpdateDailyKillMark(npc_id)
+	if IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
+		self.entity_name_frame.strings[npc_id]:SetText("(x) "..RTM.rare_names_localized["enUS"][npc_id])
+	else
+		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names_localized["enUS"][npc_id])
+	end
+end
+
+function RTM:UpdateAllDailyKillMarks()
+	for i=1, #RTM.rare_ids do
+		local npc_id = RTM.rare_ids[i]
+		self:UpdateDailyKillMark(npc_id)
+	end
+end
+
+function RTM:InitializeFavoriteIconFrame(f)
+	f.favorite_icon = CreateFrame("Frame", "RTM.favorite_icon", f)
+	f.favorite_icon:SetSize(10, 10)
+	f.favorite_icon:SetPoint("TOPLEFT", f, frame_padding + 1, -(frame_padding + 3))
+
+	f.favorite_icon.texture = f.favorite_icon:CreateTexture(nil, "OVERLAY")
+	f.favorite_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Favorite.tga")
+	f.favorite_icon.texture:SetSize(10, 10)
+	f.favorite_icon.texture:SetPoint("CENTER", f.favorite_icon)
+	
+	f.favorite_icon.tooltip = CreateFrame("Frame", nil, UIParent)
+	f.favorite_icon.tooltip:SetSize(300, 18)
+	
+	local texture = f.favorite_icon.tooltip:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.favorite_icon.tooltip)
+	f.favorite_icon.tooltip.texture = texture
+	f.favorite_icon.tooltip:SetPoint("TOPLEFT", f, 0, 19)
+	f.favorite_icon.tooltip:Hide()
+	
+	f.favorite_icon.tooltip.text = f.favorite_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.favorite_icon.tooltip.text:SetJustifyH("LEFT")
+	f.favorite_icon.tooltip.text:SetJustifyV("TOP")
+	f.favorite_icon.tooltip.text:SetPoint("TOPLEFT", f.favorite_icon.tooltip, 5, -3)
+	f.favorite_icon.tooltip.text:SetText("Click on the squares to add rares to your favorites.")
+	
+	f.favorite_icon:SetScript("OnEnter", 
+		function(self)
+			self.tooltip:Show()
+		end
+	);
+	
+	f.favorite_icon:SetScript("OnLeave", 
+		function(self)
+			self.tooltip:Hide()
+		end
+	);
+end
+
+function RTM:InitializeAnnounceIconFrame(f)
+	f.broadcast_icon = CreateFrame("Frame", "RTM.broadcast_icon", f)
+	f.broadcast_icon:SetSize(10, 10)
+	f.broadcast_icon:SetPoint("TOPLEFT", f, 2 * frame_padding + favorite_rares_width + 1, -(frame_padding + 3))
+
+	f.broadcast_icon.texture = f.broadcast_icon:CreateTexture(nil, "OVERLAY")
+	f.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
+	f.broadcast_icon.texture:SetSize(10, 10)
+	f.broadcast_icon.texture:SetPoint("CENTER", f.broadcast_icon)
+	
+	f.broadcast_icon.tooltip = CreateFrame("Frame", nil, UIParent)
+	f.broadcast_icon.tooltip:SetSize(273, 44)
+	
+	local texture = f.broadcast_icon.tooltip:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.broadcast_icon.tooltip)
+	f.broadcast_icon.tooltip.texture = texture
+	f.broadcast_icon.tooltip:SetPoint("TOPLEFT", f, 0, 45)
+	f.broadcast_icon.tooltip:Hide()
+	
+	f.broadcast_icon.tooltip.text1 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.broadcast_icon.tooltip.text1:SetJustifyH("LEFT")
+	f.broadcast_icon.tooltip.text1:SetJustifyV("TOP")
+	f.broadcast_icon.tooltip.text1:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -3)
+	f.broadcast_icon.tooltip.text1:SetText("Click on the squares to announce rare timers.")
+	
+	f.broadcast_icon.tooltip.text2 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.broadcast_icon.tooltip.text2:SetJustifyH("LEFT")
+	f.broadcast_icon.tooltip.text2:SetJustifyV("TOP")
+	f.broadcast_icon.tooltip.text2:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -15)
+	f.broadcast_icon.tooltip.text2:SetText("Left click: report to general")
+	  
+	f.broadcast_icon.tooltip.text3 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.broadcast_icon.tooltip.text3:SetJustifyH("LEFT")
+	f.broadcast_icon.tooltip.text3:SetJustifyV("TOP")
+	f.broadcast_icon.tooltip.text3:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -27)
+	f.broadcast_icon.tooltip.text3:SetText("Right click: set waypoint")
+	
+	f.broadcast_icon:SetScript("OnEnter", 
+		function(self)
+			self.tooltip:Show()
+		end
+	);
+	
+	f.broadcast_icon:SetScript("OnLeave", 
+		function(self)
+			self.tooltip:Hide()
+		end
+	);
+end
+
+
 function RTM:InitializeInterface()
 	self:SetSize(entity_name_width + entity_status_width + 2 * favorite_rares_width + 5 * frame_padding, shard_id_frame_height + 3 * frame_padding + #RTM.rare_ids * 12 + 8)
 	local texture = self:CreateTexture(nil, "BACKGROUND")
@@ -221,24 +331,10 @@ function RTM:InitializeInterface()
 	self:SetScript("OnDragStop", self.StopMovingOrSizing)
 	
 	-- Add icons for the favorite and broadcast columns.
-	self.favorite_icon = CreateFrame("Frame", "RTM.favorite_icon", self)
-	self.favorite_icon:SetSize(10, 10)
-	self.favorite_icon:SetPoint("TOPLEFT", self, frame_padding + 1, -(frame_padding + 3))
-
-	self.favorite_icon.texture = self.favorite_icon:CreateTexture(nil, "OVERLAY")
-	self.favorite_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Favorite.tga")
-	self.favorite_icon.texture:SetSize(10, 10)
-	self.favorite_icon.texture:SetPoint("CENTER", self.favorite_icon)
+	RTM:InitializeFavoriteIconFrame(self)
+	RTM:InitializeAnnounceIconFrame(self)
 	
-	self.broadcast_icon = CreateFrame("Frame", "RTM.broadcast_icon", self)
-	self.broadcast_icon:SetSize(10, 10)
-	self.broadcast_icon:SetPoint("TOPLEFT", self, 2 * frame_padding + favorite_rares_width + 1, -(frame_padding + 3))
-
-	self.broadcast_icon.texture = self.broadcast_icon:CreateTexture(nil, "OVERLAY")
-	self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
-	self.broadcast_icon.texture:SetSize(10, 10)
-	self.broadcast_icon.texture:SetPoint("CENTER", self.broadcast_icon)
-	
+	-- Create a reset button.
 	self.reload_button = CreateFrame("Button", "RTM.reload_button", self)
 	self.reload_button:SetSize(10, 10)
 	self.reload_button:SetPoint("TOPRIGHT", self, -2 * frame_padding, -(frame_padding + 3))
