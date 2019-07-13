@@ -25,7 +25,7 @@ function RTM:InitializeShardNumberFrame()
 	f.texture = texture
 	
 	f.status_text = f:CreateFontString(nil, nil, "GameFontNormal")
-	f.status_text:SetPoint("TOPLEFT", 10 + 2 * favorite_rares_width + 2 * frame_padding, -2)
+	f.status_text:SetPoint("TOPLEFT", 10 + 2 * favorite_rares_width + 2 * frame_padding, -3)
 	f.status_text:SetText("Shard ID: Unknown")
 	f:SetPoint("TOPLEFT", self, frame_padding, -frame_padding)
 	
@@ -220,7 +220,6 @@ function RTM:InitializeInterface()
 	self.favorite_icon.texture = self.favorite_icon:CreateTexture(nil, "OVERLAY")
 	self.favorite_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Favorite.tga")
 	self.favorite_icon.texture:SetSize(10, 10)
-	self.favorite_icon.texture:SetBlendMode("ADD")
 	self.favorite_icon.texture:SetPoint("CENTER", self.favorite_icon)
 	
 	self.broadcast_icon = CreateFrame("Frame", "RTM.broadcast_icon", self)
@@ -230,7 +229,6 @@ function RTM:InitializeInterface()
 	self.broadcast_icon.texture = self.broadcast_icon:CreateTexture(nil, "OVERLAY")
 	self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
 	self.broadcast_icon.texture:SetSize(10, 10)
-	self.broadcast_icon.texture:SetBlendMode("ADD")
 	self.broadcast_icon.texture:SetPoint("CENTER", self.broadcast_icon)
 	
 	self.reload_button = CreateFrame("Button", "RTM.reload_button", self)
@@ -240,13 +238,12 @@ function RTM:InitializeInterface()
 	self.reload_button.texture = self.reload_button:CreateTexture(nil, "OVERLAY")
 	self.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Reload.tga")
 	self.reload_button.texture:SetSize(10, 10)
-	self.reload_button.texture:SetBlendMode("ADD")
 	self.reload_button.texture:SetPoint("CENTER", self.reload_button)
 	
 	self.reload_button:SetScript("OnClick", 
 		function()
 			if RTM.current_shard_id then
-				print("[RTM] Resetting current rare timers and requesting up-to-date data.")
+				print("<RTM> Resetting current rare timers and requesting up-to-date data.")
 				RTM.is_alive = {}
 				RTM.current_health = {}
 				RTM.last_recorded_death = {}
@@ -258,7 +255,7 @@ function RTM:InitializeInterface()
 				-- Re-register your arrival in the shard.
 				RTM:RegisterArrival(RTM.current_shard_id)
 			else
-				print("[RTM] Please target a non-player entity prior to reloading, such that the addon can determine the current shard id.")
+				print("<RTM> Please target a non-player entity prior to reloading, such that the addon can determine the current shard id.")
 			end
 		end
 	);

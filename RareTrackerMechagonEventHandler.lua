@@ -46,7 +46,7 @@ end
 
 function RTM:CheckForShardChange(zone_uid)
 	if RTM.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print("[RTM] Moving to shard", (zone_uid + 42)..".")
+		print("<RTM> Moving to shard", (zone_uid + 42)..".")
 		RTM:UpdateShardNumber(zone_uid)
 		
 		if RTM.current_shard_id == nil then

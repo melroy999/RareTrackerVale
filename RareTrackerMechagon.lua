@@ -92,7 +92,7 @@ function RTM:StartInterface()
 	RTM.icon:Show("RTM_icon")
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
-		print("RTM: Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
+		print("<RTM> Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
 	end
 	
 	if RTMDB.show_window then 

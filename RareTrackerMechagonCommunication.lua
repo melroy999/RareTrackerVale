@@ -87,7 +87,7 @@ end
 -- Inform the others that you are still present.
 function RTM:RegisterPresenceWhisper(shard_id, target, time_stamp)
 	-- Announce to the others that you are still present on the shard.
-	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id.."-"..RTM.version..":"..arrival.."-"..RTM:GetCompressedSpawnData(time_stamp), "WHISPER", target)
+	C_ChatInfo.SendAddonMessage("RTM", "PW-"..shard_id.."-"..RTM.version..":"..RTM:GetCompressedSpawnData(time_stamp), "WHISPER", target)
 end
 
 --Leave the channel.
@@ -119,7 +119,7 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 	end	
 end
 
-function RTM:AcknowledgePresenceWhisper(player, arrival, spawn_data)
+function RTM:AcknowledgePresenceWhisper(player, spawn_data)
 	if not RTM.rare_table_updated then
 		RTM:DecompressSpawnData(spawn_data, RTM.arrival_register_time)
 		RTM.rare_table_updated = true
@@ -212,9 +212,7 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 			time_stamp = tonumber(payload)
 			RTM:AcknowledgeArrival(player, time_stamp)
 		elseif prefix == "PW" then
-			local arrival_str, spawn_data = strsplit("-", payload)
-			local arrival = tonumber(arrival_str)
-			RTM:AcknowledgePresenceWhisper(player, arrival, spawn_data)
+			RTM:AcknowledgePresenceWhisper(player, payload)
 		elseif prefix == "ED" then
 			local npc_id = tonumber(payload)
 			RTM:AcknowledgeEntityDeath(npc_id)
