@@ -12,13 +12,11 @@ function CommandHandler(msg, editbox)
 	local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
    
 	if cmd == "show" then
-		print("showing interface")
-		RTM:Show()
-		-- Handle adding of the contents of rest... to something.
+		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
+			RTM:Show()
+		end
 	elseif cmd == "hide" then
-		print("hiding interface")
-		RTM:Hide()
-		-- Handle removing of the contents of rest... to something.   
+		RTM:Hide()  
 	end
 end
 

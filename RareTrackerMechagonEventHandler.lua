@@ -20,8 +20,6 @@ function RTM:OnEvent(event, ...)
 		RTM:OnChatMsgChannel(...)
 	elseif event == "CHAT_MSG_ADDON" then
 		RTM:OnChatMsgAddon(...)
-	elseif event == "CHAT_MSG_CHANNEL_LEAVE" then
-		RTM:OnChatMsgChannelLeave(...)
 	elseif event == "VIGNETTE_MINIMAP_UPDATED" then
 		RTM:OnVignetteMinimapUpdated(...)
 	elseif event == "ADDON_LOADED" then
@@ -38,6 +36,9 @@ function RTM:ChangeShard(old_zone_uid, new_zone_uid)
 	RTM.current_health = {}
 	RTM.last_recorded_death = {}
 	RTM.recorded_entity_death_ids = {}
+	RTM.current_coordinates = {}
+	RTM.reported_spawn_uids = {}
+	RTM.reported_vignettes = {}
 	
 	-- Announce your arrival in the new shard.
 	RTM:RegisterArrival(new_zone_uid)
@@ -80,7 +81,11 @@ function RTM:OnTargetChanged(...)
 				RTM.current_health[npc_id] = percentage
 				RTM:UpdateStatus(npc_id)
 				
-				RTM:RegisterEntityHealth(RTM.current_shard_id, npc_id, spawn_uid, percentage)
+				-- Get the current position of the player.
+				local pos = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player")
+				local x, y = math.floor(pos.x * 10000 + 0.5) / 100, math.floor(pos.y * 10000 + 0.5) / 100
+				
+				RTM:RegisterEntityTarget(RTM.current_shard_id, npc_id, spawn_uid, percentage, x, y)
 			else 
 				if RTM.recorded_entity_death_ids[spawn_uid] == nil then
 					RTM.recorded_entity_death_ids[spawn_uid] = true
@@ -138,13 +143,6 @@ function RTM:OnCombatLogEvent(...)
 	end
 end	
 
-RTM.last_zone_id = nil
-
-RTM.target_zones = {}
-RTM.target_zones[1462] = true
-RTM.target_zones[37] = true
-RTM.target_zones[1522] = true
-
 function RTM:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
@@ -183,16 +181,6 @@ function RTM:OnChatMsgAddon(...)
 		local addon_version = tonumber(addon_version_str)
 
 		RTM:OnChatMessageReceived(sender, prefix, shard_id, addon_version, payload)
-	end
-end	
-
-function RTM:OnChatMsgChannelLeave(...)
-	--local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, unused, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
-	
-	local player, channel = select(2, ...), select(9, ...)
-	
-	if channel == "RTM" then
-		RTM:AcknowledgeDeparture(player)
 	end
 end	
 
@@ -248,7 +236,6 @@ function RTM:RegisterEvents()
 	RTM:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	RTM:RegisterEvent("CHAT_MSG_CHANNEL")
 	RTM:RegisterEvent("CHAT_MSG_ADDON")
-	RTM:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 	RTM:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
@@ -258,7 +245,6 @@ function RTM:UnregisterEvents()
 	RTM:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	RTM:UnregisterEvent("CHAT_MSG_CHANNEL")
 	RTM:UnregisterEvent("CHAT_MSG_ADDON")
-	RTM:UnregisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 	RTM:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 

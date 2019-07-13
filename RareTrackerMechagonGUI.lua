@@ -9,7 +9,7 @@ local favorite_rares_width = 10
 
 local shard_id_frame_height = 16
 
-background_opacity = 0.2
+background_opacity = 0.3
 front_opacity = 0.6
 
 -- ####################################################################
@@ -82,23 +82,32 @@ function RTM:InitializeAliveMarkerFrame()
 		texture:SetAllPoints(f.checkboxes[npc_id])
 		f.checkboxes[npc_id].texture = texture
 		f.checkboxes[npc_id]:SetPoint("TOPLEFT", 1, -(i - 1) * 12 - 5)
+		f.checkboxes[npc_id]:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 		
 		-- Add an action listener.
 		f.checkboxes[npc_id]:SetScript("OnClick", 
-			function()
-				local pos = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player")
-				local x, y = math.floor(pos.x * 10000 + 0.5) / 100, math.floor(pos.y * 10000 + 0.5) / 100
-				
+			function(self, button, down)
 				local name = RTM.rare_names_localized["enUS"][npc_id]
 				local health = RTM.current_health[npc_id]
 				local last_death = RTM.last_recorded_death[npc_id]
-			
-				if RTM.current_health[npc_id] then
-					SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, x, y), "CHANNEL", nil, 1)
-				elseif RTM.last_recorded_death[npc_id] ~= nil then
-					SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((time() - last_death) / 60)), "CHANNEL", nil, 1)
-				elseif RTM.is_alive[npc_id] then
-					SendChatMessage(string.format("<RTM> %s seen alive (location unknown)", name), "CHANNEL", nil, 1)
+				local loc = RTM.current_coordinates[npc_id]
+				
+				if button == "LeftButton" then
+					if RTM.current_health[npc_id] and loc then
+						-- SendChatMessage
+						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), "CHANNEL", nil, 1)
+					elseif RTM.current_health[npc_id] then
+						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(location unknown)", name, health), "CHANNEL", nil, 1)
+					elseif RTM.last_recorded_death[npc_id] ~= nil then
+						SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((time() - last_death) / 60)), "CHANNEL", nil, 1)
+					elseif RTM.is_alive[npc_id] then
+						SendChatMessage(string.format("<RTM> %s seen alive (location unknown)", name), "CHANNEL", nil, 1)
+					end
+				else
+					-- does the user have tom tom? if so, add a waypoint if it exists.
+					if TomTom ~= nil and loc then
+						RTM.waypoints[npc_id] = TomTom:AddWaypointToCurrentZone(loc.x, loc.y, name)
+					end
 				end
 			end
 		);
@@ -158,7 +167,7 @@ function RTM:UpdateStatus(npc_id)
 	elseif RTM.last_recorded_death[npc_id] ~= nil then
 		local last_death = RTM.last_recorded_death[npc_id]
 		status_text_frame:SetText(math.floor((time() - last_death) / 60).."m")
-		alive_status_frame.texture:SetColorTexture(0, 0, 0, front_opacity)
+		alive_status_frame.texture:SetColorTexture(0, 0, 1, front_opacity)
 	elseif RTM.is_alive[npc_id] then
 		status_text_frame:SetText("NA")
 		alive_status_frame.texture:SetColorTexture(0, 1, 0, 1)
@@ -169,7 +178,7 @@ function RTM:UpdateStatus(npc_id)
 end
 
 function RTM:UpdateShardNumber(shard_number)
-	RTM.shard_id_frame.status_text:SetText("Shard ID: "..shard_number)
+	RTM.shard_id_frame.status_text:SetText("Shard ID: "..(shard_number + 42))
 end
 
 function RTM:CorrectFavoriteMarks()
@@ -224,6 +233,35 @@ function RTM:InitializeInterface()
 	self.broadcast_icon.texture:SetBlendMode("ADD")
 	self.broadcast_icon.texture:SetPoint("CENTER", self.broadcast_icon)
 	
+	self.reload_button = CreateFrame("Button", "RTM.reload_button", self)
+	self.reload_button:SetSize(10, 10)
+	self.reload_button:SetPoint("TOPRIGHT", self, -2 * frame_padding, -(frame_padding + 3))
+
+	self.reload_button.texture = self.reload_button:CreateTexture(nil, "OVERLAY")
+	self.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Reload.tga")
+	self.reload_button.texture:SetSize(10, 10)
+	self.reload_button.texture:SetBlendMode("ADD")
+	self.reload_button.texture:SetPoint("CENTER", self.reload_button)
+	
+	self.reload_button:SetScript("OnClick", 
+		function()
+			if RTM.current_shard_id then
+				print("[RTM] Resetting current rare timers and requesting up-to-date data.")
+				RTM.is_alive = {}
+				RTM.current_health = {}
+				RTM.last_recorded_death = {}
+				RTM.recorded_entity_death_ids = {}
+				RTM.current_coordinates = {}
+				RTM.reported_spawn_uids = {}
+				RTM.reported_vignettes = {}
+				
+				-- Re-register your arrival in the shard.
+				RTM:RegisterArrival(RTM.current_shard_id)
+			else
+				print("[RTM] Please target a non-player entity prior to reloading, such that the addon can determine the current shard id.")
+			end
+		end
+	);
 	
 	self:Hide()
 end
