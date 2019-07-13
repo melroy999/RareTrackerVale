@@ -46,7 +46,7 @@ end
 
 function RTM:CheckForShardChange(zone_uid)
 	if RTM.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print("Changing from shard", RTM.current_shard_id, "to", zone_uid..".")
+		print("[RTM] Moving to shard", (zone_uid + 42)..".")
 		RTM:UpdateShardNumber(zone_uid)
 		
 		if RTM.current_shard_id == nil then
@@ -149,12 +149,12 @@ function RTM:OnZoneTransition()
 		
 	if RTM.target_zones[zone_id] and not RTM.target_zones[RTM.last_zone_id] then
 		-- Enable the Mechagon rares.
-		print("Enabling addon", zone_id)
+		--print("Enabling addon", zone_id)
 		RTM:StartInterface()
 		
 	elseif RTM.target_zones[RTM.last_zone_id] and not RTM.target_zones[zone_id] then
 		-- Disable the addon.
-		print("Disabling addon", zone_id)
+		--print("Disabling addon", zone_id)
 		
 		-- If we do not have a shard ID, we are not subscribed to one of the channels.
 		if RTM.current_shard_id ~= nil then

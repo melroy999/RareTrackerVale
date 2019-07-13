@@ -169,7 +169,6 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_id)
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		print("Playing sound file")
 		RTM.reported_spawn_uids[spawn_id] = true
 	end
 end
@@ -185,7 +184,6 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_id, percentage, x, y)
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		print("Playing sound file")
 		RTM.reported_spawn_uids[spawn_id] = true
 	end
 end
@@ -198,14 +196,12 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		print("Playing sound file")
 		RTM.reported_spawn_uids[spawn_id] = true
 	end
 end
 
 function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
-	print(player, prefix, shard_id, addon_version, payload)
-	
+
 	if not reported_version_mismatch and RTM.version < addon_version and addon_version ~= 9001 then
 		print("[RTM] Your version or RareTrackerMechagon is outdated. Please update to the most recent version at the earliest convenience.")
 		reported_version_mismatch = true
