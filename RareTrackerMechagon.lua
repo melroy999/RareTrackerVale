@@ -36,12 +36,6 @@ sound_options['Algalon: Beware!'] = 543587
 -- The version of the addon.
 RTM.version = 1
 
--- Setting saved in the saved variables.
-RTMDB = {}
-
--- The rares marked as RTMDB.favorite_rares by the player.
-RTMDB.favorite_rares = {}
-
 -- The last zone the user was in.
 RTM.last_zone_id = nil
 
@@ -49,6 +43,22 @@ RTM.last_zone_id = nil
 RTM.target_zones = {}
 RTM.target_zones[1462] = true
 RTM.target_zones[1522] = true
+
+-- Check whether the addon has loaded.
+RTM.is_loaded = false
+
+-- ####################################################################
+-- ##                         Saved Variables                        ##
+-- ####################################################################
+
+-- Setting saved in the saved variables.
+RTMDB = {}
+
+-- The rares marked as RTMDB.favorite_rares by the player.
+RTMDB.favorite_rares = {}
+
+-- Remember whether the user wants to see the window or not.
+RTMDB.show_window = nil
 
 -- ####################################################################
 -- ##                        Helper functions                        ##
@@ -79,14 +89,15 @@ function RTM:StartInterface()
 	RTM.current_shard_id = nil
 	
 	RTM:RegisterEvents()
+	RTM.icon:Show("RTM_icon")
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
 		print("RTM: Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
 	end
 	
-	RTM:Show()
-	
-	if RTM.hide_override then RTM:Hide() end
+	if RTMDB.show_window then 
+		RTM:Show()
+	end
 end
 
 function RTM:CloseInterface()
@@ -102,12 +113,44 @@ function RTM:CloseInterface()
 	-- Register the user's departure and disable event listeners.
 	RTM:RegisterDeparture(RTM.current_shard_id)
 	RTM:UnregisterEvents()
+	RTM.icon:Hide("RTM_icon")
 	
 	-- Hide the interface.
 	RTM:Hide()
 end
 
+-- ####################################################################
+-- ##                          Minimap Icon                          ##
+-- ####################################################################
 
+local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
+	type = "data source",
+	text = "RTM",
+	icon = "Interface\\Icons\\inv_gizmo_goblingtonkcontroller",
+	OnClick = function() 
+		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
+			if RTM:IsShown() then
+				RTM:Hide()
+				RTMDB.show_window = false
+			else
+				RTM:Show()
+				RTMDB.show_window = true
+			end
+		end
+	end,
+})
+RTM.icon = LibStub("LibDBIcon-1.0")
 
+function RTM:RegisterMapIcon() 
+
+	self.ace_db = LibStub("AceDB-3.0"):New("RTM_ace_db", {
+		profile = {
+			minimap = {
+				hide = false,
+			},
+		},
+	})
+	RTM.icon:Register("RTM_icon", RTM_LDB, self.ace_db.profile.minimap)
+end
 
 

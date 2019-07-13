@@ -227,7 +227,16 @@ function RTM:OnUpdate()
 end	
 
 function RTM:OnAddonLoaded()
-	self:CorrectFavoriteMarks()
+	-- OnAddonLoaded might be called multiple times. We only want it to do so once.
+	if not RTM.is_loaded then
+		self:CorrectFavoriteMarks()
+		self:RegisterMapIcon()
+		RTM.is_loaded = true
+		
+		if RTMDB.show_window == nil then
+			RTMDB.show_window = true
+		end
+	end
 end	
 
 function RTM:RegisterEvents()

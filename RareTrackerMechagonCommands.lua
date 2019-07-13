@@ -14,9 +14,11 @@ function CommandHandler(msg, editbox)
 	if cmd == "show" then
 		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
 			RTM:Show()
+			RTMDB.show_window = true
 		end
 	elseif cmd == "hide" then
 		RTM:Hide()  
+		RTMDB.show_window = false
 	end
 end
 
