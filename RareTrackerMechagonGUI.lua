@@ -9,7 +9,7 @@ local favorite_rares_width = 10
 
 local shard_id_frame_height = 16
 
-background_opacity = 0.3
+background_opacity = 0.4
 front_opacity = 0.6
 
 -- ####################################################################
@@ -99,7 +99,11 @@ function RTM:InitializeAliveMarkerFrame()
 					elseif RTM.current_health[npc_id] then
 						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(location unknown)", name, health), "CHANNEL", nil, 1)
 					elseif RTM.last_recorded_death[npc_id] ~= nil then
-						SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((time() - last_death) / 60)), "CHANNEL", nil, 1)
+						if time() - last_death < 60 then
+							SendChatMessage(string.format("<RTM> %s died %s seconds ago", name, time() - last_death), "CHANNEL", nil, 1)
+						else
+							SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((time() - last_death) / 60)), "CHANNEL", nil, 1)
+						end
 					elseif RTM.is_alive[npc_id] then
 						SendChatMessage(string.format("<RTM> %s seen alive (location unknown)", name), "CHANNEL", nil, 1)
 					end
@@ -178,7 +182,11 @@ function RTM:UpdateStatus(npc_id)
 end
 
 function RTM:UpdateShardNumber(shard_number)
-	RTM.shard_id_frame.status_text:SetText("Shard ID: "..(shard_number + 42))
+	if shard_number then
+		RTM.shard_id_frame.status_text:SetText("Shard ID: "..(shard_number + 42))
+	else
+		RTM.shard_id_frame.status_text:SetText("Shard ID: Unknown")
+	end
 end
 
 function RTM:CorrectFavoriteMarks()
@@ -194,7 +202,7 @@ end
 function RTM:InitializeInterface()
 	self:SetSize(entity_name_width + entity_status_width + 2 * favorite_rares_width + 5 * frame_padding, shard_id_frame_height + 3 * frame_padding + #RTM.rare_ids * 12 + 8)
 	local texture = self:CreateTexture(nil, "BACKGROUND")
-	texture:SetColorTexture(0, 0, 0, 0.1)
+	texture:SetColorTexture(0, 0, 0, background_opacity)
 	texture:SetAllPoints(self)
 	self.texture = texture
 	self:SetPoint("CENTER")

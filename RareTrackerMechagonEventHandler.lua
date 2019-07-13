@@ -77,7 +77,7 @@ function RTM:OnTargetChanged(...)
 			if health > 0 then
 				local percentage = RTM:GetTargetHealthPercentage()
 				
-				RTM.is_alive[npc_id] = true
+				RTM.is_alive[npc_id] = time()
 				RTM.current_health[npc_id] = percentage
 				RTM:UpdateStatus(npc_id)
 				
@@ -114,7 +114,7 @@ function RTM:OnUnitHealth(unit)
 			-- Update the current health of the entity.
 			local percentage = RTM:GetTargetHealthPercentage()
 			
-			RTM.is_alive[npc_id] = true
+			RTM.is_alive[npc_id] = time()
 			RTM.current_health[npc_id] = percentage
 			RTM:UpdateStatus(npc_id)
 			
@@ -128,13 +128,14 @@ function RTM:OnCombatLogEvent(...)
 	local timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
 	npc_id = tonumber(npc_id)
+	
+	-- We can always check for a shard change.
+	if unittype == "Creature" then
+		RTM:CheckForShardChange(zone_uid)
+	end	
 		
 	if subevent == "UNIT_DIED" then
-	
 		if RTM.rare_ids_set[npc_id] then
-		
-			RTM:CheckForShardChange(zone_uid)
-
 			if RTM.recorded_entity_death_ids[spawn_uid] == nil then
 				RTM.recorded_entity_death_ids[spawn_uid] = true
 				RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id)
@@ -204,7 +205,7 @@ function RTM:OnVignetteMinimapUpdated(...)
 			RTM:CheckForShardChange(zone_uid)
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
-				RTM.is_alive[npc_id] = true
+				RTM.is_alive[npc_id] = time()
 				RTM.reported_vignettes[vignetteGUID] = npc_id
 				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid)
 			end
@@ -218,6 +219,19 @@ function RTM:OnUpdate()
 	if (RTM.last_display_update + 0.25 < time()) then
 		for i=1, #RTM.rare_ids do
 			local npc_id = RTM.rare_ids[i]
+			
+			-- It might occur that the rare is marked as alive, but no health is known.
+			-- If 20 seconds pass without a health value, the alive tag will be reset.
+			if RTM.is_alive[npc_id] and not RTM.current_health[npc_id] and time() - RTM.is_alive[npc_id] > 20 then
+				RTM.is_alive[npc_id] = nil
+			end
+			
+			-- It might occur that we have both a hp and health, but no changes.
+			-- If 2 minutes pass without a health value, the alive and health tags will be reset.
+			if RTM.is_alive[npc_id] and RTM.current_health[npc_id] and time() - RTM.is_alive[npc_id] > 120 then
+				RTM.is_alive[npc_id] = nil
+				RTM.current_health[npc_id] = nil
+			end
 			
 			RTM:UpdateStatus(npc_id)
 		end

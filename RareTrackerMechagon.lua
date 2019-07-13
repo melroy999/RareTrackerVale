@@ -66,7 +66,6 @@ RTMDB.show_window = nil
 
 function RTM:GetTargetHealthPercentage()
 	-- Find the current and maximum health of the current target.
-	local current_hp = UnitHealth("target")
 	local max_hp = UnitHealthMax("target")
 	
 	-- Check for division by zero.
@@ -74,7 +73,7 @@ function RTM:GetTargetHealthPercentage()
 		return -1
 	end
 	
-	return math.floor((100 * current_hp) / max_hp) 
+	return math.floor((100 * UnitHealth("target")) / UnitHealthMax("target")) 
 end
 
 function RTM:StartInterface()
@@ -87,6 +86,7 @@ function RTM:StartInterface()
 	RTM.reported_vignettes = {}
 	RTM.waypoints = {}
 	RTM.current_shard_id = nil
+	RTM:UpdateShardNumber(nil)
 	
 	RTM:RegisterEvents()
 	RTM.icon:Show("RTM_icon")
@@ -109,6 +109,7 @@ function RTM:CloseInterface()
 	RTM.reported_spawn_uids = {}
 	RTM.reported_vignettes = {}
 	RTM.current_shard_id = nil
+	RTM:UpdateShardNumber(nil)
 	
 	-- Register the user's departure and disable event listeners.
 	RTM:RegisterDeparture(RTM.current_shard_id)

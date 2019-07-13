@@ -153,7 +153,7 @@ end
 
 function RTM:AcknowledgeEntityDeath(npc_id)
 	RTM.last_recorded_death[npc_id] = time()
-	RTM.is_alive[npc_id] = false
+	RTM.is_alive[npc_id] = nil
 	RTM.current_health[npc_id] = nil
 	RTM.current_coordinates[npc_id] = nil
 	
@@ -164,7 +164,7 @@ function RTM:AcknowledgeEntityDeath(npc_id)
 end
 
 function RTM:AcknowledgeEntityAlive(npc_id, spawn_id)
-	RTM.is_alive[npc_id] = true
+	RTM.is_alive[npc_id] = time()
 	
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
@@ -175,7 +175,7 @@ end
 
 function RTM:AcknowledgeEntityTarget(npc_id, spawn_id, percentage, x, y)
 	RTM.last_recorded_death[npc_id] = nil
-	RTM.is_alive[npc_id] = true
+	RTM.is_alive[npc_id] = time()
 	RTM.current_health[npc_id] = percentage
 	RTM.current_coordinates[npc_id] = {}
 	RTM.current_coordinates[npc_id].x = x
@@ -190,7 +190,7 @@ end
 
 function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	RTM.last_recorded_death[npc_id] = nil
-	RTM.is_alive[npc_id] = true
+	RTM.is_alive[npc_id] = time()
 	RTM.current_health[npc_id] = percentage
 	
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
