@@ -139,6 +139,11 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 			end
 		end
 	end,
+	OnTooltipShow = function(tooltip)
+		tooltip:SetText("RTM")
+		tooltip:AddLine("Hide/Show RTM", 1, 1, 1)
+		tooltip:Show()
+	end
 })
 RTM.icon = LibStub("LibDBIcon-1.0")
 
