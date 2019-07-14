@@ -154,13 +154,11 @@ function RTM:OnZoneTransition()
 		-- Enable the Mechagon rares.
 		RTM:StartInterface()
 		
-	elseif RTM.target_zones[RTM.last_zone_id] and not RTM.target_zones[zone_id] then
+	elseif not RTM.target_zones[zone_id] then
 		-- Disable the addon.
 		
 		-- If we do not have a shard ID, we are not subscribed to one of the channels.
-		if RTM.current_shard_id ~= nil then
-			RTM:RegisterDeparture(RTM.current_shard_id)
-		end
+		RTM:RegisterDeparture(RTM.current_shard_id)
 		
 		RTM:CloseInterface()
 	end

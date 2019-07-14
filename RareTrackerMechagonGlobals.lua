@@ -6,6 +6,11 @@ local RTM = data.RTM
 -- ##                          Static Data                           ##
 -- ####################################################################
 
+-- The zones in which the addon is active.
+RTM.target_zones = {}
+RTM.target_zones[1462] = true
+RTM.target_zones[1522] = true
+
 -- Simulate a set data structure for efficient existence lookups.
 function Set (list)
   local set = {}

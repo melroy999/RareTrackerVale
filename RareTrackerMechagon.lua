@@ -40,11 +40,6 @@ RTM.version = 2
 -- The last zone the user was in.
 RTM.last_zone_id = nil
 
--- The zones in which the addon is active.
-RTM.target_zones = {}
-RTM.target_zones[1462] = true
-RTM.target_zones[1522] = true
-
 -- Check whether the addon has loaded.
 RTM.is_loaded = false
 
@@ -151,6 +146,7 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 	end
 })
 RTM.icon = LibStub("LibDBIcon-1.0")
+RTM.icon:Hide("RTM_icon")
 
 function RTM:RegisterMapIcon() 
 

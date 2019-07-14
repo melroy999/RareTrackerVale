@@ -356,6 +356,9 @@ function RTM:InitializeInterface()
 				RTM.reported_spawn_uids = {}
 				RTM.reported_vignettes = {}
 				
+				-- Reset the cache.
+				RTMDB.previous_records[shard_id] = nil
+				
 				-- Re-register your arrival in the shard.
 				RTM:RegisterArrival(RTM.current_shard_id)
 			else
