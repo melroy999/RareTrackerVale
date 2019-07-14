@@ -126,7 +126,7 @@ function RTM:OnUnitHealth(unit)
 end
 
 function RTM:OnCombatLogEvent(...)
-	-- The event itRTN does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
+	-- The event does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
 	local timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
 	npc_id = tonumber(npc_id)
@@ -134,7 +134,7 @@ function RTM:OnCombatLogEvent(...)
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] then
-		RTN:CheckForShardChange(zone_uid)
+		RTM:CheckForShardChange(zone_uid)
 	end	
 		
 	if subevent == "UNIT_DIED" then
