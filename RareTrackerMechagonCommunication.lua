@@ -18,6 +18,10 @@ local reported_version_mismatch = false
 -- The name of the current channel.
 local channel_name = nil
 
+-- The last time the health of an entity has been reported.
+-- Used for limiting the number of messages sent to the channel.
+RTM.last_health_report = {}
+
 -- ####################################################################
 -- ##                        Helper Functions                        ##
 -- ####################################################################
@@ -26,7 +30,7 @@ RTM.last_message_sent = 0
 -- A function that acts as a rate limiter for channel messages.
 function RTM:SendRateLimitedAddonMessage(message, target, target_id)
 	-- We only allow one message to be sent every ~4 seconds.
-	if RTM.last_message_sent + 4 < time() then
+	if time() - RTM.last_message_sent > 4 then
 		C_ChatInfo.SendAddonMessage("RTM", message, target, target_id)
 		RTM.last_message_sent = time()
 	end
@@ -165,7 +169,9 @@ end
 
 -- Inform the others the health of a specific entity.
 function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_id, percentage)
-	RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id.."-"..percentage, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+	if not RTM.last_health_report[npc_id] or time() - RTM.last_health_report[npc_id] > 2 then
+		RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id.."-"..percentage, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+	end
 end
 
 
@@ -211,6 +217,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	RTM.last_recorded_death[npc_id] = nil
 	RTM.is_alive[npc_id] = time()
 	RTM.current_health[npc_id] = percentage
+	RTM.last_health_report[npc_id] = time()
 	
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
