@@ -129,10 +129,12 @@ function RTM:OnCombatLogEvent(...)
 	-- The event itRTM does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
 	local timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
+	local unittype2, _, _, _, zone_uid2, _, _ = strsplit("-", sourceGUID);
 	npc_id = tonumber(npc_id)
 	
 	-- We can always check for a shard change.
-	if unittype == "Creature" then
+	-- We only take fights between creatures, since they seem to be the only reliable option.
+	if unittype == "Creature" and unittype2 == "Creature" and zone_uid == zone_uid2 then
 		RTM:CheckForShardChange(zone_uid)
 	end	
 		
