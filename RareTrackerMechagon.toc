@@ -1,7 +1,7 @@
 ## Interface: 80200
 ## Title: RareTrackerMechagon
 ## Author: Melroy
-## Version: 2.0.3
+## Version: 2.0.4
 ##SavedVariables: RTMDB, RTM_ace_db
 
 libs\LibDBIcon-1.0\LibStub\LibStub.lua
