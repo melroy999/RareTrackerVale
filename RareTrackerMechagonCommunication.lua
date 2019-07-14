@@ -92,14 +92,38 @@ function RTM:RegisterArrival(shard_id)
 
 	RTM.channel_name = "RTM"..shard_id
 	
+	local is_in_channel = false
+	if select(1, GetChannelName(RTM.channel_name)) ~= 0 then
+		is_in_channel = true
+	end
+	
 	-- Join the appropriate channel.
 	JoinTemporaryChannel(RTM.channel_name)
 
 	-- Announce to the others that you have arrived.
 	RTM.arrival_register_time = time()
 	RTM.rare_table_updated = false
-	
-	C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+		
+	if not is_in_channel then
+		-- If we are not in the channel yet, we cannot immediately send a message.
+		-- Wait for a few seconds and send the arrival announcement message.
+		local frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
+		frame.start_time = time()
+		frame:SetScript("OnUpdate", 
+			function()
+				if time() - frame.start_time > 3 then
+					print("<RTM> Requesting rare kill data for shard "..(shard_id + 42)..".")
+					C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+					frame:SetScript("OnUpdate", nil)
+					frame:Hide()
+				end
+			end
+		)
+		frame:Show()
+		print("<RTM> Channel joined, requesting rare kill data in 3 seconds.")
+	else
+		C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+	end	
 end
 
 -- Inform the others that you are still present.
@@ -219,6 +243,8 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	RTM.current_health[npc_id] = percentage
 	RTM.last_health_report[npc_id] = time()
 	
+	print(npc_id, spawn_id, percentage)
+	
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
@@ -227,7 +253,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 end
 
 function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
-
+	
 	if not reported_version_mismatch and RTM.version < addon_version and addon_version ~= 9001 then
 		print("<RTM> Your version or RareTrackerMechagon is outdated. Please update to the most recent version at the earliest convenience.")
 		reported_version_mismatch = true

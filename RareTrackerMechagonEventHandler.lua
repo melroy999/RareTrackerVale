@@ -25,7 +25,7 @@ function RTM:OnEvent(event, ...)
 	elseif event == "ADDON_LOADED" then
 		RTM:OnAddonLoaded()
 	elseif event == "PLAYER_LOGOUT" then
-		RTM:OnPlayerLogout()
+		RTM:OnPlayerLogout()	
 	end
 end
 
@@ -309,3 +309,4 @@ RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
 RTM:RegisterEvent("ADDON_LOADED")
 RTM:RegisterEvent("PLAYER_LOGOUT")
+
