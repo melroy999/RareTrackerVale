@@ -243,8 +243,6 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
 	RTM.current_health[npc_id] = percentage
 	RTM.last_health_report[npc_id] = time()
 	
-	print(npc_id, spawn_id, percentage)
-	
 	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
