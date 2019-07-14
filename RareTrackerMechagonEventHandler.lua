@@ -197,6 +197,10 @@ function RTM:OnVignetteMinimapUpdated(...)
 			RTM:RegisterEntityDeath(RTM.current_shard_id, RTM.reported_vignettes[vignetteGUID])
 		end
 	else
+		if vignetteInfo == nil then
+			return
+		end
+	
 		-- Report the entity.
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID);
 		local npc_id = tonumber(npc_id)
