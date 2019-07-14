@@ -5,7 +5,7 @@ local _, data = ...
 -- ####################################################################
 
 data.RTM = CreateFrame("Frame", "RTM", UIParent);
-local RTM = data.RTM;
+local RTM = data.RTM
 
 -- The current data we have of the rares.
 RTM.is_alive = {}
@@ -34,7 +34,8 @@ sound_options['none'] = -1
 sound_options['Algalon: Beware!'] = 543587
 
 -- The version of the addon.
-RTM.version = 1
+RTM.version = 2
+-- Version 2: changed the order of the rares.
 
 -- The last zone the user was in.
 RTM.last_zone_id = nil
@@ -59,6 +60,9 @@ RTMDB.favorite_rares = {}
 
 -- Remember whether the user wants to see the window or not.
 RTMDB.show_window = nil
+
+-- Keep a cache of previous data, that we can restore if appropriate.
+RTMDB.previous_records = {}
 
 -- ####################################################################
 -- ##                        Helper functions                        ##

@@ -1,6 +1,6 @@
 local _, data = ...
 
-local RTM = data.RTM;
+local RTM = data.RTM
 
 -- ####################################################################
 -- ##                         Event Handlers                         ##
@@ -24,6 +24,8 @@ function RTM:OnEvent(event, ...)
 		RTM:OnVignetteMinimapUpdated(...)
 	elseif event == "ADDON_LOADED" then
 		RTM:OnAddonLoaded()
+	elseif event == "PLAYER_LOGOUT" then
+		RTM:OnPlayerLogout()
 	end
 end
 
@@ -150,12 +152,10 @@ function RTM:OnZoneTransition()
 		
 	if RTM.target_zones[zone_id] and not RTM.target_zones[RTM.last_zone_id] then
 		-- Enable the Mechagon rares.
-		--print("Enabling addon", zone_id)
 		RTM:StartInterface()
 		
 	elseif RTM.target_zones[RTM.last_zone_id] and not RTM.target_zones[zone_id] then
 		-- Disable the addon.
-		--print("Disabling addon", zone_id)
 		
 		-- If we do not have a shard ID, we are not subscribed to one of the channels.
 		if RTM.current_shard_id ~= nil then
@@ -250,8 +250,32 @@ function RTM:OnAddonLoaded()
 		if RTMDB.show_window == nil then
 			RTMDB.show_window = true
 		end
+		
+		if not RTMDB.favorite_rares then
+			RTMDB.favorite_rares = {}
+		end
+		
+		if not RTMDB.previous_records then
+			RTMDB.previous_records = {}
+		end
+		
+		-- Remove any data in the previous records that has expired.
+		for key, _ in pairs(RTMDB.previous_records) do
+			if time() - RTMDB.previous_records[key].time_stamp > 300 then
+				print("<RTM> Removing cached data for shard", (key + 42)..".")
+				RTMDB.previous_records[key] = nil
+			end
+		end
 	end
 end	
+
+function RTM:OnPlayerLogout()
+	if RTM.current_shard_id then
+		RTMDB.previous_records[RTM.current_shard_id] = {}
+		RTMDB.previous_records[RTM.current_shard_id].time_stamp = time()
+		RTMDB.previous_records[RTM.current_shard_id].time_table = RTM.last_recorded_death
+	end
+end
 
 function RTM:RegisterEvents()
 	RTM:RegisterEvent("PLAYER_TARGET_CHANGED")
@@ -280,3 +304,4 @@ RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
 RTM:RegisterEvent("ADDON_LOADED")
+RTM:RegisterEvent("PLAYER_LOGOUT")

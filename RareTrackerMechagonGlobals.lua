@@ -1,6 +1,6 @@
 local _, data = ...
 
-local RTM = data.RTM;
+local RTM = data.RTM
 
 -- ####################################################################
 -- ##                          Static Data                           ##
@@ -17,21 +17,16 @@ end
 RTM.rare_ids = {
 	151934, -- "Arachnoid Harvester"
 	154342, -- "Arachnoid Harvester (F)"
-	--155060, -- "Doppel Ganger"
-	152113, -- "The Kleptoboss"
-	154225, -- "The Rusty Prince (F)"
-	151623, -- "The Scrap King (M)"
-	151625, -- "The Scrap King"
-	151940, -- "Uncle T'Rogg"
 	--150394, -- "Armored Vaultbot"
-	153200, -- "Boilburn"
 	151308, -- "Boggac Skullbash"
+	153200, -- "Boilburn"
 	152001, -- "Bonepicker"
 	154739, -- "Caustic Mechaslime"
-	149847, -- "Crazed Trogg (Orange)"
-	152569, -- "Crazed Trogg (Green)"
 	152570, -- "Crazed Trogg (Blue)"
+	152569, -- "Crazed Trogg (Green)"
+	149847, -- "Crazed Trogg (Orange)"
 	151569, -- "Deepwater Maw"
+	--155060, -- "Doppel Ganger"
 	150342, -- "Earthbreaker Gulroc"
 	154153, -- "Enforcer KX-T57"
 	151202, -- "Foul Manifestation"
@@ -45,8 +40,8 @@ RTM.rare_ids = {
 	151124, -- "Mechagonian Nullifier"
 	151672, -- "Mecharantula"
 	151627, -- "Mr. Fixthis"
-	151296, -- "OOX-Avenger/MG"
 	153206, -- "Ol' Big Tusk"
+	151296, -- "OOX-Avenger/MG"
 	152764, -- "Oxidized Leachbeast"
 	151702, -- "Paol Pondwader"
 	150575, -- "Rumblerocks"
@@ -55,6 +50,11 @@ RTM.rare_ids = {
 	150937, -- "Seaspit"
 	153000, -- "Sparkqueen P'Emp"
 	153226, -- "Steel Singer Freza"
+	152113, -- "The Kleptoboss"
+	154225, -- "The Rusty Prince (F)"
+	151623, -- "The Scrap King (M)"
+	151625, -- "The Scrap King"
+	151940, -- "Uncle T'Rogg"
 }
 
 RTM.rare_ids_set = Set(RTM.rare_ids)

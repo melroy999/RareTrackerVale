@@ -1,6 +1,6 @@
 local _, data = ...
 
-local RTM = data.RTM;
+local RTM = data.RTM
 
 local entity_name_width = 180
 local entity_status_width = 50 
@@ -287,13 +287,13 @@ function RTM:InitializeAnnounceIconFrame(f)
 	f.broadcast_icon.tooltip.text2:SetJustifyH("LEFT")
 	f.broadcast_icon.tooltip.text2:SetJustifyV("TOP")
 	f.broadcast_icon.tooltip.text2:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -15)
-	f.broadcast_icon.tooltip.text2:SetText("Left click: report to general")
+	f.broadcast_icon.tooltip.text2:SetText("Left click: report to general chat")
 	  
 	f.broadcast_icon.tooltip.text3 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
 	f.broadcast_icon.tooltip.text3:SetJustifyH("LEFT")
 	f.broadcast_icon.tooltip.text3:SetJustifyV("TOP")
 	f.broadcast_icon.tooltip.text3:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -27)
-	f.broadcast_icon.tooltip.text3:SetText("Right click: set waypoint")
+	f.broadcast_icon.tooltip.text3:SetText("Right click: set waypoint if available")
 	
 	f.broadcast_icon:SetScript("OnEnter", 
 		function(self)

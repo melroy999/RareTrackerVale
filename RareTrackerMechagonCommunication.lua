@@ -1,6 +1,6 @@
 local _, data = ...
 
-local RTM = data.RTM;
+local RTM = data.RTM
 
 -- ####################################################################
 -- ##                         Communication                          ##
@@ -17,9 +17,6 @@ local reported_version_mismatch = false
 
 -- The name of the current channel.
 local channel_name = nil
-
--- A flag that ensures that the rare table is only updated once upon query.
-local rare_table_updated = false
 
 -- ####################################################################
 -- ##                        Helper Functions                        ##
@@ -61,7 +58,14 @@ function RTM:DecompressSpawnData(spawn_data, time_stamp)
 		local kill_time = RTM:toBase10(spawn_data_entries[i])
 		
 		if kill_time ~= 0 then
-			RTM.last_recorded_death[npc_id] = time_stamp - kill_time
+			if RTM.last_recorded_death[npc_id] then
+				-- If we already have an entry, take the minimal.
+				if time_stamp - kill_time < RTM.last_recorded_death[npc_id] then
+					RTM.last_recorded_death[npc_id] = time_stamp - kill_time
+				end
+			else
+				RTM.last_recorded_death[npc_id] = time_stamp - kill_time
+			end
 		end
 	end
 end
@@ -72,8 +76,18 @@ end
 
 -- Inform other clients of your arrival.
 function RTM:RegisterArrival(shard_id)
-	RTM.channel_name = "RTM"..shard_id
+	-- Attempt to load previous data from our cache.
+	if RTMDB.previous_records[shard_id] then
+		if time() - RTMDB.previous_records[shard_id].time_stamp < 300 then
+			print("<RTM> Restoring data from previous session in shard "..(shard_id + 42)..".")
+			RTM.last_recorded_death = RTMDB.previous_records[shard_id].time_table
+		else
+			RTMDB.previous_records[shard_id] = nil
+		end
+	end
 
+	RTM.channel_name = "RTM"..shard_id
+	
 	-- Join the appropriate channel.
 	JoinTemporaryChannel(RTM.channel_name)
 
@@ -106,6 +120,13 @@ function RTM:RegisterDeparture(shard_id)
 	for channel_name, _ in pairs(channels_to_leave) do
 		LeaveChannelByName(channel_name)
 	end
+	
+	-- Store any timer data we previously had in the saved variables.
+	if shard_id then
+		RTMDB.previous_records[shard_id] = {}
+		RTMDB.previous_records[shard_id].time_stamp = time()
+		RTMDB.previous_records[shard_id].time_table = RTM.last_recorded_death
+	end
 end
 
 -- ####################################################################
@@ -120,10 +141,7 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 end
 
 function RTM:AcknowledgePresenceWhisper(player, spawn_data)
-	if not RTM.rare_table_updated then
-		RTM:DecompressSpawnData(spawn_data, RTM.arrival_register_time)
-		RTM.rare_table_updated = true
-	end
+	RTM:DecompressSpawnData(spawn_data, RTM.arrival_register_time)
 end
 
 -- ####################################################################
@@ -204,7 +222,7 @@ end
 function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
 
 	if not reported_version_mismatch and RTM.version < addon_version and addon_version ~= 9001 then
-		print("[RTM] Your version or RareTrackerMechagon is outdated. Please update to the most recent version at the earliest convenience.")
+		print("<RTM> Your version or RareTrackerMechagon is outdated. Please update to the most recent version at the earliest convenience.")
 		reported_version_mismatch = true
 	end
 	

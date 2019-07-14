@@ -1,6 +1,6 @@
 local _, data = ...
 
-local RTM = data.RTM;
+local RTM = data.RTM
 
 -- ####################################################################
 -- ##                        Command Handlers                        ##
