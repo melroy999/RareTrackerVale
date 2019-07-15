@@ -14,6 +14,13 @@ RTM.target_zones[1522] = true
 -- NPCs that are banned during shard detection.
 -- Player followers sometimes spawn with the wrong zone id.
 RTM.banned_NPC_ids = {}
+RTM.banned_NPC_ids[154297] = true
+RTM.banned_NPC_ids[150202] = true
+RTM.banned_NPC_ids[154304] = true
+RTM.banned_NPC_ids[152108] = true
+RTM.banned_NPC_ids[151300] = true
+RTM.banned_NPC_ids[151310] = true
+RTM.banned_NPC_ids[69792] = true
 
 -- Simulate a set data structure for efficient existence lookups.
 function Set (list)

@@ -10,9 +10,9 @@ local RTM = data.RTM
 function RTM:OnEvent(event, ...)
 	if event == "PLAYER_TARGET_CHANGED" then
 		RTM:OnTargetChanged(...)
-	elseif event == "UNIT_HEALTH" then
+	elseif event == "UNIT_HEALTH" and RTM.chat_frame_loaded then
 		RTM:OnUnitHealth(...)
-	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and RTM.chat_frame_loaded then
 		RTM:OnCombatLogEvent(...)
 	elseif event == "ZONE_CHANGED_NEW_AREA" or event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED" then
 		RTM:OnZoneTransition()
@@ -20,7 +20,7 @@ function RTM:OnEvent(event, ...)
 		RTM:OnChatMsgChannel(...)
 	elseif event == "CHAT_MSG_ADDON" then
 		RTM:OnChatMsgAddon(...)
-	elseif event == "VIGNETTE_MINIMAP_UPDATED" then
+	elseif event == "VIGNETTE_MINIMAP_UPDATED" and RTM.chat_frame_loaded then
 		RTM:OnVignetteMinimapUpdated(...)
 	elseif event == "ADDON_LOADED" then
 		RTM:OnAddonLoaded()
@@ -47,9 +47,12 @@ function RTM:ChangeShard(old_zone_uid, new_zone_uid)
 end
 
 function RTM:CheckForShardChange(zone_uid)
+	local has_changed = false
+
 	if RTM.current_shard_id ~= zone_uid and zone_uid ~= nil then
 		print("<RTM> Moving to shard", (zone_uid + 42)..".")
 		RTM:UpdateShardNumber(zone_uid)
+		has_changed = true
 		
 		if RTM.current_shard_id == nil then
 			-- Register yourRTM for the given shard.
@@ -61,6 +64,8 @@ function RTM:CheckForShardChange(zone_uid)
 		
 		RTM.current_shard_id = zone_uid
 	end
+	
+	return has_changed
 end
 
 function RTM:OnTargetChanged(...)
@@ -70,7 +75,9 @@ function RTM:OnTargetChanged(...)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		RTM:CheckForShardChange(zone_uid)
+		if RTM:CheckForShardChange(zone_uid) then
+			--print("[Target]", guid)
+		end
 		
 		if RTM.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
@@ -110,7 +117,9 @@ function RTM:OnUnitHealth(unit)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		RTM:CheckForShardChange(zone_uid)
+		if RTM:CheckForShardChange(zone_uid) then
+			--print("[OnUnitHealth]", guid)
+		end
 		
 		if RTM.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
@@ -134,7 +143,9 @@ function RTM:OnCombatLogEvent(...)
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] then
-		RTM:CheckForShardChange(zone_uid)
+		if RTM:CheckForShardChange(zone_uid) then
+			--print("[OnCombatLogEvent]", sourceGUID, destGUID)
+		end
 	end	
 		
 	if subevent == "UNIT_DIED" then
@@ -205,7 +216,9 @@ function RTM:OnVignetteMinimapUpdated(...)
 		local npc_id = tonumber(npc_id)
 		
 		if unittype == "Creature" then
-			RTM:CheckForShardChange(zone_uid)
+			if RTM:CheckForShardChange(zone_uid) then
+				--print("[OnVignette]", vignetteInfo.objectGUID)
+			end
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
 				RTM.is_alive[npc_id] = time()
@@ -309,3 +322,28 @@ RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
 RTM:RegisterEvent("ADDON_LOADED")
 RTM:RegisterEvent("PLAYER_LOGOUT")
 
+-- ####################################################################
+-- ##                       Channel Wait Frame                       ##
+-- ####################################################################
+
+-- One of the issues encountered is that the chat might be joined before the default channels.
+-- In such a situation, the order of the channels changes, which is undesirable.
+-- Thus, we block certain events until these chats have been loaded.
+RTM.chat_frame_loaded = false
+
+RTM.message_delay_frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
+RTM.message_delay_frame.start_time = time()
+RTM.message_delay_frame:SetScript("OnUpdate", 
+	function(self)
+		if time() - self.start_time > 0 then
+			if #{GetChannelList()} == 0 then
+				self.start_time = time()
+			else
+				RTM.chat_frame_loaded = true
+				self:SetScript("OnUpdate", nil)
+				self:Hide()
+			end
+		end
+	end
+)
+RTM.message_delay_frame:Show()

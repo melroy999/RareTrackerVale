@@ -1,7 +1,8 @@
 ## Interface: 80200
 ## Title: RareTrackerMechagon
+## Notes: Track and coordinate rare spawn timers in Mechagon.
 ## Author: Melroy
-## Version: 2.0.4
+## Version: 2.1.0
 ##SavedVariables: RTMDB, RTM_ace_db
 
 libs\LibDBIcon-1.0\LibStub\LibStub.lua

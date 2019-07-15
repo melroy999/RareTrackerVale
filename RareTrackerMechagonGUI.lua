@@ -97,15 +97,15 @@ function RTM:InitializeAliveMarkerFrame()
 						-- SendChatMessage
 						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), "CHANNEL", nil, 1)
 					elseif RTM.current_health[npc_id] then
-						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(location unknown)", name, health), "CHANNEL", nil, 1)
+						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(N/A)", name, health), "CHANNEL", nil, 1)
 					elseif RTM.last_recorded_death[npc_id] ~= nil then
 						if time() - last_death < 60 then
-							SendChatMessage(string.format("<RTM> %s died %s seconds ago", name, time() - last_death), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s has died", name, time() - last_death), "CHANNEL", nil, 1)
 						else
 							SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((time() - last_death) / 60)), "CHANNEL", nil, 1)
 						end
 					elseif RTM.is_alive[npc_id] then
-						SendChatMessage(string.format("<RTM> %s seen alive (location unknown)", name), "CHANNEL", nil, 1)
+						SendChatMessage(string.format("<RTM> %s seen alive (vignette)", name), "CHANNEL", nil, 1)
 					end
 				else
 					-- does the user have tom tom? if so, add a waypoint if it exists.

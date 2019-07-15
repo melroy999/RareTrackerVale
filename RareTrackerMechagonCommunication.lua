@@ -103,23 +103,9 @@ function RTM:RegisterArrival(shard_id)
 		
 	if not is_in_channel then
 		-- Join the appropriate channel.
-		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
-		local frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
-		frame.start_time = time()
-		frame:SetScript("OnUpdate", 
-			function(self)
-				if time() - self.start_time > 2 then
-					JoinTemporaryChannel(RTM.channel_name)
-					print("<RTM> Channel joined, requesting rare kill data in 3 seconds.")
-					self:SetScript("OnUpdate", nil)
-					self:Hide()
-				end
-			end
-		)
-		frame:Show()
+		JoinTemporaryChannel(RTM.channel_name)		
 		
-		-- If we are not in the channel yet, we cannot immediately send a message.
-		-- Wait for a few seconds and send the arrival announcement message.
+		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
 		local frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
 		frame.start_time = time()
 		frame:SetScript("OnUpdate", 
