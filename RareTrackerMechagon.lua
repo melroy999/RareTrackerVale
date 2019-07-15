@@ -64,6 +64,7 @@ RTMDB.previous_records = {}
 -- ##                        Helper functions                        ##
 -- ####################################################################
 
+-- Get the current health of the entity, rounded down to an integer.
 function RTM:GetTargetHealthPercentage()
 	-- Find the current and maximum health of the current target.
 	local max_hp = UnitHealthMax("target")
@@ -76,6 +77,7 @@ function RTM:GetTargetHealthPercentage()
 	return math.floor((100 * UnitHealth("target")) / UnitHealthMax("target")) 
 end
 
+-- Open and start the RTM interface and subscribe to all the required events.
 function RTM:StartInterface()
 	-- Reset the data, since we cannot guarantee its correctness.
 	RTM.is_alive = {}
@@ -101,6 +103,7 @@ function RTM:StartInterface()
 	end
 end
 
+-- Open and start the RTM interface and unsubscribe to all the required events.
 function RTM:CloseInterface()
 	-- Reset the data.
 	RTM.is_alive = {}
@@ -146,11 +149,11 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 		tooltip:Show()
 	end
 })
+
 RTM.icon = LibStub("LibDBIcon-1.0")
 RTM.icon:Hide("RTM_icon")
 
 function RTM:RegisterMapIcon() 
-
 	self.ace_db = LibStub("AceDB-3.0"):New("RTM_ace_db", {
 		profile = {
 			minimap = {

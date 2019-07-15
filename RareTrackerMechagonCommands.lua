@@ -6,6 +6,7 @@ local RTM = data.RTM
 -- ##                        Command Handlers                        ##
 -- ####################################################################
 
+-- Process the given command.
 function CommandHandler(msg, editbox)
 	-- pattern matching that skips leading whitespace and whitespace between cmd and args
 	-- any whitespace at end of args is retained
@@ -22,5 +23,6 @@ function CommandHandler(msg, editbox)
 	end
 end
 
+-- Register the slashes that can be used to issue commands.
 SLASH_RTM1 = "/rtm"
 SlashCmdList["RTM"] = CommandHandler

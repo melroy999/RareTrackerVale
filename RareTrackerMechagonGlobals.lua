@@ -73,8 +73,10 @@ RTM.rare_ids = {
 	151940, -- "Uncle T'Rogg"
 }
 
+-- Create a table, such that we can look up a rare in constant time.
 RTM.rare_ids_set = Set(RTM.rare_ids)
 
+-- The names to be displayed in the frames and general chat messages.
 RTM.rare_names_localized = {}
 RTM.rare_names_localized["enUS"] = {}
 RTM.rare_names_localized["enUS"][151934] = "Arachnoid Harvester"

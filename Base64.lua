@@ -5,6 +5,7 @@ local RTM = data.RTM;
 -- The characters to be used in the base64 string.
 local digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
+-- A cheat sheet used to easily convert back to decimal.
 local inverse_map = {}
 for i = 1, #digits do
 	local c = digits:sub(i,i)
