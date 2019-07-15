@@ -175,52 +175,56 @@ end
 -- ####################################################################
 
 -- Inform the others that a specific entity has died.
-function RTM:RegisterEntityDeath(shard_id, npc_id)
-	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
+	C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 end
 
 -- Inform the others that you have spotted an alive entity.
-function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_id)
-	C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid)
+	C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 end
 
 -- Inform the others that you have spotted an alive entity.
-function RTM:RegisterEntityTarget(shard_id, npc_id, spawn_id, percentage, x, y)
-	C_ChatInfo.SendAddonMessage("RTM", "ET-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id.."-"..percentage.."-"..x.."-"..y, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+function RTM:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
+	C_ChatInfo.SendAddonMessage("RTM", "ET-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 end
 
 -- Inform the others the health of a specific entity.
-function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_id, percentage)
+function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
 	if not RTM.last_health_report[npc_id] or time() - RTM.last_health_report[npc_id] > 2 then
-		RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_id.."-"..percentage, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+		RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 	end
 end
 
 
-function RTM:AcknowledgeEntityDeath(npc_id)
-	RTM.last_recorded_death[npc_id] = time()
-	RTM.is_alive[npc_id] = nil
-	RTM.current_health[npc_id] = nil
-	RTM.current_coordinates[npc_id] = nil
-	RTM:UpdateDailyKillMark(npc_id)
-	
+function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
+	if RTM.recorded_entity_death_ids[spawn_uid] == nil then
+		-- Set all the flags.
+		RTM.last_recorded_death[npc_id] = time()
+		RTM.is_alive[npc_id] = nil
+		RTM.current_health[npc_id] = nil
+		RTM.current_coordinates[npc_id] = nil
+		RTM:UpdateDailyKillMark(npc_id)
+		RTM.recorded_entity_death_ids[spawn_uid] = true
+	end
+
 	if RTM.waypoints[npc_id] and TomTom then
 		TomTom:RemoveWaypoint(RTM.waypoints[npc_id])
 		RTM.waypoints[npc_id] = nil
 	end
 end
 
-function RTM:AcknowledgeEntityAlive(npc_id, spawn_id)
+function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid)
 	RTM.is_alive[npc_id] = time()
 	
-	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
+	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		RTM.reported_spawn_uids[spawn_id] = true
+		RTM.reported_spawn_uids[spawn_uid] = true
 	end
 end
 
-function RTM:AcknowledgeEntityTarget(npc_id, spawn_id, percentage, x, y)
+function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 	RTM.last_recorded_death[npc_id] = nil
 	RTM.is_alive[npc_id] = time()
 	RTM.current_health[npc_id] = percentage
@@ -228,23 +232,23 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_id, percentage, x, y)
 	RTM.current_coordinates[npc_id].x = x
 	RTM.current_coordinates[npc_id].y = y
 	
-	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
+	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		RTM.reported_spawn_uids[spawn_id] = true
+		RTM.reported_spawn_uids[spawn_uid] = true
 	end
 end
 
-function RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
+function RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 	RTM.last_recorded_death[npc_id] = nil
 	RTM.is_alive[npc_id] = time()
 	RTM.current_health[npc_id] = percentage
 	RTM.last_health_report[npc_id] = time()
 	
-	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_id] then
+	if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 		-- Play a sound file.
 		PlaySoundFile(543587)
-		RTM.reported_spawn_uids[spawn_id] = true
+		RTM.reported_spawn_uids[spawn_uid] = true
 	end
 end
 
@@ -262,20 +266,21 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 		elseif prefix == "PW" then
 			RTM:AcknowledgePresenceWhisper(player, payload)
 		elseif prefix == "ED" then
-			local npc_id = tonumber(payload)
-			RTM:AcknowledgeEntityDeath(npc_id)
-		elseif prefix == "EA" then
-			local npcs_id_str, spawn_id = strsplit("-", payload)
+			local npcs_id_str, spawn_uid = strsplit("-", payload)
 			local npc_id = tonumber(npcs_id_str)
-			RTM:AcknowledgeEntityAlive(npc_id, spawn_id)
+			RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
+		elseif prefix == "EA" then
+			local npcs_id_str, spawn_uid = strsplit("-", payload)
+			local npc_id = tonumber(npcs_id_str)
+			RTM:AcknowledgeEntityAlive(npc_id, spawn_uid)
 		elseif prefix == "ET" then
-			local npc_id_str, spawn_id, percentage_str, x_str, y_str = strsplit("-", payload)
+			local npc_id_str, spawn_uid, percentage_str, x_str, y_str = strsplit("-", payload)
 			local npc_id, percentage, x, y = tonumber(npc_id_str), tonumber(percentage_str), tonumber(x_str), tonumber(y_str)
-			RTM:AcknowledgeEntityTarget(npc_id, spawn_id, percentage, x, y)
+			RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		elseif prefix == "EH" then
-			local npc_id_str, spawn_id, percentage_str = strsplit("-", payload)
+			local npc_id_str, spawn_uid, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
-			RTM:AcknowledgeEntityHealth(npc_id, spawn_id, percentage)
+			RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 		end
 	end
 end

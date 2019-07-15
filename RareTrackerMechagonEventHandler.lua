@@ -97,8 +97,15 @@ function RTM:OnTargetChanged(...)
 				RTM:RegisterEntityTarget(RTM.current_shard_id, npc_id, spawn_uid, percentage, x, y)
 			else 
 				if RTM.recorded_entity_death_ids[spawn_uid] == nil then
+					-- Set all the flags.
+					RTM.last_recorded_death[npc_id] = time()
+					RTM.is_alive[npc_id] = nil
+					RTM.current_health[npc_id] = nil
+					RTM.current_coordinates[npc_id] = nil
+					RTM:UpdateDailyKillMark(npc_id)
 					RTM.recorded_entity_death_ids[spawn_uid] = true
-					RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id)
+					
+					RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id, spawn_uid)
 				end
 			end
 		end
@@ -151,8 +158,15 @@ function RTM:OnCombatLogEvent(...)
 	if subevent == "UNIT_DIED" then
 		if RTM.rare_ids_set[npc_id] then
 			if RTM.recorded_entity_death_ids[spawn_uid] == nil then
+				-- Set all the flags.
+				RTM.last_recorded_death[npc_id] = time()
+				RTM.is_alive[npc_id] = nil
+				RTM.current_health[npc_id] = nil
+				RTM.current_coordinates[npc_id] = nil
+				RTM:UpdateDailyKillMark(npc_id)
 				RTM.recorded_entity_death_ids[spawn_uid] = true
-				RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id)
+					
+				RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id, spawn_uid)
 			end
 		end
 	end
@@ -204,7 +218,19 @@ function RTM:OnVignetteMinimapUpdated(...)
 	if vignetteInfo == nil and RTM.current_shard_id ~= nil then
 		-- An entity we saw earlier might have died.
 		if RTM.reported_vignettes[vignetteGUID] then
-			RTM:RegisterEntityDeath(RTM.current_shard_id, RTM.reported_vignettes[vignetteGUID])
+			npc_id, spawn_uid = RTM.reported_vignettes[vignetteGUID][1], RTM.reported_vignettes[vignetteGUID][2]
+		
+			if RTM.recorded_entity_death_ids[spawn_uid] == nil then
+				-- Set all the flags.
+				RTM.last_recorded_death[npc_id] = time()
+				RTM.is_alive[npc_id] = nil
+				RTM.current_health[npc_id] = nil
+				RTM.current_coordinates[npc_id] = nil
+				RTM:UpdateDailyKillMark(npc_id)
+				RTM.recorded_entity_death_ids[spawn_uid] = true
+					
+				RTM:RegisterEntityDeath(RTM.current_shard_id, npc_id, spawn_uid)
+			end
 		end
 	else
 		if vignetteInfo == nil then
@@ -222,7 +248,7 @@ function RTM:OnVignetteMinimapUpdated(...)
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
 				RTM.is_alive[npc_id] = time()
-				RTM.reported_vignettes[vignetteGUID] = npc_id
+				RTM.reported_vignettes[vignetteGUID] = {npc_id, spawn_uid}
 				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid)
 			end
 		end
@@ -238,7 +264,7 @@ function RTM:OnUpdate()
 			
 			-- It might occur that the rare is marked as alive, but no health is known.
 			-- If 20 seconds pass without a health value, the alive tag will be reset.
-			if RTM.is_alive[npc_id] and not RTM.current_health[npc_id] and time() - RTM.is_alive[npc_id] > 20 then
+			if RTM.is_alive[npc_id] and not RTM.current_health[npc_id] and time() - RTM.is_alive[npc_id] > 120 then
 				RTM.is_alive[npc_id] = nil
 			end
 			
