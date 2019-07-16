@@ -210,7 +210,7 @@ function RTM:CorrectFavoriteMarks()
 end
 
 function RTM:UpdateDailyKillMark(npc_id)
-	if IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
+	if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
 		self.entity_name_frame.strings[npc_id]:SetText("(x) "..RTM.rare_names_localized["enUS"][npc_id])
 	else
 		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names_localized["enUS"][npc_id])
