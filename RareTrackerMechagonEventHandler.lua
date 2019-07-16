@@ -77,7 +77,7 @@ function RTM:OnTargetChanged(...)
 		npc_id = tonumber(npc_id)
 		
 		if RTM:CheckForShardChange(zone_uid) then
-			--print("[Target]", guid)
+			print("[Target]", guid)
 		end
 		
 		if RTM.rare_ids_set[npc_id] then
@@ -114,7 +114,7 @@ function RTM:OnUnitHealth(unit)
 		npc_id = tonumber(npc_id)
 		
 		if RTM:CheckForShardChange(zone_uid) then
-			--print("[OnUnitHealth]", guid)
+			print("[OnUnitHealth]", guid)
 		end
 		
 		if RTM.rare_ids_set[npc_id] then
@@ -144,7 +144,7 @@ function RTM:OnCombatLogEvent(...)
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] then
 		if RTM:CheckForShardChange(zone_uid) then
-			--print("[OnCombatLogEvent]", sourceGUID, destGUID)
+			print("[OnCombatLogEvent]", sourceGUID, destGUID)
 		end
 	end	
 		
@@ -178,7 +178,7 @@ function RTM:OnVignetteMinimapUpdated(...)
 		
 		if unittype == "Creature" then
 			if RTM:CheckForShardChange(zone_uid) then
-				--print("[OnVignette]", vignetteInfo.objectGUID)
+				print("[OnVignette]", vignetteInfo.objectGUID)
 			end
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
