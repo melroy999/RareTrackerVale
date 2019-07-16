@@ -206,13 +206,20 @@ function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 end
 
 -- Inform the others that you have spotted an alive entity.
-function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid)
+function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 	if RTM.recorded_entity_death_ids[spawn_uid] == nil then
 		-- Mark the entity as alive.
 		RTM.is_alive[npc_id] = GetServerTime()
 	
 		-- Send the alive message.
-		C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+		if x and y then 
+			RTM.current_coordinates[npc_id] = {}
+			RTM.current_coordinates[npc_id].x = x
+			RTM.current_coordinates[npc_id].y = y
+			C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+		else
+			C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."--", "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
+		end
 	end
 end
 
@@ -255,6 +262,7 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 		RTM.current_coordinates[npc_id] = nil
 		RTM:UpdateDailyKillMark(npc_id)
 		RTM.recorded_entity_death_ids[spawn_uid] = true
+		RTM:UpdateStatus(npc_id)
 	end
 
 	if RTM.waypoints[npc_id] and TomTom then
@@ -264,9 +272,16 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 end
 
 -- Acknowledge that the entity is alive and set the according flags.
-function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid)
+function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 	if not RTM.recorded_entity_death_ids[spawn_uid] then
 		RTM.is_alive[npc_id] = GetServerTime()
+		RTM:UpdateStatus(npc_id)
+		
+		if x and y then
+			RTM.current_coordinates[npc_id] = {}
+			RTM.current_coordinates[npc_id].x = x
+			RTM.current_coordinates[npc_id].y = y
+		end
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
@@ -285,6 +300,7 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		RTM.current_coordinates[npc_id] = {}
 		RTM.current_coordinates[npc_id].x = x
 		RTM.current_coordinates[npc_id].y = y
+		RTM:UpdateStatus(npc_id)
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
@@ -301,6 +317,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 		RTM.is_alive[npc_id] = GetServerTime()
 		RTM.current_health[npc_id] = percentage
 		RTM.last_health_report[npc_id] = GetServerTime()
+		RTM:UpdateStatus(npc_id)
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
@@ -335,9 +352,9 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 			local npc_id = tonumber(npcs_id_str)
 			RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 		elseif prefix == "EA" then
-			local npcs_id_str, spawn_uid = strsplit("-", payload)
-			local npc_id = tonumber(npcs_id_str)
-			RTM:AcknowledgeEntityAlive(npc_id, spawn_uid)
+			local npcs_id_str, spawn_uid, x_str, y_str = strsplit("-", payload)
+			local npc_id, x, y = tonumber(npcs_id_str), tonumber(x_str), tonumber(y_str)
+			RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 		elseif prefix == "ET" then
 			local npc_id_str, spawn_uid, percentage_str, x_str, y_str = strsplit("-", payload)
 			local npc_id, percentage, x, y = tonumber(npc_id_str), tonumber(percentage_str), tonumber(x_str), tonumber(y_str)

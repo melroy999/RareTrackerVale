@@ -160,6 +160,7 @@ end
 function RTM:OnVignetteMinimapUpdated(...)
 	vignetteGUID, onMinimap = ...
 	vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+	vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
 	
 	if not vignetteInfo and RTM.current_shard_id ~= nil then
 		-- An entity we saw earlier might have died.
@@ -182,7 +183,9 @@ function RTM:OnVignetteMinimapUpdated(...)
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
 				RTM.reported_vignettes[vignetteGUID] = {npc_id, spawn_uid}
-				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid)
+				
+				local x, y = 100 * vignetteLocation.x, 100 * vignetteLocation.y
+				RTM:RegisterEntityAlive(RTM.current_shard_id, npc_id, spawn_uid, x, y)
 			end
 		end
 	end
@@ -206,7 +209,7 @@ end
 -- Called on every addon message received by the addon.
 function RTM:OnChatMsgAddon(...)
 	local addon_prefix, message, channel, sender = ...
-	
+
 	if addon_prefix == "RTM" then
 		local header, payload = strsplit(":", message)
 		local prefix, shard_id, addon_version_str = strsplit("-", header)

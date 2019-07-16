@@ -34,9 +34,10 @@ sound_options['none'] = -1
 sound_options['Algalon: Beware!'] = 543587
 
 -- The version of the addon.
-RTM.version = 3
+RTM.version = 4
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
+-- Version 4: changed the interface of the alive message to include coordinates.
 
 -- The last zone the user was in.
 RTM.last_zone_id = nil
