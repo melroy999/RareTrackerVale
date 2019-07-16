@@ -285,7 +285,7 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(543587)
+			PlaySoundFile(RTMDB.selected_sound_number)
 			RTM.reported_spawn_uids[spawn_uid] = true
 		end
 	end
@@ -304,7 +304,7 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(543587)
+			PlaySoundFile(RTMDB.selected_sound_number)
 			RTM.reported_spawn_uids[spawn_uid] = true
 		end
 	end
@@ -321,7 +321,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 		
 		if RTMDB.favorite_rares[npc_id] and not RTM.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(543587)
+			PlaySoundFile(RTMDB.selected_sound_number)
 			RTM.reported_spawn_uids[spawn_uid] = true
 		end
 	end

@@ -78,6 +78,13 @@ function RTM:GetTargetHealthPercentage()
 	return math.floor((100 * UnitHealth("target")) / UnitHealthMax("target")) 
 end
 
+-- A print function used for debug purposes.
+function RTM:Debug(...)
+	if RTMDB.debug_enabled then
+		print(...)
+	end
+end
+
 -- Open and start the RTM interface and subscribe to all the required events.
 function RTM:StartInterface()
 	-- Reset the data, since we cannot guarantee its correctness.
@@ -93,7 +100,12 @@ function RTM:StartInterface()
 	RTM:UpdateAllDailyKillMarks()
 	
 	RTM:RegisterEvents()
-	RTM.icon:Show("RTM_icon")
+	
+	if RTMDB.minimap_icon_enabled then
+		RTM.icon:Show("RTM_icon")
+	else
+		RTM.icon:Hide("RTM_icon")
+	end
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
 		print("<RTM> Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
