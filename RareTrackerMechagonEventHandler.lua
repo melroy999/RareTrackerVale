@@ -76,8 +76,10 @@ function RTM:OnTargetChanged(...)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if RTM:CheckForShardChange(zone_uid) then
-			RTM:Debug("[Target]", guid)
+		if not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+			if RTM:CheckForShardChange(zone_uid) then
+				RTM:Debug("[Target]", guid)
+			end
 		end
 		
 		if RTM.rare_ids_set[npc_id] then
@@ -113,8 +115,10 @@ function RTM:OnUnitHealth(unit)
 		local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
 		npc_id = tonumber(npc_id)
 		
-		if RTM:CheckForShardChange(zone_uid) then
-			RTM:Debug("[OnUnitHealth]", guid)
+		if not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+			if RTM:CheckForShardChange(zone_uid) then
+				RTM:Debug("[OnUnitHealth]", guid)
+			end
 		end
 		
 		if RTM.rare_ids_set[npc_id] then
@@ -136,6 +140,10 @@ end
 -- The flag used to detect guardians or pets.
 local flag_mask = bit.bor(COMBATLOG_OBJECT_TYPE_GUARDIAN, COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_OBJECT)
 
+-- We track a list of entities that might cause erroneous shard changes.
+-- This list is updated dynamically.
+RTMDB.banned_NPC_ids = {}
+
 -- Called when a unit health update event is fired.
 function RTM:OnCombatLogEvent(...)
 	-- The event does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
@@ -143,10 +151,15 @@ function RTM:OnCombatLogEvent(...)
 	local unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
 	npc_id = tonumber(npc_id)
 	
+	-- Blacklist the entity.
+	if not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 then
+		RTMDB.banned_NPC_ids[npc_id] = true
+	end
+	
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	-- We exclude all pets and guardians, since they might have retained their old shard change.
-	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
+	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
 		if RTM:CheckForShardChange(zone_uid) then
 			RTM:Debug("[OnCombatLogEvent]", sourceGUID, destGUID)
 		end
@@ -181,8 +194,10 @@ function RTM:OnVignetteMinimapUpdated(...)
 		local npc_id = tonumber(npc_id)
 		
 		if unittype == "Creature" then
-			if RTM:CheckForShardChange(zone_uid) then
-				RTM:Debug("[OnVignette]", vignetteInfo.objectGUID)
+			if not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+				if RTM:CheckForShardChange(zone_uid) then
+					RTM:Debug("[OnVignette]", vignetteInfo.objectGUID)
+				end
 			end
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
@@ -226,6 +241,9 @@ end
 -- A counter that tracks the time stamp on which the displayed data was updated last. 
 RTM.last_display_update = 0
 
+-- The last time the icon changed.
+RTM.last_icon_change = 0
+
 -- Called on every addon message received by the addon.
 function RTM:OnUpdate()
 	if (RTM.last_display_update + 0.25 < GetServerTime()) then
@@ -248,7 +266,19 @@ function RTM:OnUpdate()
 			RTM:UpdateStatus(npc_id)
 		end
 		
-		RTM.last_display_update = GetServerTime();
+		RTM.last_display_update = GetServerTime()
+	end
+	
+	if RTM.last_icon_change + 2 < GetServerTime() then
+		RTM.last_icon_change = GetServerTime()
+		
+		RTM.broadcast_icon.icon_state = not RTM.broadcast_icon.icon_state
+		
+		if RTM.broadcast_icon.icon_state then
+			RTM.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
+		else
+			RTM.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Waypoint.tga")
+		end
 	end
 end	
 
@@ -282,6 +312,10 @@ function RTM:OnAddonLoaded()
 		
 		if RTMDB.debug_enabled == nil then
 			RTMDB.debug_enabled = false
+		end
+		
+		if not RTMDB.banned_NPC_ids then
+			RTMDB.banned_NPC_ids = {}
 		end
 		
 		-- Initialize the configuration menu.

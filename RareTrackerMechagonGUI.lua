@@ -272,6 +272,7 @@ function RTM:InitializeAnnounceIconFrame(f)
 	f.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
 	f.broadcast_icon.texture:SetSize(10, 10)
 	f.broadcast_icon.texture:SetPoint("CENTER", f.broadcast_icon)
+	f.broadcast_icon.icon_state = false
 	
 	f.broadcast_icon.tooltip = CreateFrame("Frame", nil, UIParent)
 	f.broadcast_icon.tooltip:SetSize(273, 44)
