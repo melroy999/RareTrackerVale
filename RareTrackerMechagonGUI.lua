@@ -2,7 +2,7 @@ local _, data = ...
 
 local RTM = data.RTM
 
-local entity_name_width = 180
+local entity_name_width = 208
 local entity_status_width = 50 
 local frame_padding = 4
 local favorite_rares_width = 10
