@@ -87,7 +87,7 @@ function RTM:InitializeAliveMarkerFrame()
 		-- Add an action listener.
 		f.checkboxes[npc_id]:SetScript("OnClick", 
 			function(self, button, down)
-				local name = RTM.rare_names_localized["enUS"][npc_id]
+				local name = RTM.rare_names[npc_id]
 				local health = RTM.current_health[npc_id]
 				local last_death = RTM.last_recorded_death[npc_id]
 				local loc = RTM.current_coordinates[npc_id]
@@ -142,7 +142,7 @@ function RTM:InitializeInterfaceEntityNameFrame()
 		f.strings[npc_id]:SetJustifyH("LEFT")
 		f.strings[npc_id]:SetJustifyV("TOP")
 		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
-		f.strings[npc_id]:SetText(RTM.rare_names_localized["enUS"][npc_id])
+		f.strings[npc_id]:SetText(RTM.rare_names[npc_id])
 	end
 	
 	f:SetPoint("TOPLEFT", self, 3 * frame_padding + 2 * favorite_rares_width, -(2 * frame_padding + shard_id_frame_height))
@@ -211,9 +211,9 @@ end
 
 function RTM:UpdateDailyKillMark(npc_id)
 	if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
-		self.entity_name_frame.strings[npc_id]:SetText("(x) "..RTM.rare_names_localized["enUS"][npc_id])
+		self.entity_name_frame.strings[npc_id]:SetText("(x) "..RTM.rare_names[npc_id])
 	else
-		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names_localized["enUS"][npc_id])
+		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
 	end
 end
 
