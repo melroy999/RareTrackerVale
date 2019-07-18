@@ -364,9 +364,9 @@ RTM.rare_names_localized["ruRU"][153200] = "Ошпар (JD41)"
 RTM.rare_names_localized["ruRU"][151308] = "Боггак Черепокол"
 RTM.rare_names_localized["ruRU"][152001] = "Костегрыз"
 RTM.rare_names_localized["ruRU"][154739] = "Едкий механослизень (CC73)"
-RTM.rare_names_localized["ruRU"][149847] = "Обезумевший трогг (o)"
-RTM.rare_names_localized["ruRU"][152569] = "Обезумевший трогг (з)"
-RTM.rare_names_localized["ruRU"][152570] = "Обезумевший трогг (с)"
+RTM.rare_names_localized["ruRU"][149847] = "Обезумевший трогг (оранжевый)"
+RTM.rare_names_localized["ruRU"][152569] = "Обезумевший трогг (зеленый)"
+RTM.rare_names_localized["ruRU"][152570] = "Обезумевший трогг (синий)"
 RTM.rare_names_localized["ruRU"][151569] = "Глубоководный пожиратель"
 RTM.rare_names_localized["ruRU"][150342] = "Землекрушитель Гулрок (TR35)"
 RTM.rare_names_localized["ruRU"][154153] = "Каратель KX-T57"
@@ -399,7 +399,7 @@ RTM.rare_names_localized["koKR"] = RTM.rare_names_localized["enUS"]
 
 -- Select the rare name table, using the localization.
 RTM.localization = GetLocale()
-RTM.rare_names = RTM.rare_names_localized["enUS"]
+RTM.rare_names = RTM.rare_names_localized[RTM.localization]
 
 -- The quest ids that indicate that the rare has been killed already.
 RTM.completion_quest_ids = {}
