@@ -330,6 +330,10 @@ function RTM:OnAddonLoaded()
 			RTMDB.banned_NPC_ids = {}
 		end
 		
+		if not RTMDB.window_scale then
+			RTMDB.window_scale = 1.0
+		end
+		
 		-- Initialize the configuration menu.
 		RTM:InitializeConfigMenu()
 		

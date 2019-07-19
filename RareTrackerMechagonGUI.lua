@@ -211,9 +211,11 @@ end
 
 function RTM:UpdateDailyKillMark(npc_id)
 	if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
-		self.entity_name_frame.strings[npc_id]:SetText("(x) "..RTM.rare_names[npc_id])
+		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
+		self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontRed")
 	else
 		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
+		self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontNormal")
 	end
 end
 
@@ -487,6 +489,34 @@ function RTM:IntializeDebugCheckbox(parent_frame)
 	f:SetPoint("TOPLEFT", parent_frame, 0, -75)
 end
 
+function RTM:IntializeScaleSlider(parent_frame)
+	local f = CreateFrame("Slider", "RTM.options_panel.scale_slider", parent_frame, "OptionsSliderTemplate")
+	f.tooltip = "Set the scale of the rare window.";
+	f:SetMinMaxValues(0.5, 2)
+	f:SetValueStep(0.05)
+	f:SetValue(RTMDB.window_scale)
+	RTM:SetScale(RTMDB.window_scale)
+	f:Enable()
+	
+	f:SetScript("OnValueChanged", 
+		function(self, value)
+			-- Round the value to the nearest step value.
+			value = math.floor(value * 20) / 20
+		
+			RTMDB.window_scale = value
+			self.label:SetText("Rare window scale "..string.format("(%.2f)", RTMDB.window_scale))
+			RTM:SetScale(RTMDB.window_scale)
+		end
+	);
+	
+	f.label = f:CreateFontString(nil, "BORDER", "GameFontNormal")
+	f.label:SetJustifyH("LEFT")
+	f.label:SetText("Rare window scale "..string.format("(%.2f)", RTMDB.window_scale))
+	f.label:SetPoint("TOPLEFT", parent_frame, 0, -103)
+	
+	f:SetPoint("TOPLEFT", f.label, 5, -15)
+end
+
 function RTM:InitializeConfigMenu()
 	RTM.options_panel = CreateFrame("Frame", "RTM.options_panel", UIParent)
 	RTM.options_panel.name = "RareTrackerMechagon"
@@ -499,7 +529,9 @@ function RTM:InitializeConfigMenu()
 	RTM.options_panel.sound_selector = RTM:IntializeSoundSelectionMenu(RTM.options_panel.frame)
 	RTM.options_panel.minimap_checkbox = RTM:IntializeMinimapCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.debug_checkbox = RTM:IntializeDebugCheckbox(RTM.options_panel.frame)
+	RTM.options_panel.scale_slider = RTM:IntializeScaleSlider(RTM.options_panel.frame)
 end
+
 
 
 
