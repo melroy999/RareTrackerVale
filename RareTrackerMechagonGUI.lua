@@ -232,6 +232,11 @@ function RTM:UpdateDailyKillMark(npc_id)
 		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
 		self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontNormal")
 	end
+	
+	if npc_id == 151625 then
+		-- Bug fix for the mounted variant of the scrap king.
+		RTM:UpdateDailyKillMark(151623)
+	end
 end
 
 function RTM:UpdateAllDailyKillMarks()
