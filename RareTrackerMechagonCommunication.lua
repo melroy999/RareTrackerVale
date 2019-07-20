@@ -194,11 +194,15 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
 		RTM:RegisterPresenceWhisper(RTM.current_shard_id, player, time_stamp)
+		
+		if UnitInRaid("player") or UnitInParty("player") then
+			RTM:RegisterPresenceGroup(RTM.current_shard_id, player, time_stamp)
+		end
 	end	
 end
 
 -- Acknowledge the welcome message of other players and parse and import their tables.
-function RTM:AcknowledgePresenceWhisper(player, spawn_data)
+function RTM:AcknowledgePresence(player, spawn_data)
 	RTM:DecompressSpawnData(spawn_data, RTM.arrival_register_time)
 end
 
@@ -408,13 +412,11 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 	
 	-- Only allow communication if the users are on the same shards and if their addon version is equal.
 	if RTM.current_shard_id == shard_id and RTM.version == addon_version then
-		if prefix == "A" then
+		if prefix == "A" or prefix == "AP" then
 			time_stamp = tonumber(payload)
 			RTM:AcknowledgeArrival(player, time_stamp)
-		elseif prefix == "PW" then
-			RTM:AcknowledgePresenceWhisper(player, payload)
-		elseif prefix == "PG" then
-			RTM:AcknowledgePresenceGroup(player, payload)
+		elseif prefix == "PW" or prefix == "PG" then
+			RTM:AcknowledgePresence(player, payload)
 		elseif prefix == "ED" then
 			local npcs_id_str, spawn_uid = strsplit("-", payload)
 			local npc_id = tonumber(npcs_id_str)
