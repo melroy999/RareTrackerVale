@@ -93,24 +93,39 @@ function RTM:InitializeAliveMarkerFrame()
 				local loc = RTM.current_coordinates[npc_id]
 				
 				if button == "LeftButton" then
+					-- First, determine the target of our message.
+					local target = nil
+					
+					if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+						if UnitInRaid("player") then
+							target = "RAID"
+						else
+							target = "PARTY"
+						end
+					elseif IsLeftAltKeyDown() or IsRightAltKeyDown() then
+						target = "SAY"
+					else
+						target = "CHANNEL"
+					end
+				
 					if RTM.current_health[npc_id] then
 						-- SendChatMessage
 						if loc then
-							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), target, nil, 1)
 						else 
-							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(N/A)", name, health), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(N/A)", name, health), target, nil, 1)
 						end
 					elseif RTM.last_recorded_death[npc_id] ~= nil then
 						if GetServerTime() - last_death < 60 then
-							SendChatMessage(string.format("<RTM> %s has died", name, GetServerTime() - last_death), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s has died", name, GetServerTime() - last_death), target, nil, 1)
 						else
-							SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((GetServerTime() - last_death) / 60)), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((GetServerTime() - last_death) / 60)), target, nil, 1)
 						end
 					elseif RTM.is_alive[npc_id] then
 						if loc then
-							SendChatMessage(string.format("<RTM> %s seen alive, vignette at ~(%.2f, %.2f)", name, loc.x, loc.y), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s seen alive, vignette at ~(%.2f, %.2f)", name, loc.x, loc.y), target, nil, 1)
 						else
-							SendChatMessage(string.format("<RTM> %s seen alive (vignette)", name), "CHANNEL", nil, 1)
+							SendChatMessage(string.format("<RTM> %s seen alive (vignette)", name), target, nil, 1)
 						end
 					end
 				else
@@ -277,13 +292,13 @@ function RTM:InitializeAnnounceIconFrame(f)
 	f.broadcast_icon.icon_state = false
 	
 	f.broadcast_icon.tooltip = CreateFrame("Frame", nil, UIParent)
-	f.broadcast_icon.tooltip:SetSize(273, 44)
+	f.broadcast_icon.tooltip:SetSize(273, 68)
 	
 	local texture = f.broadcast_icon.tooltip:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
 	texture:SetAllPoints(f.broadcast_icon.tooltip)
 	f.broadcast_icon.tooltip.texture = texture
-	f.broadcast_icon.tooltip:SetPoint("TOPLEFT", f, 0, 45)
+	f.broadcast_icon.tooltip:SetPoint("TOPLEFT", f, 0, 69)
 	f.broadcast_icon.tooltip:Hide()
 	
 	f.broadcast_icon.tooltip.text1 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
@@ -297,12 +312,24 @@ function RTM:InitializeAnnounceIconFrame(f)
 	f.broadcast_icon.tooltip.text2:SetJustifyV("TOP")
 	f.broadcast_icon.tooltip.text2:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -15)
 	f.broadcast_icon.tooltip.text2:SetText("Left click: report to general chat")
-	  
+	
 	f.broadcast_icon.tooltip.text3 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
 	f.broadcast_icon.tooltip.text3:SetJustifyH("LEFT")
 	f.broadcast_icon.tooltip.text3:SetJustifyV("TOP")
 	f.broadcast_icon.tooltip.text3:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -27)
-	f.broadcast_icon.tooltip.text3:SetText("Right click: set waypoint if available")
+	f.broadcast_icon.tooltip.text3:SetText("Control-left click: report to party/raid chat")
+	
+	f.broadcast_icon.tooltip.text4 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.broadcast_icon.tooltip.text4:SetJustifyH("LEFT")
+	f.broadcast_icon.tooltip.text4:SetJustifyV("TOP")
+	f.broadcast_icon.tooltip.text4:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -39)
+	f.broadcast_icon.tooltip.text4:SetText("Alt-left click: report to say")
+	  
+	f.broadcast_icon.tooltip.text5 = f.broadcast_icon.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.broadcast_icon.tooltip.text5:SetJustifyH("LEFT")
+	f.broadcast_icon.tooltip.text5:SetJustifyV("TOP")
+	f.broadcast_icon.tooltip.text5:SetPoint("TOPLEFT", f.broadcast_icon.tooltip, 5, -51)
+	f.broadcast_icon.tooltip.text5:SetText("Right click: set waypoint if available")
 	
 	f.broadcast_icon:SetScript("OnEnter", 
 		function(self)

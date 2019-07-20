@@ -198,7 +198,7 @@ function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 		RTM.recorded_entity_death_ids[spawn_uid..npc_id] = true
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
-		RTM:DelayedExecution(1, function() RTM:UpdateDailyKillMark(npc_id) end)
+		RTM:DelayedExecution(3, function() RTM:UpdateDailyKillMark(npc_id) end)
 		
 		-- Send the death message.
 		C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
@@ -260,9 +260,9 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 		RTM.is_alive[npc_id] = nil
 		RTM.current_health[npc_id] = nil
 		RTM.current_coordinates[npc_id] = nil
-		RTM:UpdateDailyKillMark(npc_id)
 		RTM.recorded_entity_death_ids[spawn_uid..npc_id] = true
 		RTM:UpdateStatus(npc_id)
+		RTM:DelayedExecution(3, function() RTM:UpdateDailyKillMark(npc_id) end)
 	end
 
 	if RTM.waypoints[npc_id] and TomTom then
