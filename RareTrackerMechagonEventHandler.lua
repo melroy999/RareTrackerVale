@@ -365,6 +365,10 @@ function RTM:OnAddonLoaded()
 			RTMDB.window_scale = 1.0
 		end
 		
+		if RTMDB.enable_raid_communication == nil then
+			RTMDB.enable_raid_communication = true
+		end
+		
 		-- Initialize the configuration menu.
 		RTM:InitializeConfigMenu()
 		

@@ -513,6 +513,19 @@ function RTM:IntializeMinimapCheckbox(parent_frame)
 	f:SetPoint("TOPLEFT", parent_frame, 0, -53)
 end
 
+function RTM:IntializeRaidCommunicationCheckbox(parent_frame)
+	local f = CreateFrame("CheckButton", "RTM.options_panel.raid_comms_checkbox", parent_frame, "ChatConfigCheckButtonTemplate");
+	getglobal(f:GetName() .. 'Text'):SetText(" Enable communication over part/raid channel");
+	f.tooltip = "Enable communication over party/raid channel, to support CRZ functionality while in a party or raid group.";
+	f:SetScript("OnClick", 
+		function()
+			RTMDB.enable_raid_communication = not RTMDB.enable_raid_communication
+		end
+	);
+	f:SetChecked(RTMDB.enable_raid_communication)
+	f:SetPoint("TOPLEFT", parent_frame, 0, -75)
+end
+
 function RTM:IntializeDebugCheckbox(parent_frame)
 	local f = CreateFrame("CheckButton", "RTM.options_panel.debug_checkbox", parent_frame, "ChatConfigCheckButtonTemplate");
 	getglobal(f:GetName() .. 'Text'):SetText(" Enable debug mode");
@@ -523,7 +536,7 @@ function RTM:IntializeDebugCheckbox(parent_frame)
 		end
 	);
 	f:SetChecked(RTMDB.debug_enabled)
-	f:SetPoint("TOPLEFT", parent_frame, 0, -75)
+	f:SetPoint("TOPLEFT", parent_frame, 0, -97)
 end
 
 function RTM:IntializeScaleSlider(parent_frame)
@@ -549,7 +562,7 @@ function RTM:IntializeScaleSlider(parent_frame)
 	f.label = f:CreateFontString(nil, "BORDER", "GameFontNormal")
 	f.label:SetJustifyH("LEFT")
 	f.label:SetText("Rare window scale "..string.format("(%.2f)", RTMDB.window_scale))
-	f.label:SetPoint("TOPLEFT", parent_frame, 0, -103)
+	f.label:SetPoint("TOPLEFT", parent_frame, 0, -125)
 	
 	f:SetPoint("TOPLEFT", f.label, 5, -15)
 end
@@ -565,6 +578,7 @@ function RTM:InitializeConfigMenu()
 
 	RTM.options_panel.sound_selector = RTM:IntializeSoundSelectionMenu(RTM.options_panel.frame)
 	RTM.options_panel.minimap_checkbox = RTM:IntializeMinimapCheckbox(RTM.options_panel.frame)
+	RTM.options_panel.raid_comms_checkbox = RTM:IntializeRaidCommunicationCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.debug_checkbox = RTM:IntializeDebugCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.scale_slider = RTM:IntializeScaleSlider(RTM.options_panel.frame)
 end

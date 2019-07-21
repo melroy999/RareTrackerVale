@@ -139,7 +139,7 @@ function RTM:RegisterArrival(shard_id)
 	end	
 	
 	-- Register your arrival within the group.
-	if UnitInRaid("player") or UnitInParty("player") then
+	if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 		C_ChatInfo.SendAddonMessage("RTM", "AP-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "RAID", nil)
 	end
 end
@@ -156,7 +156,7 @@ end
 function RTM:RegisterPresenceGroup(shard_id, target, time_stamp)
 	if next(RTM.last_recorded_death) ~= nil then
 		-- Announce to the others that you are still present on the shard.
-		C_ChatInfo.SendAddonMessage("RTM", "PG-"..shard_id.."-"..RTM.version..":"..RTM:GetCompressedSpawnData(time_stamp), "RAID", nil)
+		C_ChatInfo.SendAddonMessage("RTM", "PP-"..shard_id.."-"..RTM.version..":"..RTM:GetCompressedSpawnData(time_stamp), "RAID", nil)
 	end
 end
 
@@ -195,7 +195,7 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 	if player_name ~= player then
 		RTM:RegisterPresenceWhisper(RTM.current_shard_id, player, time_stamp)
 		
-		if UnitInRaid("player") or UnitInParty("player") then
+		if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 			RTM:RegisterPresenceGroup(RTM.current_shard_id, player, time_stamp)
 		end
 	end	
@@ -226,8 +226,8 @@ function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 		-- Send the death message.
 		C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 	
-		if UnitInRaid("player") or UnitInParty("player") then
-			C_ChatInfo.SendAddonMessage("RTM", "ED-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "RAID", nil)
+		if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+			C_ChatInfo.SendAddonMessage("RTM", "EDP-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid, "RAID", nil)
 		end
 	end
 end
@@ -245,14 +245,14 @@ function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 			RTM.current_coordinates[npc_id].y = y
 			C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 		
-			if UnitInRaid("player") or UnitInParty("player") then
-				C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y, "RAID", nil)
+			if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+				C_ChatInfo.SendAddonMessage("RTM", "EAP-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y, "RAID", nil)
 			end
 		else
 			C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."--", "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 		
-			if UnitInRaid("player") or UnitInParty("player") then
-				C_ChatInfo.SendAddonMessage("RTM", "EA-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."--", "RAID", nil)
+			if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+				C_ChatInfo.SendAddonMessage("RTM", "EAP-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."--", "RAID", nil)
 			end
 		end
 	end
@@ -272,8 +272,8 @@ function RTM:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
 		-- Send the target message.
 		C_ChatInfo.SendAddonMessage("RTM", "ET-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
 		
-		if UnitInRaid("player") or UnitInParty("player") then
-			C_ChatInfo.SendAddonMessage("RTM", "ET-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y, "RAID", nil)
+		if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+			C_ChatInfo.SendAddonMessage("RTM", "ETP-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y, "RAID", nil)
 		end
 	end
 end
@@ -290,7 +290,7 @@ function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
 		RTM:SendRateLimitedAddonMessage("EH-"..shard_id.."-"..RTM.version..":"..npc_id.."-"..spawn_uid.."-"..percentage, "CHANNEL", select(1, GetChannelName(RTM.channel_name)), "CHANNEL")
 	end
 	
-	if UnitInRaid("player") or UnitInParty("player") then
+	if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 		if not RTM.last_health_report["RAID"][npc_id] or GetServerTime() - RTM.last_health_report["RAID"][npc_id] > 2 then
 			-- Mark the entity as targeted and alive.
 			RTM.is_alive[npc_id] = GetServerTime()
@@ -412,10 +412,10 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 	
 	-- Only allow communication if the users are on the same shards and if their addon version is equal.
 	if RTM.current_shard_id == shard_id and RTM.version == addon_version then
-		if prefix == "A" or prefix == "AP" then
+		if prefix == "A" then
 			time_stamp = tonumber(payload)
 			RTM:AcknowledgeArrival(player, time_stamp)
-		elseif prefix == "PW" or prefix == "PG" then
+		elseif prefix == "PW" then
 			RTM:AcknowledgePresence(player, payload)
 		elseif prefix == "ED" then
 			local npcs_id_str, spawn_uid = strsplit("-", payload)
@@ -433,10 +433,29 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 			local npc_id_str, spawn_uid, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
 			RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
-		elseif prefix == "EHP" then
-			local npc_id_str, spawn_uid, percentage_str = strsplit("-", payload)
-			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
-			RTM:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
+		elseif RTMDB.enable_raid_communication then
+			if prefix == "AP" then
+				time_stamp = tonumber(payload)
+				RTM:AcknowledgeArrival(player, time_stamp)
+			elseif prefix == "PP" then
+				RTM:AcknowledgePresence(player, payload)	
+			elseif prefix == "EDP" then
+				local npcs_id_str, spawn_uid = strsplit("-", payload)
+				local npc_id = tonumber(npcs_id_str)
+				RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)	
+			elseif prefix == "EAP" then
+				local npcs_id_str, spawn_uid, x_str, y_str = strsplit("-", payload)
+				local npc_id, x, y = tonumber(npcs_id_str), tonumber(x_str), tonumber(y_str)
+				RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
+			elseif prefix == "ETP" then
+				local npc_id_str, spawn_uid, percentage_str, x_str, y_str = strsplit("-", payload)
+				local npc_id, percentage, x, y = tonumber(npc_id_str), tonumber(percentage_str), tonumber(x_str), tonumber(y_str)
+				RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
+			elseif prefix == "EHP" then
+				local npc_id_str, spawn_uid, percentage_str = strsplit("-", payload)
+				local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
+				RTM:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
+			end
 		end
 	end
 end
