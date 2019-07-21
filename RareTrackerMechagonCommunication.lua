@@ -156,7 +156,7 @@ end
 function RTM:RegisterPresenceGroup(shard_id, target, time_stamp)
 	if next(RTM.last_recorded_death) ~= nil then
 		-- Announce to the others that you are still present on the shard.
-		C_ChatInfo.SendAddonMessage("RTM", "PP-"..shard_id.."-"..RTM.version..":"..RTM:GetCompressedSpawnData(time_stamp), "RAID", nil)
+		C_ChatInfo.SendAddonMessage("RTM", "PP-"..shard_id.."-"..RTM.version..":"..RTM:GetCompressedSpawnData(time_stamp).."-"..time_stamp, "RAID", nil)
 	end
 end
 
@@ -438,7 +438,11 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 				time_stamp = tonumber(payload)
 				RTM:AcknowledgeArrival(player, time_stamp)
 			elseif prefix == "PP" then
-				RTM:AcknowledgePresence(player, payload)	
+				local payload, arrival_time_str = strsplit("-", payload)
+				local arrival_time = tonumber(arrival_time_str)
+				if RTM.arrival_register_time == arrival_time then
+					RTM:AcknowledgePresence(player, payload)	
+				end
 			elseif prefix == "EDP" then
 				local npcs_id_str, spawn_uid = strsplit("-", payload)
 				local npc_id = tonumber(npcs_id_str)

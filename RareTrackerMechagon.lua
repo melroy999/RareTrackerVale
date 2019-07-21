@@ -29,11 +29,12 @@ RTM.reported_vignettes = {}
 RTM.reported_spawn_uids = {}
 
 -- The version of the addon.
-RTM.version = 5
+RTM.version = 9001
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
 -- Version 4: changed the interface of the alive message to include coordinates.
 -- Version 5: added a future version of Mechtarantula.
+-- Version 6: the time stamp that was used to generate the compressed table is now included in group messages.
 
 -- The last zone the user was in.
 RTM.last_zone_id = nil

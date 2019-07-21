@@ -16,6 +16,8 @@ front_opacity = 0.6
 -- ##                              GUI                               ##
 -- ####################################################################
 
+RTM.last_reload_time = 0
+
 function RTM:InitializeShardNumberFrame()
 	local f = CreateFrame("Frame", "RTM.shard_id_frame", self)
 	f:SetSize(entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width, shard_id_frame_height)
@@ -354,6 +356,79 @@ function RTM:InitializeAnnounceIconFrame(f)
 	);
 end
 
+function InitializeReloadButton(f)
+	f.reload_button = CreateFrame("Button", "RTM.reload_button", f)
+	f.reload_button:SetSize(10, 10)
+	f.reload_button:SetPoint("TOPRIGHT", f, -2 * frame_padding, -(frame_padding + 3))
+
+	f.reload_button.texture = f.reload_button:CreateTexture(nil, "OVERLAY")
+	f.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Reload.tga")
+	f.reload_button.texture:SetSize(10, 10)
+	f.reload_button.texture:SetPoint("CENTER", f.reload_button)
+	
+	-- Create a tooltip window.
+	f.reload_button.tooltip = CreateFrame("Frame", nil, UIParent)
+	f.reload_button.tooltip:SetSize(390, 34)
+	
+	local texture = f.reload_button.tooltip:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.reload_button.tooltip)
+	f.reload_button.tooltip.texture = texture
+	f.reload_button.tooltip:SetPoint("TOPLEFT", f, 0, 35)
+	f.reload_button.tooltip:Hide()
+	
+	f.reload_button.tooltip.text1 = f.reload_button.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.reload_button.tooltip.text1:SetJustifyH("LEFT")
+	f.reload_button.tooltip.text1:SetJustifyV("TOP")
+	f.reload_button.tooltip.text1:SetPoint("TOPLEFT", f.reload_button.tooltip, 5, -3)
+	f.reload_button.tooltip.text1:SetText("Reset your data and replace it with the data of others.")
+	
+	f.reload_button.tooltip.text2 = f.reload_button.tooltip:CreateFontString(nil, nil, "GameFontNormal")
+	f.reload_button.tooltip.text2:SetJustifyH("LEFT")
+	f.reload_button.tooltip.text2:SetJustifyV("TOP")
+	f.reload_button.tooltip.text2:SetPoint("TOPLEFT", f.reload_button.tooltip, 5, -15)
+	f.reload_button.tooltip.text2:SetText("Note: you do not need to press this button to receive new timers.")
+	
+	-- Hide and show the tooltip on mouseover.
+	f.reload_button:SetScript("OnEnter", 
+		function(self)
+			self.tooltip:Show()
+		end
+	);
+	
+	f.reload_button:SetScript("OnLeave", 
+		function(self)
+			self.tooltip:Hide()
+		end
+	);
+	
+	f.reload_button:SetScript("OnClick", 
+		function()
+			if RTM.current_shard_id ~= nil and GetServerTime() - RTM.last_reload_time > 600 then
+				print("<RTM> Resetting current rare timers and requesting up-to-date data.")
+				RTM.is_alive = {}
+				RTM.current_health = {}
+				RTM.last_recorded_death = {}
+				RTM.recorded_entity_death_ids = {}
+				RTM.current_coordinates = {}
+				RTM.reported_spawn_uids = {}
+				RTM.reported_vignettes = {}
+				RTM.last_reload_time = GetServerTime()
+				
+				-- Reset the cache.
+				RTMDB.previous_records[RTM.current_shard_id] = nil
+				
+				-- Re-register your arrival in the shard.
+				RTM:RegisterArrival(RTM.current_shard_id)
+			elseif RTM.current_shard_id == nil then
+				print("<RTM> Please target a non-player entity prior to resetting, such that the addon can determine the current shard id.")
+			else
+				print("<RTM> The reset button is on cooldown. Please note that a reset is not needed to receive new timers. If it is your intention to reset the data, please do a /reload and click the reset button again.")
+			end
+		end
+	);
+end
+
 
 function RTM:InitializeInterface()
 	self:SetSize(entity_name_width + entity_status_width + 2 * favorite_rares_width + 5 * frame_padding, shard_id_frame_height + 3 * frame_padding + #RTM.rare_ids * 12 + 8)
@@ -381,37 +456,7 @@ function RTM:InitializeInterface()
 	RTM:InitializeAnnounceIconFrame(self)
 	
 	-- Create a reset button.
-	self.reload_button = CreateFrame("Button", "RTM.reload_button", self)
-	self.reload_button:SetSize(10, 10)
-	self.reload_button:SetPoint("TOPRIGHT", self, -2 * frame_padding, -(frame_padding + 3))
-
-	self.reload_button.texture = self.reload_button:CreateTexture(nil, "OVERLAY")
-	self.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Reload.tga")
-	self.reload_button.texture:SetSize(10, 10)
-	self.reload_button.texture:SetPoint("CENTER", self.reload_button)
-	
-	self.reload_button:SetScript("OnClick", 
-		function()
-			if RTM.current_shard_id then
-				print("<RTM> Resetting current rare timers and requesting up-to-date data.")
-				RTM.is_alive = {}
-				RTM.current_health = {}
-				RTM.last_recorded_death = {}
-				RTM.recorded_entity_death_ids = {}
-				RTM.current_coordinates = {}
-				RTM.reported_spawn_uids = {}
-				RTM.reported_vignettes = {}
-				
-				-- Reset the cache.
-				RTMDB.previous_records[RTM.current_shard_id] = nil
-				
-				-- Re-register your arrival in the shard.
-				RTM:RegisterArrival(RTM.current_shard_id)
-			else
-				print("<RTM> Please target a non-player entity prior to reloading, such that the addon can determine the current shard id.")
-			end
-		end
-	);
+	InitializeReloadButton(self)	
 	
 	self:Hide()
 end
