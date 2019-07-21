@@ -28,16 +28,12 @@ RTM.reported_vignettes = {}
 -- A table containing all spawn UIDs that have been reported through a sound warning.
 RTM.reported_spawn_uids = {}
 
--- Sound file options.
-local sound_options = {}
-sound_options['none'] = -1
-sound_options['Algalon: Beware!'] = 543587
-
 -- The version of the addon.
-RTM.version = 4
+RTM.version = 5
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
 -- Version 4: changed the interface of the alive message to include coordinates.
+-- Version 5: added a future version of Mechtarantula.
 
 -- The last zone the user was in.
 RTM.last_zone_id = nil

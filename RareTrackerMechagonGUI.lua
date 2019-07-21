@@ -225,17 +225,22 @@ function RTM:CorrectFavoriteMarks()
 end
 
 function RTM:UpdateDailyKillMark(npc_id)
-	if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
-		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
-		self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontRed")
-	else
-		self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
-		self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontNormal")
+	if not RTM.completion_quest_ids[npc_id] then 
+		return 
 	end
 	
-	if npc_id == 151625 then
-		-- Bug fix for the mounted variant of the scrap king.
-		RTM:UpdateDailyKillMark(151623)
+	-- Multiple NPCs might share the same quest id.
+	local completion_quest_id = RTM.completion_quest_ids[npc_id]
+	local npc_ids = RTM.completion_quest_inverse[completion_quest_id]
+	
+	for key, npc_id in pairs(npc_ids) do
+		if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
+			self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
+			self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontRed")
+		else
+			self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
+			self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontNormal")
+		end
 	end
 end
 

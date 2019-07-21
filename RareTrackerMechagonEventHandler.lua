@@ -68,6 +68,25 @@ function RTM:CheckForShardChange(zone_uid)
 	return has_changed
 end
 
+function RTM:CheckForFutureMecharantula(npc_id)
+	-- Next, we check whether this is Mecharantula.
+		if npc_id == 151672 then
+		-- Check if the player has the time displacement buff.
+		for i=1, 40 do
+			spell_id = select(10, UnitBuff("player", i))
+			if spell_id == nil then 
+				break 
+			elseif spell_id == 296644 then
+				-- Chance the NPC id to a bogus id.
+				npc_id = 8821909
+				break
+			end
+		end
+	end
+
+	return npc_id
+end
+
 -- Called when a target changed event is fired.
 function RTM:OnTargetChanged(...)
 	if UnitGUID("target") ~= nil then
@@ -84,6 +103,9 @@ function RTM:OnTargetChanged(...)
 				RTM:Debug("[Target]", guid)
 			end
 		end
+		
+		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
+		npc_id = RTM:CheckForFutureMecharantula(npc_id)
 		
 		if RTM.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
@@ -126,6 +148,9 @@ function RTM:OnUnitHealth(unit)
 				RTM:Debug("[OnUnitHealth]", guid)
 			end
 		end
+		
+		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
+		npc_id = RTM:CheckForFutureMecharantula(npc_id)
 		
 		if RTM.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
@@ -173,6 +198,9 @@ function RTM:OnCombatLogEvent(...)
 			RTM:Debug("[OnCombatLogEvent]", sourceGUID, destGUID)
 		end
 	end	
+	
+	--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
+	npc_id = RTM:CheckForFutureMecharantula(npc_id)
 		
 	if subevent == "UNIT_DIED" then
 		if RTM.rare_ids_set[npc_id] then
@@ -211,6 +239,9 @@ function RTM:OnVignetteMinimapUpdated(...)
 					RTM:Debug("[OnVignette]", vignetteInfo.objectGUID)
 				end
 			end
+			
+			--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
+			npc_id = RTM:CheckForFutureMecharantula(npc_id)
 			
 			if RTM.rare_ids_set[npc_id] and not RTM.reported_vignettes[vignetteGUID] then
 				RTM.reported_vignettes[vignetteGUID] = {npc_id, spawn_uid}
