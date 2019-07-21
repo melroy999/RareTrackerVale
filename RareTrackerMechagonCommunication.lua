@@ -136,7 +136,7 @@ function RTM:RegisterArrival(shard_id)
 		)
 	else
 		C_ChatInfo.SendAddonMessage("RTM", "A-"..shard_id.."-"..RTM.version..":"..RTM.arrival_register_time, "CHANNEL", select(1, GetChannelName(RTM.channel_name)))
-	end	
+	end
 	
 	-- Register your arrival within the group.
 	if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
@@ -194,7 +194,13 @@ function RTM:AcknowledgeArrival(player, time_stamp)
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
 		RTM:RegisterPresenceWhisper(RTM.current_shard_id, player, time_stamp)
-		
+	end	
+end
+
+-- Acknowledge that the player has arrived and whisper your data table.
+function RTM:AcknowledgeArrivalGroup(player, time_stamp)
+	-- Notify the newly arrived user of your presence through a whisper.
+	if player_name ~= player then
 		if RTMDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 			RTM:RegisterPresenceGroup(RTM.current_shard_id, player, time_stamp)
 		end
@@ -436,7 +442,7 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 		elseif RTMDB.enable_raid_communication then
 			if prefix == "AP" then
 				time_stamp = tonumber(payload)
-				RTM:AcknowledgeArrival(player, time_stamp)
+				RTM:AcknowledgeArrivalGroup(player, time_stamp)
 			elseif prefix == "PP" then
 				local payload, arrival_time_str = strsplit("-", payload)
 				local arrival_time = tonumber(arrival_time_str)
