@@ -107,7 +107,7 @@ function RTM:OnTargetChanged(...)
 		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
 		npc_id = RTM:CheckForFutureMecharantula(npc_id)
 		
-		if RTM.rare_ids_set[npc_id] then
+		if unittype == "Creature" and RTM.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
 			local health = UnitHealth("target")
 			
@@ -186,14 +186,14 @@ function RTM:OnCombatLogEvent(...)
 	if not npc_id then return end
 	
 	-- Blacklist the entity.
-	if not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 then
+	if not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 and not RTM.rare_ids_set[npc_id] then
 		RTMDB.banned_NPC_ids[npc_id] = true
 	end
 	
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	-- We exclude all pets and guardians, since they might have retained their old shard change.
-	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+	if unittype == "Creature" and not RTM.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
 		if RTM:CheckForShardChange(zone_uid) then
 			RTM:Debug("[OnCombatLogEvent]", sourceGUID, destGUID)
 		end
@@ -215,7 +215,7 @@ function RTM:OnVignetteMinimapUpdated(...)
 	vignetteGUID, onMinimap = ...
 	vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
-	
+
 	if not vignetteInfo and RTM.current_shard_id ~= nil then
 		-- An entity we saw earlier might have died.
 		if RTM.reported_vignettes[vignetteGUID] then
