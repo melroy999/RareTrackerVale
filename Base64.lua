@@ -16,6 +16,10 @@ end
 function RTM:toBase64(number)
     local t = {}
 	
+	if number < 0 then
+		number = 0
+	end
+	
     repeat
         local d = (number % 64) + 1
         number = floor(number / 64)
