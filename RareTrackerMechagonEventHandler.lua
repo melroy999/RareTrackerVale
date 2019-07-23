@@ -374,7 +374,7 @@ function RTM:OnAddonLoaded()
 		
 		-- Remove any data in the previous records that has expired.
 		for key, _ in pairs(RTMDB.previous_records) do
-			if GetServerTime() - RTMDB.previous_records[key].time_stamp > 300 then
+			if GetServerTime() - RTMDB.previous_records[key].time_stamp > 900 then
 				print("<RTM> Removing cached data for shard", (key + 42)..".")
 				RTMDB.previous_records[key] = nil
 			end

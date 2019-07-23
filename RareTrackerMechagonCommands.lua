@@ -20,6 +20,9 @@ function CommandHandler(msg, editbox)
 	elseif cmd == "hide" then
 		RTM:Hide()  
 		RTMDB.show_window = false
+	else 
+		InterfaceOptionsFrame_Show()
+		InterfaceOptionsFrame_OpenToCategory(RTM.options_panel)
 	end
 end
 

@@ -142,20 +142,26 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 	type = "data source",
 	text = "RTM",
 	icon = "Interface\\Icons\\inv_gizmo_goblingtonkcontroller",
-	OnClick = function() 
-		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
-			if RTM:IsShown() then
-				RTM:Hide()
-				RTMDB.show_window = false
-			else
-				RTM:Show()
-				RTMDB.show_window = true
+	OnClick = function(self, button, down) 
+		if button == "LeftButton" then
+			if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
+				if RTM:IsShown() then
+					RTM:Hide()
+					RTMDB.show_window = false
+				else
+					RTM:Show()
+					RTMDB.show_window = true
+				end
 			end
+		else 
+			InterfaceOptionsFrame_Show()
+			InterfaceOptionsFrame_OpenToCategory(RTM.options_panel)
 		end
 	end,
 	OnTooltipShow = function(tooltip)
 		tooltip:SetText("RTM")
-		tooltip:AddLine("Hide/Show RTM", 1, 1, 1)
+		tooltip:AddLine("Left-click: hide/show RTM", 1, 1, 1)
+		tooltip:AddLine("Right-click: show options", 1, 1, 1)
 		tooltip:Show()
 	end
 })

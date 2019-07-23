@@ -222,6 +222,8 @@ function RTM:CorrectFavoriteMarks()
 		
 		if RTMDB.favorite_rares[npc_id] then
 			self.favorite_rares_frame.checkboxes[npc_id].texture:SetColorTexture(0, 1, 0, 1)
+		else
+			self.favorite_rares_frame.checkboxes[npc_id].texture:SetColorTexture(0, 0, 0, front_opacity)
 		end
 	end
 end
@@ -612,6 +614,29 @@ function RTM:IntializeScaleSlider(parent_frame)
 	f:SetPoint("TOPLEFT", f.label, 5, -15)
 end
 
+function RTM:InitializeButtons(parent_frame)
+	parent_frame.reset_favorites_button = CreateFrame("Button", "RTM.options_panel.reset_favorites_button", parent_frame, 'UIPanelButtonTemplate')
+	parent_frame.reset_favorites_button:SetText("Reset Favorites")
+	parent_frame.reset_favorites_button:SetSize(150, 25)
+	parent_frame.reset_favorites_button:SetPoint("TOPLEFT", parent_frame, 0, -175)
+	parent_frame.reset_favorites_button:SetScript("OnClick", 
+		function()
+			RTMDB.favorite_rares = {}
+			RTM:CorrectFavoriteMarks()
+		end
+	);
+	
+	parent_frame.reset_blacklist_button = CreateFrame("Button", "RTM.options_panel.reset_blacklist_button", parent_frame, 'UIPanelButtonTemplate')
+	parent_frame.reset_blacklist_button:SetText("Reset Blacklist")
+	parent_frame.reset_blacklist_button:SetSize(150, 25)
+	parent_frame.reset_blacklist_button:SetPoint("TOPRIGHT", parent_frame.reset_favorites_button, 155, 0)
+	parent_frame.reset_blacklist_button:SetScript("OnClick", 
+		function()
+			RTMDB.banned_NPC_ids = {}
+		end
+	);
+end
+
 function RTM:InitializeConfigMenu()
 	RTM.options_panel = CreateFrame("Frame", "RTM.options_panel", UIParent)
 	RTM.options_panel.name = "RareTrackerMechagon"
@@ -626,6 +651,7 @@ function RTM:InitializeConfigMenu()
 	RTM.options_panel.raid_comms_checkbox = RTM:IntializeRaidCommunicationCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.debug_checkbox = RTM:IntializeDebugCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.scale_slider = RTM:IntializeScaleSlider(RTM.options_panel.frame)
+	RTM:InitializeButtons(RTM.options_panel.frame)
 end
 
 

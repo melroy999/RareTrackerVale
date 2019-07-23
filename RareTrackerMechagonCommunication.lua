@@ -105,7 +105,7 @@ end
 function RTM:RegisterArrival(shard_id)
 	-- Attempt to load previous data from our cache.
 	if RTMDB.previous_records[shard_id] then
-		if GetServerTime() - RTMDB.previous_records[shard_id].time_stamp < 300 then
+		if GetServerTime() - RTMDB.previous_records[shard_id].time_stamp < 900 then
 			print("<RTM> Restoring data from previous session in shard "..(shard_id + 42)..".")
 			RTM.last_recorded_death = RTMDB.previous_records[shard_id].time_table
 		else
