@@ -9,8 +9,8 @@ local favorite_rares_width = 10
 
 local shard_id_frame_height = 16
 
-background_opacity = 0.4
-front_opacity = 0.6
+local background_opacity = 0.4
+local front_opacity = 0.6
 
 -- ####################################################################
 -- ##                              GUI                               ##
@@ -459,6 +459,7 @@ function RTM:InitializeInterface()
 	
 	-- Create a reset button.
 	InitializeReloadButton(self)	
+	RTM:SetClampedToScreen(true)
 	
 	self:Hide()
 end
@@ -637,6 +638,131 @@ function RTM:InitializeButtons(parent_frame)
 	);
 end
 
+function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
+	local f = CreateFrame("Frame", "parent_frame.rare_selection.frame.list["..npc_id.."]", parent_frame);
+	f:SetSize(500, 12)
+	
+	f.enable = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].enable", f);
+	f.enable:SetSize(10, 10)
+	local texture = f.enable:CreateTexture(nil, "BACKGROUND")
+	
+	if not RTMDB.ignore_rare[npc_id] then
+		texture:SetColorTexture(0, 1, 0, 1)
+	else
+		texture:SetColorTexture(1, 0, 0, 1)
+	end
+	
+	texture:SetAllPoints(f.enable)
+	f.enable.texture = texture
+	f.enable:SetPoint("TOPLEFT", f, 0, 0)
+	f.enable:SetScript("OnClick", 
+		function()
+			if not RTMDB.ignore_rare[npc_id] then
+				if RTMDB.favorite_rares[npc_id] then
+					print("<RTM> Favorites cannot be hidden.")
+				else 
+					RTMDB.ignore_rare[npc_id] = true
+					f.enable.texture:SetColorTexture(1, 0, 0, 1)
+				end
+			else
+				RTMDB.ignore_rare[npc_id] = nil
+				f.enable.texture:SetColorTexture(0, 1, 0, 1)
+			end
+		end
+	)
+	
+	f.up = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].up", f);
+	f.up:SetSize(10, 10)
+	local texture = f.up:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 1, 0, 1)
+	texture:SetAllPoints(f.up)
+	f.up.texture = texture
+	f.up:SetPoint("TOPLEFT", f, 13, 0)
+	
+	f.up:SetScript("OnClick", 
+		function()
+			RTMDB.rare_ordering:SwapNeighbors(data.__previous, npc_id)
+			RTM:ReorderRareSelectionEntryItems(parent_frame)
+		end
+	)
+		
+	if data.__previous == nil then	
+		f.up:Hide()
+	end
+	
+	f.down = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].down", f);
+	f.down:SetSize(10, 10)
+	local texture = f.down:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 1, 0, 1)
+	texture:SetAllPoints(f.down)
+	f.down.texture = texture
+	f.down:SetPoint("TOPLEFT", f, 26, 0)
+	
+	f.down:SetScript("OnClick", 
+		function()
+			RTMDB.rare_ordering:SwapNeighbors(npc_id, data.__next)
+			RTM:ReorderRareSelectionEntryItems(parent_frame)
+		end
+	)
+
+	if data.__next == nil then
+		f.down:Hide()
+	end
+	
+	f.text = f:CreateFontString(nil, "BORDER", "GameFontNormal")
+	f.text:SetJustifyH("LEFT")
+	f.text:SetText(RTM.rare_names[npc_id])
+	f.text:SetPoint("TOPLEFT", f, 42, 0)
+	
+	return f
+end
+
+function RTM:ReorderRareSelectionEntryItems(parent_frame)
+	local i = 1
+	RTMDB.rare_ordering:ForEach(
+		function(npc_id, data)
+			local f = parent_frame.list_item[npc_id]
+			if data.__previous == nil then
+				f.up:Hide()
+			else
+				f.up:Show()
+			end
+			
+			if data.__next == nil then
+				f.down:Hide()
+			else
+				f.down:Show()
+			end
+				
+			f:SetPoint("TOPLEFT", parent_frame, 1, -(i - 1) * 13 - 5)
+			i = i + 1
+		end
+	)
+end
+
+function RTM:InitializeRareSelectionChildMenu(parent_frame)
+	parent_frame.rare_selection = CreateFrame("Frame", "RTM.options_panel", parent_frame)
+	parent_frame.rare_selection.name = "Rare ordering/selection"
+	parent_frame.rare_selection.parent = parent_frame.name
+	InterfaceOptions_AddCategory(parent_frame.rare_selection)
+	
+	parent_frame.rare_selection.frame = CreateFrame("Frame", "RTM.options_panel.frame", parent_frame.rare_selection)
+	parent_frame.rare_selection.frame:SetPoint("TOPLEFT", parent_frame.rare_selection, 11, -14)
+	parent_frame.rare_selection.frame:SetSize(500, 500)
+	
+	local f = parent_frame.rare_selection.frame
+	local i = 1
+	f.list_item = {}
+	
+	RTMDB.rare_ordering:ForEach(
+		function(npc_id, data)
+			f.list_item[npc_id] = RTM:CreateRareSelectionEntry(npc_id, f, data)
+			f.list_item[npc_id]:SetPoint("TOPLEFT", f, 1, -(i - 1) * 13 - 5)
+			i = i + 1
+		end
+	)
+end
+
 function RTM:InitializeConfigMenu()
 	RTM.options_panel = CreateFrame("Frame", "RTM.options_panel", UIParent)
 	RTM.options_panel.name = "RareTrackerMechagon"
@@ -652,6 +778,7 @@ function RTM:InitializeConfigMenu()
 	RTM.options_panel.debug_checkbox = RTM:IntializeDebugCheckbox(RTM.options_panel.frame)
 	RTM.options_panel.scale_slider = RTM:IntializeScaleSlider(RTM.options_panel.frame)
 	RTM:InitializeButtons(RTM.options_panel.frame)
+	RTM:InitializeRareSelectionChildMenu(RTM.options_panel)
 end
 
 

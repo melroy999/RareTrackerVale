@@ -16,9 +16,6 @@ RTM.current_coordinates = {}
 -- The zone_uid can be used to distinguish different shards of the zone.
 RTM.current_shard_id = nil
 
--- An override to hide the interface initially (development).
-RTM.hide_override = false
-
 -- A table containing all UID deaths reported by the player.
 RTM.recorded_entity_death_ids = {}
 

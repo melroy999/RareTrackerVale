@@ -369,6 +369,20 @@ function RTM:OnAddonLoaded()
 			RTMDB.enable_raid_communication = true
 		end
 		
+		if not RTMDB.ignore_rare then
+			RTMDB.ignore_rare = {}
+		end
+		
+		if not RTMDB.rare_ordering then
+			RTMDB.rare_ordering = LinkedSet:New()
+			for i=1, #RTM.rare_ids do
+				local npc_id = RTM.rare_ids[i]
+				RTMDB.rare_ordering:AddBack(npc_id)
+			end
+		else
+			RTMDB.rare_ordering = LinkedSet:New(RTMDB.rare_ordering)
+		end
+		
 		-- Initialize the configuration menu.
 		RTM:InitializeConfigMenu()
 		
