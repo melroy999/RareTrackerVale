@@ -2,6 +2,9 @@ local _, data = ...
 
 local RTM = data.RTM;
 
+-- Redefine often used functions locally.
+local floor = floor
+
 -- The characters to be used in the base64 string.
 local digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
@@ -13,7 +16,7 @@ for i = 1, #digits do
 end
 
 -- Convert a decimal number to a base64 string.
-function RTM:toBase64(number)
+function RTM.toBase64(number)
     local t = {}
 	
 	if number < 0 then
@@ -30,7 +33,7 @@ function RTM:toBase64(number)
 end
 
 -- Convert a decimal number to a base64 string.
-function RTM:toBase10(base64)
+function RTM.toBase10(base64)
 	local n = 0
 	local j = 1
 	

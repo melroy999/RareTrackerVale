@@ -1,5 +1,17 @@
 local _, data = ...
 
+-- Redefine often used functions locally.
+local CreateFrame = CreateFrame
+local InterfaceOptionsFrame_Show = InterfaceOptionsFrame_Show
+local InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
+local LibStub = LibStub
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+
+-- Redefine global variables locally.
+local UIParent = UIParent
+local C_ChatInfo = C_ChatInfo
+
 -- ####################################################################
 -- ##                              Core                              ##
 -- ####################################################################
@@ -26,7 +38,7 @@ RTM.reported_vignettes = {}
 RTM.reported_spawn_uids = {}
 
 -- The version of the addon.
-RTM.version = 6
+RTM.version = 9001
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
 -- Version 4: changed the interface of the alive message to include coordinates.
@@ -60,7 +72,7 @@ RTMDB.previous_records = {}
 -- ####################################################################
 
 -- Get the current health of the entity, rounded down to an integer.
-function RTM:GetTargetHealthPercentage()
+function RTM.GetTargetHealthPercentage()
 	-- Find the current and maximum health of the current target.
 	local max_hp = UnitHealthMax("target")
 	
@@ -69,11 +81,11 @@ function RTM:GetTargetHealthPercentage()
 		return -1
 	end
 	
-	return math.floor((100 * UnitHealth("target")) / UnitHealthMax("target")) 
+	return math.floor((100 * UnitHealth("target")) / UnitHealthMax("target"))
 end
 
 -- A print function used for debug purposes.
-function RTM:Debug(...)
+function RTM.Debug(...)
 	if RTMDB.debug_enabled then
 		print(...)
 	end
@@ -82,23 +94,23 @@ end
 -- Open and start the RTM interface and subscribe to all the required events.
 function RTM:StartInterface()
 	-- Reset the data, since we cannot guarantee its correctness.
-	RTM.is_alive = {}
-	RTM.current_health = {}
-	RTM.last_recorded_death = {}
-	RTM.current_coordinates = {}
-	RTM.reported_spawn_uids = {}
-	RTM.reported_vignettes = {}
-	RTM.waypoints = {}
-	RTM.current_shard_id = nil
-	RTM:UpdateShardNumber(nil)
-	RTM:UpdateAllDailyKillMarks()
+	self.is_alive = {}
+	self.current_health = {}
+	self.last_recorded_death = {}
+	self.current_coordinates = {}
+	self.reported_spawn_uids = {}
+	self.reported_vignettes = {}
+	self.waypoints = {}
+	self.current_shard_id = nil
+	self:UpdateShardNumber(nil)
+	self:UpdateAllDailyKillMarks()
 	
-	RTM:RegisterEvents()
+	self:RegisterEvents()
 	
 	if RTMDB.minimap_icon_enabled then
-		RTM.icon:Show("RTM_icon")
+		self.icon:Show("RTM_icon")
 	else
-		RTM.icon:Hide("RTM_icon")
+		self.icon:Hide("RTM_icon")
 	end
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
@@ -106,29 +118,29 @@ function RTM:StartInterface()
 	end
 	
 	if RTMDB.show_window then 
-		RTM:Show()
+		self:Show()
 	end
 end
 
 -- Open and start the RTM interface and unsubscribe to all the required events.
 function RTM:CloseInterface()
 	-- Reset the data.
-	RTM.is_alive = {}
-	RTM.current_health = {}
-	RTM.last_recorded_death = {}
-	RTM.current_coordinates = {}
-	RTM.reported_spawn_uids = {}
-	RTM.reported_vignettes = {}
-	RTM.current_shard_id = nil
-	RTM:UpdateShardNumber(nil)
+	self.is_alive = {}
+	self.current_health = {}
+	self.last_recorded_death = {}
+	self.current_coordinates = {}
+	self.reported_spawn_uids = {}
+	self.reported_vignettes = {}
+	self.current_shard_id = nil
+	self:UpdateShardNumber(nil)
 	
 	-- Register the user's departure and disable event listeners.
-	RTM:RegisterDeparture(RTM.current_shard_id)
-	RTM:UnregisterEvents()
-	RTM.icon:Hide("RTM_icon")
+	self:RegisterDeparture(self.current_shard_id)
+	self:UnregisterEvents()
+	self.icon:Hide("RTM_icon")
 	
 	-- Hide the interface.
-	RTM:Hide()
+	self:Hide()
 end
 
 -- ####################################################################
@@ -139,7 +151,7 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 	type = "data source",
 	text = "RTM",
 	icon = "Interface\\Icons\\inv_gizmo_goblingtonkcontroller",
-	OnClick = function(self, button, down) 
+	OnClick = function(self, button)
 		if button == "LeftButton" then
 			if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
 				if RTM:IsShown() then
@@ -150,7 +162,7 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 					RTMDB.show_window = true
 				end
 			end
-		else 
+		else
 			InterfaceOptionsFrame_Show()
 			InterfaceOptionsFrame_OpenToCategory(RTM.options_panel)
 		end
@@ -166,7 +178,7 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 RTM.icon = LibStub("LibDBIcon-1.0")
 RTM.icon:Hide("RTM_icon")
 
-function RTM:RegisterMapIcon() 
+function RTM:RegisterMapIcon()
 	self.ace_db = LibStub("AceDB-3.0"):New("RTM_ace_db", {
 		profile = {
 			minimap = {

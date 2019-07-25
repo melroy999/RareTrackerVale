@@ -2,6 +2,8 @@ local _, data = ...
 
 local RTM = data.RTM
 
+local RTMDB = RTMDB
+
 -- ####################################################################
 -- ##                        Command Handlers                        ##
 -- ####################################################################
@@ -18,9 +20,9 @@ function CommandHandler(msg, editbox)
 			RTMDB.show_window = true
 		end
 	elseif cmd == "hide" then
-		RTM:Hide()  
+		RTM:Hide()
 		RTMDB.show_window = false
-	else 
+	else
 		InterfaceOptionsFrame_Show()
 		InterfaceOptionsFrame_OpenToCategory(RTM.options_panel)
 	end

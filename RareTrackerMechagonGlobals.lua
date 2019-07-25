@@ -2,6 +2,9 @@ local _, data = ...
 
 local RTM = data.RTM
 
+-- Redefine often used functions locally.
+local GetLocale = GetLocale
+
 -- ####################################################################
 -- ##                          Static Data                           ##
 -- ####################################################################

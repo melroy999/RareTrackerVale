@@ -1,16 +1,16 @@
 LinkedSet = {
-	__n = 0, 
-	__raw_data_table = {}, 
-	__front = nil, 
+	__n = 0,
+	__raw_data_table = {},
+	__front = nil,
 	__back = nil
 }
 
 -- Create a new and empty linked list.
 function LinkedSet:New(o)
 	o = o or {
-		__n = 0, 
-		__raw_data_table = {}, 
-		__front = nil, 
+		__n = 0,
+		__raw_data_table = {},
+		__front = nil,
 		__back = nil
 	}
 	setmetatable(o, self)
@@ -61,7 +61,7 @@ function LinkedSet:Replace(v1, v2)
 	if self.__raw_data_table[v2] ~= nil then
 		print("v2 is already in the set.")
 	elseif self.__raw_data_table[v1] == nil then
-		print("v1 does not exist.")	
+		print("v1 does not exist.")
 	else
 		local node = self.__raw_data_table[v1]
 	
@@ -70,13 +70,13 @@ function LinkedSet:Replace(v1, v2)
 		
 		if node.__previous ~= nil then
 			self.__raw_data_table[node.__previous].__next = v2
-		else 
+		else
 			self.__front = v2
 		end
 		
 		if node.__next ~= nil then
 			self.__raw_data_table[node.__next].__previous = v2
-		else 
+		else
 			self.__back = v2
 		end
 
@@ -134,7 +134,7 @@ end
 function LinkedSet:Remove(v)
 	if self.__raw_data_table[v] ~= nil then
 		-- Make sure that the pointers stay correct.
-		if n == 1 then
+		if self.__n == 1 then
 			self.__front = nil
 			self.__back = nil
 		else
