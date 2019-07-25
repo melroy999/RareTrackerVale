@@ -1,7 +1,5 @@
 local _, data = ...
 
-local RTM = data.RTM
-
 -- Redefine often used functions locally.
 local CreateFrame = CreateFrame
 local IsLeftControlKeyDown = IsLeftControlKeyDown
@@ -11,7 +9,6 @@ local IsLeftAltKeyDown = IsLeftAltKeyDown
 local IsRightAltKeyDown = IsRightAltKeyDown
 local SendChatMessage = SendChatMessage
 local GetServerTime = GetServerTime
-local TomTom = TomTom
 local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted
 local UIDropDownMenu_SetWidth = UIDropDownMenu_SetWidth
 local UIDropDownMenu_SetText = UIDropDownMenu_SetText
@@ -23,7 +20,6 @@ local InterfaceOptions_AddCategory = InterfaceOptions_AddCategory
 
 -- Redefine global variables locally.
 local UIParent = UIParent
-local RTMDB = RTMDB
 local C_Map = C_Map
 
 -- Width and height variables used to customize the window.
@@ -97,7 +93,7 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 	
 	-- Add an action listener.
 	f.announce:SetScript("OnClick",
-		function(button)
+		function(_, button)
 			local name = self.rare_names[npc_id]
 			local health = self.current_health[npc_id]
 			local last_death = self.last_recorded_death[npc_id]
@@ -733,10 +729,10 @@ function RTM:InitializeButtons(parent_frame)
 end
 
 function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
-	local f = CreateFrame("Frame", "parent_frame.rare_selection.frame.list["..npc_id.."]", parent_frame);
+	local f = CreateFrame("Frame", "RTM.options_panel.rare_selection.frame.list["..npc_id.."]", parent_frame);
 	f:SetSize(500, 12)
 	
-	f.enable = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].enable", f);
+	f.enable = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].enable", f);
 	f.enable:SetSize(10, 10)
 	local texture = f.enable:CreateTexture(nil, "BACKGROUND")
 	
@@ -767,7 +763,7 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 		end
 	)
 	
-	f.up = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].up", f);
+	f.up = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].up", f);
 	f.up:SetSize(10, 10)
 	texture = f.up:CreateTexture(nil, "OVERLAY")
 	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\UpArrow.tga")
@@ -790,7 +786,7 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 		f.up:Hide()
 	end
 	
-	f.down = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].down", f);
+	f.down = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].down", f);
 	f.down:SetSize(10, 10)
 	texture = f.down:CreateTexture(nil, "OVERLAY")
 	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\DownArrow.tga")
@@ -844,12 +840,12 @@ function RTM.ReorderRareSelectionEntryItems(parent_frame)
 end
 
 function RTM:InitializeRareSelectionChildMenu(parent_frame)
-	parent_frame.rare_selection = CreateFrame("Frame", "RTM.options_panel", parent_frame)
+	parent_frame.rare_selection = CreateFrame("Frame", "RTM.options_panel.rare_selection", parent_frame)
 	parent_frame.rare_selection.name = "Rare ordering/selection"
 	parent_frame.rare_selection.parent = parent_frame.name
 	InterfaceOptions_AddCategory(parent_frame.rare_selection)
 	
-	parent_frame.rare_selection.frame = CreateFrame("Frame", "RTM.options_panel.frame", parent_frame.rare_selection)
+	parent_frame.rare_selection.frame = CreateFrame("Frame", "RTM.options_panel.rare_selection.frame", parent_frame.rare_selection)
 	parent_frame.rare_selection.frame:SetPoint("LEFT", parent_frame.rare_selection, 11, 0)
 	parent_frame.rare_selection.frame:SetSize(500, 500)
 	

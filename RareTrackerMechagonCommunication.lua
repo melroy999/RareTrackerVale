@@ -1,7 +1,5 @@
 local _, data = ...
 
-local RTM = data.RTM
-
 -- Redefine often used functions locally.
 local UnitName = UnitName
 local GetRealmName = GetRealmName
@@ -16,9 +14,6 @@ local UnitInParty = UnitInParty
 local GetNumDisplayChannels = GetNumDisplayChannels
 local LeaveChannelByName = LeaveChannelByName
 local PlaySoundFile = PlaySoundFile
-
--- Redefine global variables locally.
-local RTMDB = RTMDB
 
 -- ####################################################################
 -- ##                         Communication                          ##

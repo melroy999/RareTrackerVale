@@ -1,7 +1,5 @@
 local _, data = ...
 
-local RTM = data.RTM
-
 -- Redefine often used functions locally.
 local UnitGUID = UnitGUID
 local strsplit = strsplit
@@ -15,7 +13,6 @@ local CreateFrame = CreateFrame
 local GetChannelList = GetChannelList
 
 -- Redefine often used variables locally.
-local RTMDB = RTMDB
 local C_Map = C_Map
 local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET
@@ -127,12 +124,12 @@ function RTM:OnTargetChanged()
 		end
 		
 		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-		npc_id = self:CheckForFutureMecharantula(npc_id)
+		npc_id = self.CheckForFutureMecharantula(npc_id)
 		
 		if unittype == "Creature" and self.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
 			local health = UnitHealth("target")
-			
+		
 			if health > 0 then
 				-- Get the current position of the player and the health of the entity.
 				local pos = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player")
@@ -174,7 +171,7 @@ function RTM:OnUnitHealth(unit)
 		end
 		
 		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-		npc_id = self:CheckForFutureMecharantula(npc_id)
+		npc_id = self.CheckForFutureMecharantula(npc_id)
 		
 		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
@@ -230,7 +227,7 @@ function RTM:OnCombatLogEvent()
 	end
 	
 	--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-	npc_id = self:CheckForFutureMecharantula(npc_id)
+	npc_id = self.CheckForFutureMecharantula(npc_id)
 		
 	if subevent == "UNIT_DIED" then
 		if self.rare_ids_set[npc_id] then
@@ -271,7 +268,7 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 			end
 			
 			--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-			npc_id = self:CheckForFutureMecharantula(npc_id)
+			npc_id = self.CheckForFutureMecharantula(npc_id)
 			
 			if self.rare_ids_set[npc_id] and not self.reported_vignettes[vignetteGUID] then
 				self.reported_vignettes[vignetteGUID] = {npc_id, spawn_uid}
@@ -468,7 +465,12 @@ RTM.updateHandler:SetScript("OnUpdate",
 )
 
 -- Register the event handling of the frame.
-RTM:SetScript("OnEvent", RTM.OnEvent)
+RTM:SetScript("OnEvent", 
+	function(self, event, ...)
+		self:OnEvent(event, ...)
+	end
+)
+
 RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 RTM:RegisterEvent("ZONE_CHANGED")
 RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
