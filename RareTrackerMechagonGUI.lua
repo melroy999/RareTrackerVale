@@ -34,177 +34,194 @@ function RTM:InitializeShardNumberFrame()
 	return f
 end
 
-function RTM:InitializeFavoriteMarkerFrame()
-	local f = CreateFrame("Frame", "RTM.RTMDB.favorite_rares_frame", self)
-	f:SetSize(favorite_rares_width, self:GetHeight() - 2 * frame_padding - frame_padding - shard_id_frame_height)
+function RTM:CreateRareTableEntry(npc_id, parent_frame)
+	local f = CreateFrame("Frame", "RTM.entities_frame.entities["..npc_id.."]", parent_frame);
+	f:SetSize(entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width, 12)
 	
-	f.checkboxes = {}
-	local height_offset = -(2 * frame_padding + shard_id_frame_height)
-	for i=1, #RTM.rare_ids do
-		local npc_id = RTM.rare_ids[i]
-		f.checkboxes[npc_id] = CreateFrame("CheckButton", "RTM.shard_id_frame.checkbox["..i.."]", f)
-		f.checkboxes[npc_id]:SetSize(10, 10)
-		local texture = f.checkboxes[npc_id]:CreateTexture(nil, "BACKGROUND")
-		texture:SetColorTexture(0, 0, 0, front_opacity)
-		texture:SetAllPoints(f.checkboxes[npc_id])
-		f.checkboxes[npc_id].texture = texture
-		f.checkboxes[npc_id]:SetPoint("TOPLEFT", 1, -(i - 1) * 12 - 5)
-		
-		-- Add an action listener.
-		f.checkboxes[npc_id]:SetScript("OnClick", 
-			function()
-				if RTMDB.favorite_rares[npc_id] then
-					RTMDB.favorite_rares[npc_id] = nil
-					f.checkboxes[npc_id].texture:SetColorTexture(0, 0, 0, front_opacity)
-				else
-					RTMDB.favorite_rares[npc_id] = true
-					f.checkboxes[npc_id].texture:SetColorTexture(0, 1, 0, 1)
-				end
+	-- Add the favorite button.
+	f.favorite = CreateFrame("CheckButton", "RTM.entities_frame.entities["..npc_id.."].favorite", f)
+	f.favorite:SetSize(10, 10)
+	local texture = f.favorite:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.favorite)
+	f.favorite.texture = texture
+	f.favorite:SetPoint("TOPLEFT", 1, 0)
+	
+	-- Add an action listener.
+	f.favorite:SetScript("OnClick", 
+		function()
+			if RTMDB.favorite_rares[npc_id] then
+				RTMDB.favorite_rares[npc_id] = nil
+				favorite.texture:SetColorTexture(0, 0, 0, front_opacity)
+			else
+				RTMDB.favorite_rares[npc_id] = true
+				favorite.texture:SetColorTexture(0, 1, 0, 1)
 			end
-		);
-	end
+		end
+	);
 	
-	f:SetPoint("TOPLEFT", self, frame_padding, height_offset)
-	return f
-end
-
-function RTM:InitializeAliveMarkerFrame()
-	local f = CreateFrame("Frame", "RTM.alive_marker_frame", self)
-	f:SetSize(favorite_rares_width, self:GetHeight() - 2 * frame_padding - frame_padding - shard_id_frame_height)
+	-- Add the announce/waypoint button.
+	f.announce = CreateFrame("Button", "RTM.entities_frame.entities["..npc_id.."].announce", f)
+	f.announce:SetSize(10, 10)
+	local texture = f.announce:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.announce)
+	f.announce.texture = texture
+	f.announce:SetPoint("TOPLEFT", frame_padding + favorite_rares_width + 1, 0)
+	f.announce:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 	
-	f.checkboxes = {}
-	local height_offset = -(2 * frame_padding + shard_id_frame_height)
-	for i=1, #RTM.rare_ids do
-		local npc_id = RTM.rare_ids[i]
-		f.checkboxes[npc_id] = CreateFrame("Button", "RTM.shard_id_frame.checkbox["..i.."]", f)
-		
-		f.checkboxes[npc_id]:SetSize(10, 10)
-		local texture = f.checkboxes[npc_id]:CreateTexture(nil, "BACKGROUND")
-		texture:SetColorTexture(0, 0, 0, front_opacity)
-		texture:SetAllPoints(f.checkboxes[npc_id])
-		f.checkboxes[npc_id].texture = texture
-		f.checkboxes[npc_id]:SetPoint("TOPLEFT", 1, -(i - 1) * 12 - 5)
-		f.checkboxes[npc_id]:RegisterForClicks("LeftButtonDown", "RightButtonDown")
-		
-		-- Add an action listener.
-		f.checkboxes[npc_id]:SetScript("OnClick", 
-			function(self, button, down)
-				local name = RTM.rare_names[npc_id]
-				local health = RTM.current_health[npc_id]
-				local last_death = RTM.last_recorded_death[npc_id]
-				local loc = RTM.current_coordinates[npc_id]
+	-- Add an action listener.
+	f.announce:SetScript("OnClick", 
+		function(self, button, down)
+			local name = RTM.rare_names[npc_id]
+			local health = RTM.current_health[npc_id]
+			local last_death = RTM.last_recorded_death[npc_id]
+			local loc = RTM.current_coordinates[npc_id]
+			
+			if button == "LeftButton" then
+				-- First, determine the target of our message.
+				local target = nil
 				
-				if button == "LeftButton" then
-					-- First, determine the target of our message.
-					local target = nil
-					
-					if IsLeftControlKeyDown() or IsRightControlKeyDown() then
-						if UnitInRaid("player") then
-							target = "RAID"
-						else
-							target = "PARTY"
-						end
-					elseif IsLeftAltKeyDown() or IsRightAltKeyDown() then
-						target = "SAY"
+				if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+					if UnitInRaid("player") then
+						target = "RAID"
 					else
-						target = "CHANNEL"
+						target = "PARTY"
 					end
-				
-					if RTM.current_health[npc_id] then
-						-- SendChatMessage
-						if loc then
-							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), target, nil, 1)
-						else 
-							SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(N/A)", name, health), target, nil, 1)
-						end
-					elseif RTM.last_recorded_death[npc_id] ~= nil then
-						if GetServerTime() - last_death < 60 then
-							SendChatMessage(string.format("<RTM> %s has died", name, GetServerTime() - last_death), target, nil, 1)
-						else
-							SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((GetServerTime() - last_death) / 60)), target, nil, 1)
-						end
-					elseif RTM.is_alive[npc_id] then
-						if loc then
-							SendChatMessage(string.format("<RTM> %s seen alive, vignette at ~(%.2f, %.2f)", name, loc.x, loc.y), target, nil, 1)
-						else
-							SendChatMessage(string.format("<RTM> %s seen alive (vignette)", name), target, nil, 1)
-						end
-					end
+				elseif IsLeftAltKeyDown() or IsRightAltKeyDown() then
+					target = "SAY"
 				else
-					-- does the user have tom tom? if so, add a waypoint if it exists.
-					if TomTom ~= nil and loc then
-						RTM.waypoints[npc_id] = TomTom:AddWaypointToCurrentZone(loc.x, loc.y, name)
+					target = "CHANNEL"
+				end
+			
+				if RTM.current_health[npc_id] then
+					-- SendChatMessage
+					if loc then
+						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(%.2f, %.2f)", name, health, loc.x, loc.y), target, nil, 1)
+					else 
+						SendChatMessage(string.format("<RTM> %s (%s%%) seen at ~(N/A)", name, health), target, nil, 1)
+					end
+				elseif RTM.last_recorded_death[npc_id] ~= nil then
+					if GetServerTime() - last_death < 60 then
+						SendChatMessage(string.format("<RTM> %s has died", name, GetServerTime() - last_death), target, nil, 1)
+					else
+						SendChatMessage(string.format("<RTM> %s was last seen ~%s minutes ago", name, math.floor((GetServerTime() - last_death) / 60)), target, nil, 1)
+					end
+				elseif RTM.is_alive[npc_id] then
+					if loc then
+						SendChatMessage(string.format("<RTM> %s seen alive, vignette at ~(%.2f, %.2f)", name, loc.x, loc.y), target, nil, 1)
+					else
+						SendChatMessage(string.format("<RTM> %s seen alive (vignette)", name), target, nil, 1)
 					end
 				end
+			else
+				-- does the user have tom tom? if so, add a waypoint if it exists.
+				if TomTom ~= nil and loc then
+					RTM.waypoints[npc_id] = TomTom:AddWaypointToCurrentZone(loc.x, loc.y, name)
+				end
 			end
-		);
-	end
+		end
+	);
 	
-	f:SetPoint("TOPLEFT", self, 2 * frame_padding + favorite_rares_width, height_offset)
+	-- Add the entities name.
+	f.name = f:CreateFontString(nil, nil, "GameFontNormal")
+	f.name:SetJustifyH("LEFT")
+	f.name:SetJustifyV("TOP")
+	f.name:SetPoint("TOPLEFT", 2 * frame_padding + 2 * favorite_rares_width + 10, 0)
+	f.name:SetText(RTM.rare_names[npc_id])
+	
+	-- Add the timer/health entry.
+	f.status = f:CreateFontString(nil, nil, "GameFontNormal")
+	f.status:SetPoint("TOPRIGHT", 0, 0)
+	f.status:SetText("--")
+	f.status:SetJustifyH("MIDDLE")
+	f.status:SetJustifyV("TOP")
+	f.status:SetSize(entity_status_width, 12)
+	
 	return f
 end
 
-function RTM:InitializeInterfaceEntityNameFrame()
-	local f = CreateFrame("Frame", "RTM.entity_name_frame", self)
-	f:SetSize(entity_name_width, self:GetHeight() - 2 * frame_padding - frame_padding - shard_id_frame_height)
-	local texture = f:CreateTexture(nil, "BACKGROUND")
-	texture:SetColorTexture(0, 0, 0, front_opacity)
-	texture:SetAllPoints(f)
-	f.texture = texture
+function RTM:InitializeRareTableEntries(parent_frame)
+	-- Create a holder for all the entries.
+	parent_frame.entities = {}
 	
-	f.strings = {}
+	-- Create a frame entry for all of the NPC ids, even the ignored ones.
+	-- The ordering and hiding of rares will be done later.
 	for i=1, #RTM.rare_ids do
 		local npc_id = RTM.rare_ids[i]
-		f.strings[npc_id] = f:CreateFontString(nil, nil, "GameFontNormal")
-		f.strings[npc_id]:SetJustifyH("LEFT")
-		f.strings[npc_id]:SetJustifyV("TOP")
-		f.strings[npc_id]:SetPoint("TOPLEFT", 10, -(i - 1) * 12 - 4)
-		f.strings[npc_id]:SetText(RTM.rare_names[npc_id])
+		parent_frame.entities[npc_id] = self:CreateRareTableEntry(npc_id, parent_frame)
 	end
-	
-	f:SetPoint("TOPLEFT", self, 3 * frame_padding + 2 * favorite_rares_width, -(2 * frame_padding + shard_id_frame_height))
-	return f
 end
 
-function RTM:InitializeInterfaceEntityStatusFrame()
-	local f = CreateFrame("Frame", "RTM.entity_status_frame", self)
-	f:SetSize(entity_status_width, self:GetHeight() - 2 * frame_padding - frame_padding - shard_id_frame_height)
-	local texture = f:CreateTexture(nil, "BACKGROUND")
-	texture:SetColorTexture(0, 0, 0, front_opacity)
-	texture:SetAllPoints(f)
-	f.texture = texture
-	
-	f.strings = {}
-	for i=1, #RTM.rare_ids do
-		local npc_id = RTM.rare_ids[i]
-		f.strings[npc_id] = f:CreateFontString(nil, nil, "GameFontNormal")
-		f.strings[npc_id]:SetPoint("TOP", 0, -(i - 1) * 12 - 4)
-		f.strings[npc_id]:SetText("--")
-		f.strings[npc_id]:SetJustifyH("LEFT")
-		f.strings[npc_id]:SetJustifyV("TOP")
+function RTM:ReorganizeRareTableFrame(f)
+	-- How many ignored rares do we have?
+	local n = 0
+	for v, _ in pairs(RTMDB.ignore_rare) do
+		n = n + 1
 	end
 	
-	f:SetPoint("TOPRIGHT", self, -frame_padding, -(2 * frame_padding + shard_id_frame_height))
-	return f
+	-- Resize all the frames.
+	self:SetSize(entity_name_width + entity_status_width + 2 * favorite_rares_width + 5 * frame_padding, shard_id_frame_height + 3 * frame_padding + (#RTM.rare_ids - n) * 12 + 8)
+	f:SetSize(entity_name_width + entity_status_width + 2 * favorite_rares_width + 3 * frame_padding, (#RTM.rare_ids - n) * 12 + 8)
+	f.entity_name_backdrop:SetSize(entity_name_width, f:GetHeight())
+	f.entity_status_backdrop:SetSize(entity_status_width, f:GetHeight())
+	
+	-- Give all of the table entries their new positions.
+	local i = 1
+	RTMDB.rare_ordering:ForEach(
+		function(npc_id, data)
+			if RTMDB.ignore_rare[npc_id] then
+				f.entities[npc_id]:Hide()
+			else
+				f.entities[npc_id]:SetPoint("TOPLEFT", f, 0, -(i - 1) * 12 - 5)
+				f.entities[npc_id]:Show()
+				i = i + 1
+			end
+		end
+	)
+end
+
+function RTM:InitializeRareTableFrame(f)
+	-- First, add the frames for the backdrop and make sure that the hierarchy is created.
+	f:SetPoint("TOPLEFT", frame_padding, -(2 * frame_padding + shard_id_frame_height))
+	
+	f.entity_name_backdrop = CreateFrame("Frame", "RTM.entities_frame.entity_name_backdrop", f)
+	local texture = f.entity_name_backdrop:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.entity_name_backdrop)
+	f.entity_name_backdrop.texture = texture
+	f.entity_name_backdrop:SetPoint("TOPLEFT", f, 2 * frame_padding + 2 * favorite_rares_width, 0)
+	
+	f.entity_status_backdrop = CreateFrame("Frame", "RTM.entities_frame.entity_status_backdrop", f)
+	local texture = f.entity_status_backdrop:CreateTexture(nil, "BACKGROUND")
+	texture:SetColorTexture(0, 0, 0, front_opacity)
+	texture:SetAllPoints(f.entity_status_backdrop)
+	f.entity_status_backdrop.texture = texture
+	f.entity_status_backdrop:SetPoint("TOPRIGHT", f, 0, 0)
+	
+	-- Next, add all the rare entries to the table.
+	self:InitializeRareTableEntries(f)
+	
+	-- Arrange the table such that it fits the user's wishes. Resize the frames appropriately.
+	self:ReorganizeRareTableFrame(f)
 end
 
 function RTM:UpdateStatus(npc_id)
-	local status_text_frame = RTM.entity_status_frame.strings[npc_id]
-	local alive_status_frame = RTM.alive_marker_frame.checkboxes[npc_id]
+	local target = RTM.entities_frame.entities[npc_id]
 
 	if RTM.current_health[npc_id] then
-		status_text_frame:SetText(RTM.current_health[npc_id].."%")
-		alive_status_frame.texture:SetColorTexture(0, 1, 0, 1)
+		target.status:SetText(RTM.current_health[npc_id].."%")
+		target.announce.texture:SetColorTexture(0, 1, 0, 1)
 	elseif RTM.last_recorded_death[npc_id] ~= nil then
 		local last_death = RTM.last_recorded_death[npc_id]
-		status_text_frame:SetText(math.floor((GetServerTime() - last_death) / 60).."m")
-		alive_status_frame.texture:SetColorTexture(0, 0, 1, front_opacity)
+		target.status:SetText(math.floor((GetServerTime() - last_death) / 60).."m")
+		target.announce.texture:SetColorTexture(0, 0, 1, front_opacity)
 	elseif RTM.is_alive[npc_id] then
-		status_text_frame:SetText("N/A")
-		alive_status_frame.texture:SetColorTexture(0, 1, 0, 1)
+		target.status:SetText("N/A")
+		target.announce.texture:SetColorTexture(0, 1, 0, 1)
 	else
-		status_text_frame:SetText("--")
-		alive_status_frame.texture:SetColorTexture(0, 0, 0, front_opacity)
+		target.status:SetText("--")
+		target.announce.texture:SetColorTexture(0, 0, 0, front_opacity)
 	end
 end
 
@@ -221,9 +238,9 @@ function RTM:CorrectFavoriteMarks()
 		local npc_id = RTM.rare_ids[i]
 		
 		if RTMDB.favorite_rares[npc_id] then
-			self.favorite_rares_frame.checkboxes[npc_id].texture:SetColorTexture(0, 1, 0, 1)
+			RTM.entities_frame.entities[npc_id].favorite.texture:SetColorTexture(0, 1, 0, 1)
 		else
-			self.favorite_rares_frame.checkboxes[npc_id].texture:SetColorTexture(0, 0, 0, front_opacity)
+			RTM.entities_frame.entities[npc_id].favorite.texture:SetColorTexture(0, 0, 0, front_opacity)
 		end
 	end
 end
@@ -239,11 +256,11 @@ function RTM:UpdateDailyKillMark(npc_id)
 	
 	for key, npc_id in pairs(npc_ids) do
 		if RTM.completion_quest_ids[npc_id] and IsQuestFlaggedCompleted(RTM.completion_quest_ids[npc_id]) then
-			self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
-			self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontRed")
+			RTM.entities_frame.entities[npc_id].name:SetText(RTM.rare_names[npc_id])
+			RTM.entities_frame.entities[npc_id].name:SetFontObject("GameFontRed")
 		else
-			self.entity_name_frame.strings[npc_id]:SetText(RTM.rare_names[npc_id])
-			self.entity_name_frame.strings[npc_id]:SetFontObject("GameFontNormal")
+			RTM.entities_frame.entities[npc_id].name:SetText(RTM.rare_names[npc_id])
+			RTM.entities_frame.entities[npc_id].name:SetFontObject("GameFontNormal")
 		end
 	end
 end
@@ -442,10 +459,8 @@ function RTM:InitializeInterface()
 	
 	-- Create a sub-frame for the entity names.
 	self.shard_id_frame = self:InitializeShardNumberFrame()
-	self.favorite_rares_frame = self:InitializeFavoriteMarkerFrame()
-	self.alive_marker_frame = self:InitializeAliveMarkerFrame()
-	self.entity_name_frame = self:InitializeInterfaceEntityNameFrame()
-	self.entity_status_frame = self:InitializeInterfaceEntityStatusFrame()
+	self.entities_frame = CreateFrame("Frame", "RTM.entities_frame", self)
+	self:InitializeRareTableFrame(self.entities_frame)
 
 	self:SetMovable(true)
 	self:EnableMouse(true)
@@ -463,8 +478,6 @@ function RTM:InitializeInterface()
 	
 	self:Hide()
 end
-
-RTM:InitializeInterface()
 
 -- ####################################################################
 -- ##                       Options Interface                        ##
@@ -663,10 +676,12 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
 				else 
 					RTMDB.ignore_rare[npc_id] = true
 					f.enable.texture:SetColorTexture(1, 0, 0, 1)
+					RTM:ReorganizeRareTableFrame(RTM.entities_frame)
 				end
 			else
 				RTMDB.ignore_rare[npc_id] = nil
 				f.enable.texture:SetColorTexture(0, 1, 0, 1)
+				RTM:ReorganizeRareTableFrame(RTM.entities_frame)
 			end
 		end
 	)
@@ -674,8 +689,11 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
 	f.up = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].up", f);
 	f.up:SetSize(10, 10)
 	local texture = f.up:CreateTexture(nil, "BACKGROUND")
-	texture:SetColorTexture(0, 1, 0, 1)
+	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\UpArrow.tga")
+	texture:SetSize(10, 10)
+	texture:SetPoint("CENTER", f.up)
 	texture:SetAllPoints(f.up)
+	
 	f.up.texture = texture
 	f.up:SetPoint("TOPLEFT", f, 13, 0)
 	
@@ -683,6 +701,7 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
 		function()
 			RTMDB.rare_ordering:SwapNeighbors(data.__previous, npc_id)
 			RTM:ReorderRareSelectionEntryItems(parent_frame)
+			RTM:ReorganizeRareTableFrame(RTM.entities_frame)
 		end
 	)
 		
@@ -693,7 +712,9 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
 	f.down = CreateFrame("Button", "parent_frame.rare_selection.frame.list["..npc_id.."].down", f);
 	f.down:SetSize(10, 10)
 	local texture = f.down:CreateTexture(nil, "BACKGROUND")
-	texture:SetColorTexture(0, 1, 0, 1)
+	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\DownArrow.tga")
+	texture:SetSize(10, 10)
+	texture:SetPoint("CENTER", f.down)
 	texture:SetAllPoints(f.down)
 	f.down.texture = texture
 	f.down:SetPoint("TOPLEFT", f, 26, 0)
@@ -702,6 +723,7 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, data)
 		function()
 			RTMDB.rare_ordering:SwapNeighbors(npc_id, data.__next)
 			RTM:ReorderRareSelectionEntryItems(parent_frame)
+			RTM:ReorganizeRareTableFrame(RTM.entities_frame)
 		end
 	)
 
@@ -734,7 +756,7 @@ function RTM:ReorderRareSelectionEntryItems(parent_frame)
 				f.down:Show()
 			end
 				
-			f:SetPoint("TOPLEFT", parent_frame, 1, -(i - 1) * 13 - 5)
+			f:SetPoint("TOPLEFT", parent_frame, 1, -(i - 1) * 12 - 5)
 			i = i + 1
 		end
 	)
@@ -757,7 +779,7 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
 	RTMDB.rare_ordering:ForEach(
 		function(npc_id, data)
 			f.list_item[npc_id] = RTM:CreateRareSelectionEntry(npc_id, f, data)
-			f.list_item[npc_id]:SetPoint("TOPLEFT", f, 1, -(i - 1) * 13 - 5)
+			f.list_item[npc_id]:SetPoint("TOPLEFT", f, 1, -(i - 1) * 12 - 5)
 			i = i + 1
 		end
 	)

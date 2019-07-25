@@ -329,9 +329,6 @@ end
 function RTM:OnAddonLoaded()
 	-- OnAddonLoaded might be called multiple times. We only want it to do so once.
 	if not RTM.is_loaded then
-		self:CorrectFavoriteMarks()
-		self:RegisterMapIcon()
-		RTM.is_loaded = true
 		
 		if RTMDB.show_window == nil then
 			RTMDB.show_window = true
@@ -383,8 +380,14 @@ function RTM:OnAddonLoaded()
 			RTMDB.rare_ordering = LinkedSet:New(RTMDB.rare_ordering)
 		end
 		
+		-- Initialize the frame.
+		self:InitializeInterface()
+		self:CorrectFavoriteMarks()
+		
 		-- Initialize the configuration menu.
-		RTM:InitializeConfigMenu()
+		self:InitializeConfigMenu()
+		
+		self:RegisterMapIcon()
 		
 		-- Remove any data in the previous records that has expired.
 		for key, _ in pairs(RTMDB.previous_records) do
@@ -393,6 +396,8 @@ function RTM:OnAddonLoaded()
 				RTMDB.previous_records[key] = nil
 			end
 		end
+		
+		RTM.is_loaded = true
 	end
 end	
 
