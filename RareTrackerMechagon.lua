@@ -1,5 +1,3 @@
-local _, data = ...
-
 -- Redefine often used functions locally.
 local CreateFrame = CreateFrame
 local InterfaceOptionsFrame_Show = InterfaceOptionsFrame_Show
@@ -16,8 +14,7 @@ local C_ChatInfo = C_ChatInfo
 -- ##                              Core                              ##
 -- ####################################################################
 
-data.RTM = CreateFrame("Frame", "RTM", UIParent);
-local RTM = data.RTM
+local RTM = CreateFrame("Frame", "RTM", UIParent);
 
 -- The current data we have of the rares.
 RTM.is_alive = {}
@@ -117,7 +114,7 @@ function RTM:StartInterface()
 		print("<RTM> Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
 	end
 	
-	if RTMDB.show_window then 
+	if RTMDB.show_window then
 		self:Show()
 	end
 end
@@ -151,7 +148,7 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 	type = "data source",
 	text = "RTM",
 	icon = "Interface\\Icons\\inv_gizmo_goblingtonkcontroller",
-	OnClick = function(self, button)
+	OnClick = function(_, button)
 		if button == "LeftButton" then
 			if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
 				if RTM:IsShown() then

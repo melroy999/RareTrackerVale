@@ -1,16 +1,14 @@
-local _, data = ...
-
-local RTM = data.RTM
-
 -- ####################################################################
 -- ##                        Command Handlers                        ##
 -- ####################################################################
 
 -- Process the given command.
-function CommandHandler(msg, editbox)
+-- msg, editbox
+function CommandHandler(msg, _)
 	-- pattern matching that skips leading whitespace and whitespace between cmd and args
 	-- any whitespace at end of args is retained
-	local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
+  -- _, _, cmd, args
+	local _, _, cmd, _ = string.find(msg, "%s?(%w+)%s?(.*)")
    
 	if cmd == "show" then
 		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then

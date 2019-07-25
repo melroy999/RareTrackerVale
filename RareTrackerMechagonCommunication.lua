@@ -1,5 +1,3 @@
-local _, data = ...
-
 -- Redefine often used functions locally.
 local UnitName = UnitName
 local GetRealmName = GetRealmName
@@ -96,11 +94,11 @@ function RTM:DelayedExecution(delay, _function)
 	local frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
 	frame.start_time = GetServerTime()
 	frame:SetScript("OnUpdate",
-		function(self)
-			if GetServerTime() - self.start_time > delay then
+		function(self2)
+			if GetServerTime() - self2.start_time > delay then
 				_function()
-				self:SetScript("OnUpdate", nil)
-				self:Hide()
+				self2:SetScript("OnUpdate", nil)
+				self2:Hide()
 			end
 		end
 	)

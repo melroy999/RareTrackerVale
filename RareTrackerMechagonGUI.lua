@@ -1,5 +1,3 @@
-local _, data = ...
-
 -- Redefine often used functions locally.
 local CreateFrame = CreateFrame
 local IsLeftControlKeyDown = IsLeftControlKeyDown
@@ -41,7 +39,11 @@ RTM.last_reload_time = 0
 
 function RTM:InitializeShardNumberFrame()
 	local f = CreateFrame("Frame", "RTM.shard_id_frame", self)
-	f:SetSize(entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width, shard_id_frame_height)
+	f:SetSize(
+      entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width,
+      shard_id_frame_height
+  )
+  
 	local texture = f:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
 	texture:SetAllPoints(f)
@@ -468,14 +470,14 @@ function RTM:InitializeReloadButton(f)
 	
 	-- Hide and show the tooltip on mouseover.
 	f.reload_button:SetScript("OnEnter",
-		function(self)
-			self.tooltip:Show()
+		function(self2)
+			self2.tooltip:Show()
 		end
 	);
 	
 	f.reload_button:SetScript("OnLeave",
-		function(self)
-			self.tooltip:Hide()
+		function(self2)
+			self2.tooltip:Hide()
 		end
 	);
 	
@@ -681,12 +683,12 @@ function RTM:IntializeScaleSlider(parent_frame)
 	f:Enable()
 	
 	f:SetScript("OnValueChanged",
-		function(self, value)
+		function(self2, value)
 			-- Round the value to the nearest step value.
 			value = math.floor(value * 20) / 20
 		
 			RTMDB.window_scale = value
-			self.label:SetText("Rare window scale "..string.format("(%.2f)", RTMDB.window_scale))
+			self2.label:SetText("Rare window scale "..string.format("(%.2f)", RTMDB.window_scale))
 			RTM:SetScale(RTMDB.window_scale)
 		end
 	);
@@ -845,7 +847,12 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
 	parent_frame.rare_selection.parent = parent_frame.name
 	InterfaceOptions_AddCategory(parent_frame.rare_selection)
 	
-	parent_frame.rare_selection.frame = CreateFrame("Frame", "RTM.options_panel.rare_selection.frame", parent_frame.rare_selection)
+	parent_frame.rare_selection.frame = CreateFrame(
+      "Frame",
+      "RTM.options_panel.rare_selection.frame",
+      parent_frame.rare_selection
+  )
+  
 	parent_frame.rare_selection.frame:SetPoint("LEFT", parent_frame.rare_selection, 11, 0)
 	parent_frame.rare_selection.frame:SetSize(500, 500)
 	

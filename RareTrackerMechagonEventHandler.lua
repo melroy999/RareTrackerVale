@@ -1,5 +1,3 @@
-local _, data = ...
-
 -- Redefine often used functions locally.
 local UnitGUID = UnitGUID
 local strsplit = strsplit
@@ -465,7 +463,7 @@ RTM.updateHandler:SetScript("OnUpdate",
 )
 
 -- Register the event handling of the frame.
-RTM:SetScript("OnEvent", 
+RTM:SetScript("OnEvent",
 	function(self, event, ...)
 		self:OnEvent(event, ...)
 	end
