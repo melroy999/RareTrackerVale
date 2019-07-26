@@ -271,16 +271,20 @@ function RTM:UpdateStatus(npc_id)
 
 	if self.current_health[npc_id] then
 		target.status:SetText(self.current_health[npc_id].."%")
+    target.status:SetFontObject("GameFontGreen")
+		target.announce.texture:SetColorTexture(0, 1, 0, 1)
+	elseif self.is_alive[npc_id] then
+		target.status:SetText("N/A")
+    target.status:SetFontObject("GameFontGreen")
 		target.announce.texture:SetColorTexture(0, 1, 0, 1)
 	elseif self.last_recorded_death[npc_id] ~= nil then
 		local last_death = self.last_recorded_death[npc_id]
 		target.status:SetText(math.floor((GetServerTime() - last_death) / 60).."m")
+    target.status:SetFontObject("GameFontNormal")
 		target.announce.texture:SetColorTexture(0, 0, 1, front_opacity)
-	elseif self.is_alive[npc_id] then
-		target.status:SetText("N/A")
-		target.announce.texture:SetColorTexture(0, 1, 0, 1)
 	else
 		target.status:SetText("--")
+    target.status:SetFontObject("GameFontNormal")
 		target.announce.texture:SetColorTexture(0, 0, 0, front_opacity)
 	end
 end
@@ -550,14 +554,6 @@ end
 -- ##                       Options Interface                        ##
 -- ####################################################################
 
-
-
--- Options:
--- Select warning sound
--- Reset Favorites
--- Show/hide minimap icon
--- Enable debug prints
-
 -- The provided sound options.
 local sound_options = {}
 sound_options[''] = -1
@@ -714,7 +710,7 @@ function RTM:InitializeButtons(parent_frame)
 			RTMDB.favorite_rares = {}
 			self:CorrectFavoriteMarks()
 		end
-	);
+	)
 	
 	parent_frame.reset_blacklist_button = CreateFrame(
 		"Button", "RTM.options_panel.reset_blacklist_button", parent_frame, 'UIPanelButtonTemplate'
@@ -727,7 +723,7 @@ function RTM:InitializeButtons(parent_frame)
 		function()
 			RTMDB.banned_NPC_ids = {}
 		end
-	);
+	)
 end
 
 function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
@@ -841,6 +837,69 @@ function RTM.ReorderRareSelectionEntryItems(parent_frame)
 	)
 end
 
+function RTM:DisableAllRaresButton(parent_frame)
+  parent_frame.reset_all_button = CreateFrame(
+		"Button", "RTM.options_panel.rare_selection.reset_all_button", parent_frame, 'UIPanelButtonTemplate'
+	)
+	
+	parent_frame.reset_all_button:SetText("Disable All")
+	parent_frame.reset_all_button:SetSize(150, 25)
+	parent_frame.reset_all_button:SetPoint("TOPRIGHT", parent_frame, 0, 0)
+	parent_frame.reset_all_button:SetScript("OnClick",
+		function()
+			for i=1, #self.rare_ids do
+        local npc_id = self.rare_ids[i]
+        if RTMDB.favorite_rares[npc_id] ~= true then
+          RTMDB.ignore_rare[npc_id] = true
+          parent_frame.list_item[npc_id].enable.texture:SetColorTexture(1, 0, 0, 1)
+        end
+      end
+      self:ReorganizeRareTableFrame(self.entities_frame)
+		end
+	)
+end
+
+function RTM:EnableAllRaresButton(parent_frame)
+  parent_frame.enable_all_button = CreateFrame(
+		"Button", "RTM.options_panel.rare_selection.enable_all_button", parent_frame, 'UIPanelButtonTemplate'
+	)
+	
+	parent_frame.enable_all_button:SetText("Enable All")
+	parent_frame.enable_all_button:SetSize(150, 25)
+	parent_frame.enable_all_button:SetPoint("TOPRIGHT", parent_frame, 0, -25)
+	parent_frame.enable_all_button:SetScript("OnClick",
+		function()
+      for i=1, #self.rare_ids do
+        local npc_id = self.rare_ids[i]
+        RTMDB.ignore_rare[npc_id] = nil
+        parent_frame.list_item[npc_id].enable.texture:SetColorTexture(0, 1, 0, 1)
+      end
+      self:ReorganizeRareTableFrame(self.entities_frame)
+		end
+	)
+end
+
+function RTM:ResetRareOrderButton(parent_frame)
+  parent_frame.reset_order_button = CreateFrame(
+		"Button", "RTM.options_panel.rare_selection.reset_order_button", parent_frame, 'UIPanelButtonTemplate'
+	)
+	
+	parent_frame.reset_order_button:SetText("Reset Order")
+	parent_frame.reset_order_button:SetSize(150, 25)
+	parent_frame.reset_order_button:SetPoint("TOPRIGHT", parent_frame, 0, -50)
+	parent_frame.reset_order_button:SetScript("OnClick",
+		function()
+			RTMDB.rare_ordering = LinkedSet:New()
+      for i=1, #self.rare_ids do
+        local npc_id = self.rare_ids[i]
+        RTMDB.rare_ordering:AddBack(npc_id)
+      end
+      self:ReorganizeRareTableFrame(self.entities_frame)
+      self.ReorderRareSelectionEntryItems(parent_frame)
+		end
+	)
+end
+
 function RTM:InitializeRareSelectionChildMenu(parent_frame)
 	parent_frame.rare_selection = CreateFrame("Frame", "RTM.options_panel.rare_selection", parent_frame)
 	parent_frame.rare_selection.name = "Rare ordering/selection"
@@ -854,7 +913,7 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
   )
   
 	parent_frame.rare_selection.frame:SetPoint("LEFT", parent_frame.rare_selection, 11, 0)
-	parent_frame.rare_selection.frame:SetSize(500, 500)
+	parent_frame.rare_selection.frame:SetSize(400, 500)
 	
 	local f = parent_frame.rare_selection.frame
 	local i = 1
@@ -867,6 +926,11 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
 			i = i + 1
 		end
 	)
+  
+  -- Add utility buttons.
+  RTM:DisableAllRaresButton(f)
+  RTM:EnableAllRaresButton(f)
+  RTM:ResetRareOrderButton(f)
 end
 
 function RTM:InitializeConfigMenu()
@@ -886,23 +950,3 @@ function RTM:InitializeConfigMenu()
 	self:InitializeButtons(self.options_panel.frame)
 	self:InitializeRareSelectionChildMenu(self.options_panel)
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

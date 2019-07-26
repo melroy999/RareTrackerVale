@@ -166,14 +166,11 @@ function LinkedSet:Remove(v)
 end
 
 function LinkedSet:PrintList()
-	if self.__n > 0 then
-		local v = self.__front
-		
-		while v ~= nil do
-			print(v)
-			v = self.__raw_data_table[v].__next
-		end
-	end
+  self:ForEach(
+    function(v, _)
+      print(v)
+    end
+  )
 end
 
 function LinkedSet:ForEach(__function)

@@ -35,7 +35,7 @@ RTM.reported_vignettes = {}
 RTM.reported_spawn_uids = {}
 
 -- The version of the addon.
-RTM.version = 9001
+RTM.version = 6
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
 -- Version 4: changed the interface of the alive message to include coordinates.
