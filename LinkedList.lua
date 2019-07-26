@@ -18,6 +18,13 @@ function LinkedSet:New(o)
 	return o
 end
 
+function LinkedSet:Clear()
+	self.__n = 0
+	self.__raw_data_table = {}
+	self.__front = nil
+	self.__back = nil
+end
+
 function LinkedSet:AddFront(v)
 	if self.__raw_data_table[v] == nil then
 		-- Add the item to the front of the set.

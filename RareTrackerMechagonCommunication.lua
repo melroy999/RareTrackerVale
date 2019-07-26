@@ -354,7 +354,7 @@ end
 
 -- Inform the others the health of a specific entity.
 function RTM:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
-	if not self.last_health_report["CHANNEL"][npc_id] 
+	if not self.last_health_report["CHANNEL"][npc_id]
 		or GetServerTime() - self.last_health_report["CHANNEL"][npc_id] > 2 then
 		-- Mark the entity as targeted and alive.
 		self.is_alive[npc_id] = GetServerTime()

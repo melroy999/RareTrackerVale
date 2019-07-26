@@ -774,7 +774,9 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	
 	f.up:SetScript("OnClick",
 		function()
-			RTMDB.rare_ordering:SwapNeighbors(entry_data.__previous, npc_id)
+      -- Here, we use the most up-to-date entry data, instead of the one passed as an argument.
+      local previous_entry = RTMDB.rare_ordering.__raw_data_table[npc_id].__previous
+			RTMDB.rare_ordering:SwapNeighbors(previous_entry, npc_id)
 			self.ReorderRareSelectionEntryItems(parent_frame)
 			self:ReorganizeRareTableFrame(self.entities_frame)
 		end
@@ -796,7 +798,9 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	
 	f.down:SetScript("OnClick",
 		function()
-			RTMDB.rare_ordering:SwapNeighbors(npc_id, entry_data.__next)
+      -- Here, we use the most up-to-date entry data, instead of the one passed as an argument.
+      local next_entry = RTMDB.rare_ordering.__raw_data_table[npc_id].__next
+			RTMDB.rare_ordering:SwapNeighbors(npc_id, next_entry)
 			self.ReorderRareSelectionEntryItems(parent_frame)
 			self:ReorganizeRareTableFrame(self.entities_frame)
 		end
@@ -889,7 +893,7 @@ function RTM:ResetRareOrderButton(parent_frame)
 	parent_frame.reset_order_button:SetPoint("TOPRIGHT", parent_frame, 0, -50)
 	parent_frame.reset_order_button:SetScript("OnClick",
 		function()
-			RTMDB.rare_ordering = LinkedSet:New()
+			RTMDB.rare_ordering:Clear()
       for i=1, #self.rare_ids do
         local npc_id = self.rare_ids[i]
         RTMDB.rare_ordering:AddBack(npc_id)
@@ -912,7 +916,7 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
       parent_frame.rare_selection
   )
   
-	parent_frame.rare_selection.frame:SetPoint("LEFT", parent_frame.rare_selection, 11, 0)
+	parent_frame.rare_selection.frame:SetPoint("LEFT", parent_frame.rare_selection, 101, 0)
 	parent_frame.rare_selection.frame:SetSize(400, 500)
 	
 	local f = parent_frame.rare_selection.frame
