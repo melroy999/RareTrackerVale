@@ -387,6 +387,12 @@ function RTM:OnAddonLoaded()
 		
 		if not RTMDB.banned_NPC_ids then
 			RTMDB.banned_NPC_ids = {}
+		else
+			-- As a precaution, we remove all rares from the blacklist.
+			for i=1, #self.rare_ids do
+				local npc_id = self.rare_ids[i]
+				RTMDB.banned_NPC_ids[npc_id] = nil
+			end
 		end
 		
 		if not RTMDB.window_scale then
