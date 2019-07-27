@@ -83,9 +83,9 @@ function RTM:CheckForShardChange(zone_uid)
 	return has_changed
 end
 
-function RTM.CheckForFutureMecharantula(npc_id)
+function RTM.CheckForRedirectedRareIds(npc_id)
 	-- Next, we check whether this is Mecharantula.
-		if npc_id == 151672 then
+	if npc_id == 151672 then
 		-- Check if the player has the time displacement buff.
 		for i=1, 40 do
 			local spell_id = select(10, UnitBuff("player", i))
@@ -122,7 +122,7 @@ function RTM:OnTargetChanged()
 		end
 		
 		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-		npc_id = self.CheckForFutureMecharantula(npc_id)
+		npc_id = self.CheckForRedirectedRareIds(npc_id)
 		
 		if unittype == "Creature" and self.rare_ids_set[npc_id] then
 			-- Find the health of the entity.
@@ -169,7 +169,7 @@ function RTM:OnUnitHealth(unit)
 		end
 		
 		--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-		npc_id = self.CheckForFutureMecharantula(npc_id)
+		npc_id = self.CheckForRedirectedRareIds(npc_id)
 		
 		if self.rare_ids_set[npc_id] then
 			-- Update the current health of the entity.
@@ -225,7 +225,7 @@ function RTM:OnCombatLogEvent()
 	end
 	
 	--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-	npc_id = self.CheckForFutureMecharantula(npc_id)
+	npc_id = self.CheckForRedirectedRareIds(npc_id)
 		
   if self.rare_ids_set[npc_id] then
     if subevent == "UNIT_DIED" then
@@ -272,7 +272,7 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 			end
 			
 			--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
-			npc_id = self.CheckForFutureMecharantula(npc_id)
+			npc_id = self.CheckForRedirectedRareIds(npc_id)
 			
 			if self.rare_ids_set[npc_id] and not self.reported_vignettes[vignetteGUID] then
 				self.reported_vignettes[vignetteGUID] = {npc_id, spawn_uid}
