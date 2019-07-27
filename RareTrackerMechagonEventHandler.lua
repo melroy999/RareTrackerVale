@@ -227,18 +227,18 @@ function RTM:OnCombatLogEvent()
 	--A special check for the future variant for Mecharantula, which for some reason has a duplicate NPC id.
 	npc_id = self.CheckForRedirectedRareIds(npc_id)
 		
-  if self.rare_ids_set[npc_id] then
-    if subevent == "UNIT_DIED" then
+    if unittype == "Creature" and self.rare_ids_set[npc_id] then
+		if subevent == "UNIT_DIED" then
 			-- Mark the entity has dead and report to your peers.
 			self:RegisterEntityDeath(self.current_shard_id, npc_id, spawn_uid)
-    elseif subevent ~= "PARTY_KILL" then
-      -- Report the entity as alive to your peers, if it is not marked as alive already.
-      if self.is_alive[npc_id] == nil then
-        -- The combat log range is quite long, so no coordinates can be provided.
+		elseif subevent ~= "PARTY_KILL" then
+			-- Report the entity as alive to your peers, if it is not marked as alive already.
+			if self.is_alive[npc_id] == nil then
+				-- The combat log range is quite long, so no coordinates can be provided.
 				self:RegisterEntityAlive(self.current_shard_id, npc_id, spawn_uid, nil, nil)
-      end
-    end
-  end
+			end
+		end
+	end
 end
 
 -- Called when a vignette on the minimap is updated.
