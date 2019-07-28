@@ -252,16 +252,7 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 	local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	local vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
 
-	if not vignetteInfo and self.current_shard_id ~= nil then
-		-- An entity we saw earlier might have died.
-		if self.reported_vignettes[vignetteGUID] then
-			-- Fetch the npc_id and spawn_uid from our cached data.
-			local npc_id, spawn_uid = self.reported_vignettes[vignetteGUID][1], self.reported_vignettes[vignetteGUID][2]
-		
-			-- Mark the entity has dead and report to your peers.
-			self:RegisterEntityDeath(self.current_shard_id, npc_id, spawn_uid)
-		end
-	elseif vignetteInfo then
+	if vignetteInfo then
 		-- Report the entity.
 		-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
 		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID);

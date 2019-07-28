@@ -156,6 +156,7 @@ function RTM:RegisterArrival(shard_id)
 			end
 		)
 	else
+    print(L["<RTM> Requesting rare kill data for shard "]..(shard_id + 42)..".")
 		C_ChatInfo.SendAddonMessage(
 			"RTM",
 			"A-"..shard_id.."-"..self.version..":"..self.arrival_register_time,
