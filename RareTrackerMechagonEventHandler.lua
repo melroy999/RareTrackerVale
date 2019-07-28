@@ -16,6 +16,12 @@ local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 
+-- ####################################################################
+-- ##                      Localization Support                      ##
+-- ####################################################################
+
+-- Get an object we can use for the localization of the addon.
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
 
 -- ####################################################################
 -- ##                         Event Handlers                         ##
@@ -65,7 +71,7 @@ function RTM:CheckForShardChange(zone_uid)
 	local has_changed = false
 
 	if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print("<RTM> Moving to shard", (zone_uid + 42)..".")
+		print(L["<RTM> Moving to shard "]..(zone_uid + 42)..".")
 		self:UpdateShardNumber(zone_uid)
 		has_changed = true
 		
@@ -429,7 +435,7 @@ function RTM:OnAddonLoaded()
 		-- Remove any data in the previous records that has expired.
 		for key, _ in pairs(RTMDB.previous_records) do
 			if GetServerTime() - RTMDB.previous_records[key].time_stamp > 900 then
-				print("<RTM> Removing cached data for shard", (key + 42)..".")
+				print(L["<RTM> Removing cached data for shard "]..(key + 42)..".")
 				RTMDB.previous_records[key] = nil
 			end
 		end

@@ -11,6 +11,13 @@ local UIParent = UIParent
 local C_ChatInfo = C_ChatInfo
 
 -- ####################################################################
+-- ##                      Localization Support                      ##
+-- ####################################################################
+
+-- Get an object we can use for the localization of the addon.
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
+
+-- ####################################################################
 -- ##                              Core                              ##
 -- ####################################################################
 
@@ -111,7 +118,7 @@ function RTM:StartInterface()
 	end
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTM") ~= true then
-		print("<RTM> Failed to register AddonPrefix 'RTM'. RTM will not function properly.")
+		print(L["<RTM> Failed to register AddonPrefix 'RTM'. RTM will not function properly."])
 	end
 	
 	if RTMDB.show_window then
@@ -166,8 +173,8 @@ local RTM_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTM_icon_object", {
 	end,
 	OnTooltipShow = function(tooltip)
 		tooltip:SetText("RTM")
-		tooltip:AddLine("Left-click: hide/show RTM", 1, 1, 1)
-		tooltip:AddLine("Right-click: show options", 1, 1, 1)
+		tooltip:AddLine(L["Left-click: hide/show RTM"], 1, 1, 1)
+		tooltip:AddLine(L["Right-click: show options"], 1, 1, 1)
 		tooltip:Show()
 	end
 })

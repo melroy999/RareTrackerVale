@@ -15,6 +15,13 @@ local LeaveChannelByName = LeaveChannelByName
 local PlaySoundFile = PlaySoundFile
 
 -- ####################################################################
+-- ##                      Localization Support                      ##
+-- ####################################################################
+
+-- Get an object we can use for the localization of the addon.
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
+
+-- ####################################################################
 -- ##                         Communication                          ##
 -- ####################################################################
 
@@ -115,7 +122,7 @@ function RTM:RegisterArrival(shard_id)
 	-- Attempt to load previous data from our cache.
 	if RTMDB.previous_records[shard_id] then
 		if GetServerTime() - RTMDB.previous_records[shard_id].time_stamp < 900 then
-			print("<RTM> Restoring data from previous session in shard "..(shard_id + 42)..".")
+			print(L["<RTM> Restoring data from previous session in shard "]..(shard_id + 42)..".")
 			self.last_recorded_death = RTMDB.previous_records[shard_id].time_table
 		else
 			RTMDB.previous_records[shard_id] = nil
@@ -139,7 +146,7 @@ function RTM:RegisterArrival(shard_id)
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
 		self:DelayedExecution(1, function()
-				print("<RTM> Requesting rare kill data for shard "..(shard_id + 42)..".")
+				print(L["<RTM> Requesting rare kill data for shard "]..(shard_id + 42)..".")
 				C_ChatInfo.SendAddonMessage(
 					"RTM",
 					"A-"..shard_id.."-"..self.version..":"..self.arrival_register_time,
@@ -490,8 +497,8 @@ function RTM:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 	-- The format of messages might change over time and as such, versioning is needed.
 	-- To ensure optimal performance, all users should use the latest version.
 	if not reported_version_mismatch and self.version < addon_version and addon_version ~= 9001 then
-		print("<RTM> Your version or RareTrackerMechagon is outdated. "..
-			"Please update to the most recent version at the earliest convenience.")
+		print(L["<RTM> Your version or RareTrackerMechagon is outdated. "..
+			"Please update to the most recent version at the earliest convenience."])
 		reported_version_mismatch = true
 	end
 	
