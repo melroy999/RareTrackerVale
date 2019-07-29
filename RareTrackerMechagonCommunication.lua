@@ -13,6 +13,7 @@ local UnitInParty = UnitInParty
 local GetNumDisplayChannels = GetNumDisplayChannels
 local LeaveChannelByName = LeaveChannelByName
 local PlaySoundFile = PlaySoundFile
+local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted
 
 -- ####################################################################
 -- ##                      Localization Support                      ##
@@ -430,8 +431,12 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 		
 		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(RTMDB.selected_sound_number)
+            local completion_quest_id = self.completion_quest_ids[npc_id]
 			self.reported_spawn_uids[spawn_uid] = true
+            
+            if not IsQuestFlaggedCompleted(completion_quest_id) then
+                PlaySoundFile(RTMDB.selected_sound_number)
+            end
 		end
 	end
 end
@@ -449,8 +454,12 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		
 		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(RTMDB.selected_sound_number)
+            local completion_quest_id = self.completion_quest_ids[npc_id]
 			self.reported_spawn_uids[spawn_uid] = true
+            
+            if not IsQuestFlaggedCompleted(completion_quest_id) then
+                PlaySoundFile(RTMDB.selected_sound_number)
+            end
 		end
 	end
 end
@@ -466,8 +475,12 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 		
 		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(RTMDB.selected_sound_number)
+            local completion_quest_id = self.completion_quest_ids[npc_id]
 			self.reported_spawn_uids[spawn_uid] = true
+            
+            if not IsQuestFlaggedCompleted(completion_quest_id) then
+                PlaySoundFile(RTMDB.selected_sound_number)
+            end
 		end
 	end
 end
@@ -483,8 +496,12 @@ function RTM:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
 		
 		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
 			-- Play a sound file.
-			PlaySoundFile(RTMDB.selected_sound_number)
+            local completion_quest_id = self.completion_quest_ids[npc_id]
 			self.reported_spawn_uids[spawn_uid] = true
+            
+            if not IsQuestFlaggedCompleted(completion_quest_id) then
+                PlaySoundFile(RTMDB.selected_sound_number)
+            end
 		end
 	end
 end
