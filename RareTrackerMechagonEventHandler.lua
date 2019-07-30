@@ -524,12 +524,12 @@ daily_reset_handling_frame:Show()
 RTM.chat_frame_loaded = false
 
 local message_delay_frame = CreateFrame("Frame", "RTM.message_delay_frame", UIParent)
-message_delay_frame.start_time = GetTime()
+message_delay_frame.start_time = GetServerTime()
 message_delay_frame:SetScript("OnUpdate",
 	function(self)
-		if GetTime() - self.start_time > 0 then
+		if GetServerTime() - self.start_time > 0 then
 			if #{GetChannelList()} == 0 then
-				self.start_time = GetTime()
+				self.start_time = GetServerTime()
 			else
 				RTM.chat_frame_loaded = true
 				self:SetScript("OnUpdate", nil)
