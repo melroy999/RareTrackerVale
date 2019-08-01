@@ -417,6 +417,18 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 	end
 end
 
+function RTM:PlaySoundNotification(npc_id, spawn_uid)
+    if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
+        -- Play a sound file.
+        local completion_quest_id = self.completion_quest_ids[npc_id]
+        self.reported_spawn_uids[spawn_uid] = true
+        
+        if not IsQuestFlaggedCompleted(completion_quest_id) then
+            PlaySoundFile(RTMDB.selected_sound_number)
+        end
+    end
+end
+
 -- Acknowledge that the entity is alive and set the according flags.
 function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
@@ -428,16 +440,7 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 			self.current_coordinates[npc_id].x = x
 			self.current_coordinates[npc_id].y = y
 		end
-		
-		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
-			-- Play a sound file.
-            local completion_quest_id = self.completion_quest_ids[npc_id]
-			self.reported_spawn_uids[spawn_uid] = true
-            
-            if not IsQuestFlaggedCompleted(completion_quest_id) then
-                PlaySoundFile(RTMDB.selected_sound_number)
-            end
-		end
+        self:PlaySoundNotification(npc_id, spawn_uid)
 	end
 end
 
@@ -451,16 +454,7 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		self.current_coordinates[npc_id].x = x
 		self.current_coordinates[npc_id].y = y
 		self:UpdateStatus(npc_id)
-		
-		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
-			-- Play a sound file.
-            local completion_quest_id = self.completion_quest_ids[npc_id]
-			self.reported_spawn_uids[spawn_uid] = true
-            
-            if not IsQuestFlaggedCompleted(completion_quest_id) then
-                PlaySoundFile(RTMDB.selected_sound_number)
-            end
-		end
+        self:PlaySoundNotification(npc_id, spawn_uid)
 	end
 end
 
@@ -472,16 +466,7 @@ function RTM:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 		self.current_health[npc_id] = percentage
 		self.last_health_report["CHANNEL"][npc_id] = GetTime()
 		self:UpdateStatus(npc_id)
-		
-		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
-			-- Play a sound file.
-            local completion_quest_id = self.completion_quest_ids[npc_id]
-			self.reported_spawn_uids[spawn_uid] = true
-            
-            if not IsQuestFlaggedCompleted(completion_quest_id) then
-                PlaySoundFile(RTMDB.selected_sound_number)
-            end
-		end
+        self:PlaySoundNotification(npc_id, spawn_uid)
 	end
 end
 
@@ -493,16 +478,7 @@ function RTM:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
 		self.current_health[npc_id] = percentage
 		self.last_health_report["RAID"][npc_id] = GetTime()
 		self:UpdateStatus(npc_id)
-		
-		if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
-			-- Play a sound file.
-            local completion_quest_id = self.completion_quest_ids[npc_id]
-			self.reported_spawn_uids[spawn_uid] = true
-            
-            if not IsQuestFlaggedCompleted(completion_quest_id) then
-                PlaySoundFile(RTMDB.selected_sound_number)
-            end
-		end
+        self:PlaySoundNotification(npc_id, spawn_uid)
 	end
 end
 
