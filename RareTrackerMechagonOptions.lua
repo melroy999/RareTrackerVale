@@ -281,7 +281,7 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	
 	f.text = f:CreateFontString(nil, "BORDER", "GameFontNormal")
 	f.text:SetJustifyH("LEFT")
-	f.text:SetText(self.rare_names[npc_id])
+	f.text:SetText(self.rare_display_names[npc_id])
 	f.text:SetPoint("TOPLEFT", f, 42, 0)
 	
 	return f

@@ -319,10 +319,10 @@ function RTM:UpdateDailyKillMark(npc_id)
 	
 	for _, target_npc_id in pairs(npc_ids) do
 		if self.completion_quest_ids[target_npc_id] and IsQuestFlaggedCompleted(self.completion_quest_ids[target_npc_id]) then
-			self.entities_frame.entities[target_npc_id].name:SetText(self.rare_names[target_npc_id])
+			self.entities_frame.entities[target_npc_id].name:SetText(self.rare_display_names[target_npc_id])
 			self.entities_frame.entities[target_npc_id].name:SetFontObject("GameFontRed")
 		else
-			self.entities_frame.entities[target_npc_id].name:SetText(self.rare_names[target_npc_id])
+			self.entities_frame.entities[target_npc_id].name:SetText(self.rare_display_names[target_npc_id])
 			self.entities_frame.entities[target_npc_id].name:SetFontObject("GameFontNormal")
 		end
 	end
