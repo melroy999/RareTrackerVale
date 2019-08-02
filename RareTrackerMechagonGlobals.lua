@@ -132,7 +132,6 @@ if RTM.localization == "enUS" or RTM.localization == "enGB" then
         [153000] = "Sparkqueen P'Emp",
         [153226] = "Steel Singer Freza",
     }
-
 elseif RTM.localization == "deDE" then
     -- The names to be displayed in the frames and general chat messages for the German localization.
     RTM.rare_names = {
@@ -178,7 +177,6 @@ elseif RTM.localization == "deDE" then
         [153000] = "Funkenkönigin P'Emp",
         [153226] = "Stahlsängerin Freza",
     }
-
 elseif RTM.localization == "frFR" then
     -- The names to be displayed in the frames and general chat messages for the French localization.
     RTM.rare_names = {
