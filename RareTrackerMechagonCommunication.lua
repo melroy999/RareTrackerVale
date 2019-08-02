@@ -37,18 +37,20 @@ local reported_version_mismatch = false
 
 -- The last time the health of an entity has been reported.
 -- Used for limiting the number of messages sent to the channel.
-RTM.last_health_report = {}
-RTM.last_health_report["CHANNEL"] = {}
-RTM.last_health_report["RAID"] = {}
+RTM.last_health_report = {
+    ["CHANNEL"] = {},
+    ["RAID"] = {},
+}
 
 -- ####################################################################
 -- ##                        Helper Functions                        ##
 -- ####################################################################
 
 -- A time stamp at which the last message was sent in the rate limited message sender.
-RTM.last_message_sent = {}
-RTM.last_message_sent["CHANNEL"] = 0
-RTM.last_message_sent["RAID"] = 0
+RTM.last_message_sent = {
+    ["CHANNEL"] = 0,
+    ["RAID"] = 0,
+}
 
 -- A function that acts as a rate limiter for channel messages.
 function RTM:SendRateLimitedAddonMessage(message, target, target_id, target_channel)

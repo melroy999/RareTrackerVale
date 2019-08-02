@@ -24,28 +24,29 @@ local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
 -- ####################################################################
 
 -- The provided sound options.
-local sound_options = {}
-sound_options[''] = -1
-sound_options["Rubber Ducky"] = 566121
-sound_options["Cartoon FX"] = 566543
-sound_options["Explosion"] = 566982
-sound_options["Shing!"] = 566240
-sound_options["Wham!"] = 566946
-sound_options["Simon Chime"] = 566076
-sound_options["War Drums"] = 567275
-sound_options["Scourge Horn"] = 567386
-sound_options["Pygmy Drums"] = 566508
-sound_options["Cheer"] = 567283
-sound_options["Humm"] = 569518
-sound_options["Short Circuit"] = 568975
-sound_options["Fel Portal"] = 569215
-sound_options["Fel Nova"] = 568582
-sound_options["PVP Flag"] = 569200
-sound_options["Beware!"] = 543587
-sound_options["Laugh"] = 564859
-sound_options["Not Prepared"] = 552503
-sound_options["I am Unleashed"] = 554554
-sound_options["I see you"] = 554236
+local sound_options = {
+    [''] = -1,
+    ["Rubber Ducky"] = 566121,
+    ["Cartoon FX"] = 566543,
+    ["Explosion"] = 566982,
+    ["Shing!"] = 566240,
+    ["Wham!"] = 566946,
+    ["Simon Chime"] = 566076,
+    ["War Drums"] = 567275,
+    ["Scourge Horn"] = 567386,
+    ["Pygmy Drums"] = 566508,
+    ["Cheer"] = 567283,
+    ["Humm"] = 569518,
+    ["Short Circuit"] = 568975,
+    ["Fel Portal"] = 569215,
+    ["Fel Nova"] = 568582,
+    ["PVP Flag"] = 569200,
+    ["Beware!"] = 543587,
+    ["Laugh"] = 564859,
+    ["Not Prepared"] = 552503,
+    ["I am Unleashed"] = 554554,
+    ["I see you"] = 554236,
+}
 
 local sound_options_inverse = {}
 for key, value in pairs(sound_options) do
