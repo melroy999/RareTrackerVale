@@ -572,13 +572,11 @@ rare_display_name_overwrites["ruRU"] = {
 
 RTM.rare_display_names = {}
 for key, value in pairs(RTM.rare_names) do
-    print(key, value)
     if rare_display_name_overwrites[RTM.localization][key] then
         RTM.rare_display_names[key] = rare_display_name_overwrites[RTM.localization][key]
     else
         RTM.rare_display_names[key] = value
     end
-    print(RTM.rare_display_names[key])
 end
 
 -- The quest ids that indicate that the rare has been killed already.
