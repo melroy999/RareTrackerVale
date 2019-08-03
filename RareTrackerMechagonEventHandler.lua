@@ -42,6 +42,10 @@ function RTM:OnEvent(event, ...)
 		self:OnChatMsgAddon(...)
 	elseif event == "VIGNETTE_MINIMAP_UPDATED" and self.chat_frame_loaded then
 		self:OnVignetteMinimapUpdated(...)
+	elseif event == "CHAT_MSG_MONSTER_EMOTE" and self.chat_frame_loaded then
+		self:OnChatMsgMonsterEmote(...)
+	elseif event == "CHAT_MSG_MONSTER_YELL" and self.chat_frame_loaded then
+		self:OnChatMsgMonsterYell(...)
 	elseif event == "ADDON_LOADED" then
 		self:OnAddonLoaded()
 	elseif event == "PLAYER_LOGOUT" then
@@ -116,7 +120,7 @@ function RTM:OnTargetChanged()
 		local guid = UnitGUID("target")
 		
 		-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
-		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
+		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", guid)
 		npc_id = tonumber(npc_id)
 	
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
@@ -163,7 +167,7 @@ function RTM:OnUnitHealth(unit)
 		local guid = UnitGUID("target")
 		
 		-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
-		local _, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", guid);
+		local _, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", guid)
 		npc_id = tonumber(npc_id)
 	
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
@@ -209,7 +213,7 @@ function RTM:OnCombatLogEvent()
 	local _, subevent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _ = CombatLogGetCurrentEventInfo()
 	
 	-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
-	local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID);
+	local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", destGUID)
 	npc_id = tonumber(npc_id)
 	
 	-- It might occur that the NPC id is nil. Do not proceed in such a case.
@@ -256,7 +260,7 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 	if vignetteInfo then
 		-- Report the entity.
 		-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
-		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID);
+		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID)
 		npc_id = tonumber(npc_id)
 	
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
@@ -280,6 +284,24 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 			end
 		end
 	end
+end
+
+-- Called when a monster or entity does a self emote.
+function RTM:OnChatMsgMonsterEmote(...)
+    local entity_name = select(2, ...)
+    local npc_id = RTM.yell_announcing_rares[entity_name]
+    if npc_id ~= nil then
+        print(entity_name, npc_id)
+    end
+end
+
+-- Called when a monster or entity does a yell emote.
+function RTM:OnChatMsgMonsterYell(...)
+    local entity_name = select(2, ...)
+    local npc_id = RTM.yell_announcing_rares[entity_name]
+    if npc_id ~= nil then
+        print(entity_name, npc_id)
+    end
 end
 
 -- Called whenever an event occurs that could indicate a zone change.
@@ -453,6 +475,8 @@ function RTM:RegisterEvents()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("CHAT_MSG_ADDON")
 	self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 end
 
 -- Unregister from the events, to disable the tracking functionality.
@@ -462,6 +486,8 @@ function RTM:UnregisterEvents()
 	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:UnregisterEvent("CHAT_MSG_ADDON")
 	self:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
+	self:UnregisterEvent("CHAT_MSG_MONSTER_EMOTE")
+	self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 end
 
 -- Create a frame that handles the frame updates of the addon.

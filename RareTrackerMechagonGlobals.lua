@@ -131,6 +131,7 @@ if RTM.localization == "enUS" or RTM.localization == "enGB" then
         [150937] = "Seaspit",
         [153000] = "Sparkqueen P'Emp",
         [153226] = "Steel Singer Freza",
+        [152932] = "Razak Ironsides",
     }
 elseif RTM.localization == "deDE" then
     -- The names to be displayed in the frames and general chat messages for the German localization.
@@ -176,6 +177,7 @@ elseif RTM.localization == "deDE" then
         [150937] = "Seespuck",
         [153000] = "Funkenkönigin P'Emp",
         [153226] = "Stahlsängerin Freza",
+        [152932] = "Razak Eisenflanke",
     }
 elseif RTM.localization == "frFR" then
     -- The names to be displayed in the frames and general chat messages for the French localization.
@@ -221,6 +223,7 @@ elseif RTM.localization == "frFR" then
         [150937] = "Bruinemer",
         [153000] = "Électreine P’omp",
         [153226] = "Chante-acier Freza",
+        [152932] = "Razak Côtefer",
     }
 elseif RTM.localization == "esES" or RTM.localization == "esMX" then
     -- The names to be displayed in the frames and general chat messages for the Spanish localizations.
@@ -266,6 +269,7 @@ elseif RTM.localization == "esES" or RTM.localization == "esMX" then
         [150937] = "Escupemar",
         [153000] = "Chisparreina P'Emp",
         [153226] = "Cantoacero Freza",
+        [152932] = "Michael Razak",
     }
 elseif RTM.localization == "itIT" then
     -- The names to be displayed in the frames and general chat messages for the Italian localization.
@@ -311,6 +315,7 @@ elseif RTM.localization == "itIT" then
         [150937] = "Sputaspuma",
         [153000] = "Regina delle Scintille M'IEM",
         [153226] = "Cantacciaio Freza",
+        [152932] = "Razak Rico",
     }
 elseif RTM.localization == "ptPT" or RTM.localization == "ptBR" then
     -- The names to be displayed in the frames and general chat messages for the Portuguese localizations.
@@ -356,6 +361,7 @@ elseif RTM.localization == "ptPT" or RTM.localization == "ptBR" then
         [150937] = "Gota-do-mar",
         [153000] = "Rainha Fagulhosa Pem'P",
         [153226] = "Freza Canora de Aço",
+        [152932] = "Razak Ladoférreo",
     }
 elseif RTM.localization == "ruRU" then
     -- The names to be displayed in the frames and general chat messages for the Russian localization.
@@ -401,6 +407,7 @@ elseif RTM.localization == "ruRU" then
         [150937] = "Солеплюй",
         [153000] = "Паучиха на прокачку",
         [153226] = "Певица стали Фреза",
+        [152932] = "Разак Сковородкер",
     }
 elseif RTM.localization == "zhCN" then
     -- The names to be displayed in the frames and general chat messages for the Chinese (zhCN) localization.
@@ -446,6 +453,7 @@ elseif RTM.localization == "zhCN" then
         [150937] = "唾海",
         [153000] = "火花女王皮恩普",
         [153226] = "钢铁歌手弗莉萨",
+        [152932] = "Razak Ironsides",
     }
 elseif RTM.localization == "zhTW" then
     -- The names to be displayed in the frames and general chat messages for the Taiwanese localization.
@@ -491,6 +499,7 @@ elseif RTM.localization == "zhTW" then
         [150937] = "Seaspit",
         [153000] = "Sparkqueen P'Emp",
         [153226] = "Steel Singer Freza",
+        [152932] = "Razak Ironsides",
     }
 elseif RTM.localization == "koKR" then
     -- The names to be displayed in the frames and general chat messages for the Korean localization.
@@ -536,6 +545,7 @@ elseif RTM.localization == "koKR" then
         [150937] = "바다모래톱",
         [153000] = "불꽃여왕 전파거미",
         [153226] = "강철 노래꾼 프레자",
+        [152932] = "라자크 아이언사이즈",
     }
 end
 
@@ -572,13 +582,11 @@ rare_display_name_overwrites["ruRU"] = {
 
 RTM.rare_display_names = {}
 for key, value in pairs(RTM.rare_names) do
-    print(key, value)
     if rare_display_name_overwrites[RTM.localization][key] then
         RTM.rare_display_names[key] = rare_display_name_overwrites[RTM.localization][key]
     else
         RTM.rare_display_names[key] = value
     end
-    print(RTM.rare_display_names[key])
 end
 
 -- The quest ids that indicate that the rare has been killed already.
@@ -664,3 +672,21 @@ RTM.completion_quest_inverse = {
     [55810] = {153000},
     [55854] = {153226},
 }
+
+-- Certain npcs have yell emotes to announce their arrival.
+RTM.yell_announcing_rares = {
+    [151934] = 151934, -- "Arachnoid Harvester"
+    [151625] = 151623, -- "The Scrap King"
+    [151308] = 151308, -- "Boggac Skullbash"
+    [153228] = 153228, -- "Gear Checker Cogstar"
+    [151124] = 151124, -- "Mechagonian Nullifier"
+    [151296] = 151296, -- "OOX-Avenger/MG"    
+    [150937] = 150937, -- "Seaspit"
+    --[152932] = 153000, -- "Sparkqueen P'Emp, announced by Razak Ironsides"
+}
+
+-- Concert the ids above to the names.
+for key, value in pairs(RTM.yell_announcing_rares) do
+    RTM.yell_announcing_rares[RTM.rare_names[key]] = value
+    RTM.yell_announcing_rares[key] = nil
+end
