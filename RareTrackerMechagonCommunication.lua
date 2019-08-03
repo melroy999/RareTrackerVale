@@ -296,6 +296,12 @@ function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 		self.is_alive[npc_id] = GetServerTime()
 	
 		-- Send the alive message.
+        if x == nil or y == nil then
+            local location = self.rare_coordinates[npc_id]
+            x = location.x
+            y = location.y
+        end
+        
 		if x ~= nil and y ~= nil then
 			self.current_coordinates[npc_id] = {
                 ["x"] = x,
@@ -448,6 +454,8 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
                 ["x"] = x,
                 ["y"] = y,
             }
+        else
+            self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
 		end
         self:PlaySoundNotification(npc_id, spawn_uid)
 	end

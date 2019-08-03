@@ -295,6 +295,7 @@ function RTM:OnChatMsgMonsterEmote(...)
         if text:find(designation) then
             -- We found a match.
             self.is_alive[npc_id] = GetServerTime()
+            self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
             self:PlaySoundNotification(npc_id, npc_id)
             return
         end
@@ -310,6 +311,7 @@ function RTM:OnChatMsgMonsterYell(...)
         self.Debug(entity_name, npc_id)
         -- Mark the entity as alive.
 		self.is_alive[npc_id] = GetServerTime()
+        self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
         self:PlaySoundNotification(npc_id, npc_id)
     end
 end
