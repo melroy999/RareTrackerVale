@@ -674,9 +674,10 @@ RTM.completion_quest_inverse = {
 }
 
 -- Certain npcs have yell emotes to announce their arrival.
-RTM.yell_announcing_rares = {
+local yell_announcing_rares = {
     [151934] = 151934, -- "Arachnoid Harvester"
     [151625] = 151623, -- "The Scrap King"
+    [151940] = 151940, -- "Uncle T'Rogg",
     [151308] = 151308, -- "Boggac Skullbash"
     [153228] = 153228, -- "Gear Checker Cogstar"
     [151124] = 151124, -- "Mechagonian Nullifier"
@@ -686,7 +687,7 @@ RTM.yell_announcing_rares = {
 }
 
 -- Concert the ids above to the names.
-for key, value in pairs(RTM.yell_announcing_rares) do
+RTM.yell_announcing_rares = {}
+for key, value in pairs(yell_announcing_rares) do
     RTM.yell_announcing_rares[RTM.rare_names[key]] = value
-    RTM.yell_announcing_rares[key] = nil
 end

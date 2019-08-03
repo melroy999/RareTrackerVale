@@ -289,18 +289,26 @@ end
 -- Called when a monster or entity does a self emote.
 function RTM:OnChatMsgMonsterEmote(...)
     local entity_name = select(2, ...)
-    local npc_id = RTM.yell_announcing_rares[entity_name]
+    local npc_id = self.yell_announcing_rares[entity_name]
+    
     if npc_id ~= nil then
         print(entity_name, npc_id)
+        -- Mark the entity as alive.
+		self.is_alive[npc_id] = GetServerTime()
+        self:PlaySoundNotification(npc_id, npc_id)
     end
 end
 
 -- Called when a monster or entity does a yell emote.
 function RTM:OnChatMsgMonsterYell(...)
     local entity_name = select(2, ...)
-    local npc_id = RTM.yell_announcing_rares[entity_name]
+    local npc_id = self.yell_announcing_rares[entity_name]
+    
     if npc_id ~= nil then
         print(entity_name, npc_id)
+        -- Mark the entity as alive.
+		self.is_alive[npc_id] = GetServerTime()
+        self:PlaySoundNotification(npc_id, npc_id)
     end
 end
 
@@ -346,15 +354,10 @@ function RTM:OnUpdate()
 			
 			-- It might occur that the rare is marked as alive, but no health is known.
 			-- If two minutes pass without a health value, the alive tag will be reset.
-			if self.is_alive[npc_id] and not self.current_health[npc_id] and GetServerTime() - self.is_alive[npc_id] > 120 then
-				self.is_alive[npc_id] = nil
-			end
-			
-			-- It might occur that we have both a hp and health, but no changes.
-			-- If 2 minutes pass without a health value, the alive and health tags will be reset.
-			if self.is_alive[npc_id] and self.current_health[npc_id] and GetServerTime() - self.is_alive[npc_id] > 120 then
+			if self.is_alive[npc_id] and GetServerTime() - self.is_alive[npc_id] > 120 then
 				self.is_alive[npc_id] = nil
 				self.current_health[npc_id] = nil
+                self.reported_spawn_uids[npc_id] = nil
 			end
 			
 			self:UpdateStatus(npc_id)

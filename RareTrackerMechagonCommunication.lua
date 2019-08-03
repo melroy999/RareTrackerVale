@@ -265,6 +265,7 @@ function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 		self.current_health[npc_id] = nil
 		self.current_coordinates[npc_id] = nil
 		self.recorded_entity_death_ids[spawn_uid..npc_id] = true
+        self.reported_spawn_uids[npc_id] = nil
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
 		self:DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
@@ -409,6 +410,7 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 		self.current_health[npc_id] = nil
 		self.current_coordinates[npc_id] = nil
 		self.recorded_entity_death_ids[spawn_uid..npc_id] = true
+        self.reported_spawn_uids[npc_id] = nil
 		self:UpdateStatus(npc_id)
 		self:DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
 	end
@@ -420,7 +422,9 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 end
 
 function RTM:PlaySoundNotification(npc_id, spawn_uid)
-    if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid] then
+    if RTMDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid]
+        and not self.reported_spawn_uids[npc_id] then
+            
         -- Play a sound file.
         local completion_quest_id = self.completion_quest_ids[npc_id]
         self.reported_spawn_uids[spawn_uid] = true
