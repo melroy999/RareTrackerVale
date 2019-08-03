@@ -681,7 +681,7 @@ local yell_announcing_rares = {
     [151308] = 151308, -- "Boggac Skullbash"
     [153228] = 153228, -- "Gear Checker Cogstar"
     [151124] = 151124, -- "Mechagonian Nullifier"
-    [151296] = 151296, -- "OOX-Avenger/MG"    
+    [151296] = 151296, -- "OOX-Avenger/MG"
     [150937] = 150937, -- "Seaspit"
     --[152932] = 153000, -- "Sparkqueen P'Emp, announced by Razak Ironsides"
 }
@@ -691,3 +691,59 @@ RTM.yell_announcing_rares = {}
 for key, value in pairs(yell_announcing_rares) do
     RTM.yell_announcing_rares[RTM.rare_names[key]] = value
 end
+
+-- Link drill codes to their respective entities.
+RTM.drill_announcing_rares = {
+    ["CC88"] = 152113,
+    ["JD41"] = 153200,
+    ["CC73"] = 154739,
+    ["TR35"] = 150342,
+    ["JD99"] = 153205,
+    ["CC61"] = 154701,
+    ["TR28"] = 153206,
+}
+
+-- A set of placeholder icons, which will be used if the rare location is not yet known.
+RTM.rare_coordinates = {
+    [151934]  = {}, -- "Arachnoid Harvester"
+    [154342]  = {}, -- "Arachnoid Harvester (F)"
+    [155060]  = {}, -- "Doppel Ganger"
+    [152113]  = {}, -- "The Kleptoboss (CC88)"
+    [154225]  = {}, -- "The Rusty Prince (F)"
+    [151623]  = {}, -- "The Scrap King (M)"
+    [151625]  = {}, -- "The Scrap King"
+    [151940]  = {}, -- "Uncle T'Rogg"
+    [150394]  = {}, -- "Armored Vaultbot"
+    [153200]  = {}, -- "Boilburn (JD41)"
+    [151308]  = {}, -- "Boggac Skullbash"
+    [152001]  = {}, -- "Bonepicker"
+    [154739]  = {}, -- "Caustic Mechaslime (CC73)"
+    [149847]  = {}, -- "Crazed Trogg (Orange)"
+    [152569]  = {}, -- "Crazed Trogg (Green)"
+    [152570]  = {}, -- "Crazed Trogg (Blue)"
+    [151569]  = {}, -- "Deepwater Maw"
+    [150342]  = {}, -- "Earthbreaker Gulroc (TR35)"
+    [154153]  = {}, -- "Enforcer KX-T57"
+    [151202]  = {}, -- "Foul Manifestation"
+    [135497]  = {}, -- "Fungarian Furor"
+    [153228]  = {}, -- "Gear Checker Cogstar"
+    [153205]  = {}, -- "Gemicide (JD99)"
+    [154701]  = {}, -- "Gorged Gear-Cruncher (CC61)"
+    [151684]  = {}, -- "Jawbreaker"
+    [152007]  = {}, -- "Killsaw"
+    [151933]  = {}, -- "Malfunctioning Beastbot"
+    [151124]  = {}, -- "Mechagonian Nullifier"
+    [151672]  = {}, -- "Mecharantula"
+    [8821909] = {}, -- "Mecharantula (F)"
+    [151627]  = {}, -- "Mr. Fixthis"
+    [151296]  = {}, -- "OOX-Avenger/MG"
+    [153206]  = {}, -- "Ol' Big Tusk (TR28)"
+    [152764]  = {}, -- "Oxidized Leachbeast"
+    [151702]  = {}, -- "Paol Pondwader"
+    [150575]  = {}, -- "Rumblerocks"
+    [152182]  = {}, -- "Rustfeather"
+    [155583]  = {}, -- "Scrapclaw"
+    [150937]  = {}, -- "Seaspit"
+    [153000]  = {}, -- "Sparkqueen P'Emp"
+    [153226]  = {}, -- "Steel Singer Freza"
+}

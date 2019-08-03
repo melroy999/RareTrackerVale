@@ -288,14 +288,16 @@ end
 
 -- Called when a monster or entity does a self emote.
 function RTM:OnChatMsgMonsterEmote(...)
-    local entity_name = select(2, ...)
-    local npc_id = self.yell_announcing_rares[entity_name]
+    local text = select(1, ...)
     
-    if npc_id ~= nil then
-        print(entity_name, npc_id)
-        -- Mark the entity as alive.
-		self.is_alive[npc_id] = GetServerTime()
-        self:PlaySoundNotification(npc_id, npc_id)
+    -- Check if any of the drill rig designations is contained in the broadcast text.
+    for designation, npc_id in pairs(self.drill_announcing_rares) do
+        if text:find(designation) then
+            -- We found a match.
+            self.is_alive[npc_id] = GetServerTime()
+            self:PlaySoundNotification(npc_id, npc_id)
+            return
+        end
     end
 end
 
@@ -305,7 +307,7 @@ function RTM:OnChatMsgMonsterYell(...)
     local npc_id = self.yell_announcing_rares[entity_name]
     
     if npc_id ~= nil then
-        print(entity_name, npc_id)
+        self.Debug(entity_name, npc_id)
         -- Mark the entity as alive.
 		self.is_alive[npc_id] = GetServerTime()
         self:PlaySoundNotification(npc_id, npc_id)
