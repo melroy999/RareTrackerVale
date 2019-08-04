@@ -303,10 +303,8 @@ function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
         end
         
 		if x ~= nil and y ~= nil then
-			self.current_coordinates[npc_id] = {
-                ["x"] = x,
-                ["y"] = y,
-            }
+			self.current_coordinates[npc_id] = {["x"] = x, ["y"] = y}
+            
 			C_ChatInfo.SendAddonMessage(
 				"RTM",
 				"EA-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y,
@@ -348,10 +346,7 @@ function RTM:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
 		-- Mark the entity as targeted and alive.
 		self.is_alive[npc_id] = GetServerTime()
 		self.current_health[npc_id] = percentage
-		self.current_coordinates[npc_id] = {
-            ["x"] = x,
-            ["y"] = y,
-        }
+		self.current_coordinates[npc_id] = {["x"] = x, ["y"] = y}
 		self:UpdateStatus(npc_id)
 	
 		-- Send the target message.
@@ -450,10 +445,7 @@ function RTM:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 		self:UpdateStatus(npc_id)
 		
 		if x ~= nil and y ~= nil then
-			self.current_coordinates[npc_id] = {
-                ["x"] = x,
-                ["y"] = y,
-            }
+			self.current_coordinates[npc_id] = {["x"] = x, ["y"] = y}
         else
             self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
 		end
@@ -467,10 +459,7 @@ function RTM:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 		self.last_recorded_death[npc_id] = nil
 		self.is_alive[npc_id] = GetServerTime()
 		self.current_health[npc_id] = percentage
-		self.current_coordinates[npc_id] = {
-            ["x"] = x,
-            ["y"] = y,
-        }
+		self.current_coordinates[npc_id] = {["x"] = x, ["y"] = y}
 		self:UpdateStatus(npc_id)
         self:PlaySoundNotification(npc_id, spawn_uid)
 	end

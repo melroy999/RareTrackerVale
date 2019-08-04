@@ -308,7 +308,6 @@ function RTM:OnChatMsgMonsterYell(...)
     local npc_id = self.yell_announcing_rares[entity_name]
     
     if npc_id ~= nil then
-        self.Debug(entity_name, npc_id)
         -- Mark the entity as alive.
 		self.is_alive[npc_id] = GetServerTime()
         self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
