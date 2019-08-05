@@ -18,7 +18,7 @@ L["<RTM> The reset button is on cooldown. Please note that a reset is not needed
 L["Favorite sound alert"] = "Favorite sound alert"
 L[" Show minimap icon"] = " Show minimap icon"
 L["Show or hide the minimap button."] = "Show or hide the minimap button."
-L[" Enable communication over part/raid channel"] = " Enable communication over part/raid channel"
+L[" Enable communication over part/raid channel"] = " Enable communication over party/raid channel"
 L["Enable communication over party/raid channel, to support CRZ functionality while in a party or raid group."] = "Enable communication over party/raid channel, to support CRZ functionality while in a party or raid group."
 L[" Enable debug mode"] = " Enable debug mode"
 L["Set the scale of the rare window."] = "Set the scale of the rare window."
