@@ -296,7 +296,7 @@ function RTM:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 		self.is_alive[npc_id] = GetServerTime()
 	
 		-- Send the alive message.
-        if x == nil or y == nil then
+        if (x == nil or y == nil) and self.rare_coordinates[npc_id] then
             local location = self.rare_coordinates[npc_id]
             x = location.x
             y = location.y
