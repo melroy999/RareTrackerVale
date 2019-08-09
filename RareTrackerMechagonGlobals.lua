@@ -683,7 +683,7 @@ local yell_announcing_rares = {
     [151124] = 151124, -- "Mechagonian Nullifier"
     [151296] = 151296, -- "OOX-Avenger/MG"
     [150937] = 150937, -- "Seaspit"
-    --[152932] = 153000, -- "Sparkqueen P'Emp, announced by Razak Ironsides"
+    [152932] = 153000, -- "Sparkqueen P'Emp, announced by Razak Ironsides"
 }
 
 -- Concert the ids above to the names.
