@@ -105,7 +105,7 @@ end
 
 -- A function that enables the delayed execution of a function.
 function RTM.DelayedExecution(delay, _function)
-	local frame = CreateFrame("Frame", "RTM.message_delay_frame", UIParent)
+	local frame = CreateFrame("Frame", nil, UIParent)
 	frame.start_time = GetTime()
 	frame:SetScript("OnUpdate",
 		function(self)
@@ -113,6 +113,7 @@ function RTM.DelayedExecution(delay, _function)
 				_function()
 				self:SetScript("OnUpdate", nil)
 				self:Hide()
+                self:SetParent(nil)
 			end
 		end
 	)
