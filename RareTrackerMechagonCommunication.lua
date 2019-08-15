@@ -15,6 +15,9 @@ local LeaveChannelByName = LeaveChannelByName
 local PlaySoundFile = PlaySoundFile
 local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted
 
+-- Redefine global variables locally.
+local UIParent = UIParent
+
 -- ####################################################################
 -- ##                      Localization Support                      ##
 -- ####################################################################
@@ -101,15 +104,15 @@ function RTM:DecompressSpawnData(spawn_data, time_stamp)
 end
 
 -- A function that enables the delayed execution of a function.
-function RTM:DelayedExecution(delay, _function)
-	local frame = CreateFrame("Frame", "RTM.message_delay_frame", self)
+function RTM.DelayedExecution(delay, _function)
+	local frame = CreateFrame("Frame", "RTM.message_delay_frame", UIParent)
 	frame.start_time = GetTime()
 	frame:SetScript("OnUpdate",
-		function(self2)
-			if GetTime() - self2.start_time > delay then
+		function(self)
+			if GetTime() - self.start_time > delay then
 				_function()
-				self2:SetScript("OnUpdate", nil)
-				self2:Hide()
+				self:SetScript("OnUpdate", nil)
+				self:Hide()
 			end
 		end
 	)
@@ -148,7 +151,7 @@ function RTM:RegisterArrival(shard_id)
 		JoinTemporaryChannel(self.channel_name)
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
-		self:DelayedExecution(1, function()
+		self.DelayedExecution(1, function()
 				print(L["<RTM> Requesting rare kill data for shard "]..(shard_id + 42)..".")
 				C_ChatInfo.SendAddonMessage(
 					"RTM",
@@ -268,7 +271,7 @@ function RTM:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
         self.reported_spawn_uids[npc_id] = nil
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
-		self:DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
+		self.DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
 		
 		-- Send the death message.
 		C_ChatInfo.SendAddonMessage(
@@ -415,7 +418,7 @@ function RTM:AcknowledgeEntityDeath(npc_id, spawn_uid)
 		self.recorded_entity_death_ids[spawn_uid..npc_id] = true
         self.reported_spawn_uids[npc_id] = nil
 		self:UpdateStatus(npc_id)
-		self:DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
+		self.DelayedExecution(3, function() self:UpdateDailyKillMark(npc_id) end)
 	end
 
 	if self.waypoints[npc_id] and TomTom then
