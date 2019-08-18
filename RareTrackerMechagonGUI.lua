@@ -112,6 +112,8 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 				elseif IsLeftAltKeyDown() or IsRightAltKeyDown() then
 					target = "SAY"
 				end
+                
+                local channel_id = self.GetGeneralChatId()
 			
 				if self.current_health[npc_id] then
 					-- SendChatMessage
@@ -120,14 +122,14 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 							string.format(L["<RTM> %s (%s%%) seen at ~(%.2f, %.2f)"], name, health, loc.x, loc.y),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					else
 						SendChatMessage(
 							string.format(L["<RTM> %s (%s%%)"], name, health),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					end
 				elseif self.last_recorded_death[npc_id] ~= nil then
@@ -136,7 +138,7 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 							string.format(L["<RTM> %s has died"], name, GetServerTime() - last_death),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					else
 						SendChatMessage(
@@ -147,7 +149,7 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 							),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					end
 				elseif self.is_alive[npc_id] then
@@ -156,14 +158,14 @@ function RTM:CreateRareTableEntry(npc_id, parent_frame)
 							string.format(L["<RTM> %s seen alive, vignette at ~(%.2f, %.2f)"], name, loc.x, loc.y),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					else
 						SendChatMessage(
 							string.format(L["<RTM> %s seen alive (combat log)"], name),
 							target,
 							nil,
-							1
+							channel_id
 						)
 					end
 				end
