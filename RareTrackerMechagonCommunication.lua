@@ -130,8 +130,7 @@ function RTM.GetGeneralChatId()
         end
     end
     
-    -- If the general chat is not found, we default to 1, which is usually the general chat.
-    return 1
+    return 0
 end
 
 -- ####################################################################
