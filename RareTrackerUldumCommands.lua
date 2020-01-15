@@ -11,19 +11,19 @@ function CommandHandler(msg, _)
 	local _, _, cmd, _ = string.find(msg, "%s?(%w+)%s?(.*)")
    
 	if cmd == "show" then
-		if RTM.last_zone_id and RTM.target_zones[RTM.last_zone_id] then
-			RTM:Show()
-			RTMDB.show_window = true
+		if RTU.last_zone_id and RTU.target_zones[RTU.last_zone_id] then
+			RTU:Show()
+			RTUDB.show_window = true
 		end
 	elseif cmd == "hide" then
-		RTM:Hide()
-		RTMDB.show_window = false
+		RTU:Hide()
+		RTUDB.show_window = false
 	else
 		InterfaceOptionsFrame_Show()
-		InterfaceOptionsFrame_OpenToCategory(RTM.options_panel)
+		InterfaceOptionsFrame_OpenToCategory(RTU.options_panel)
 	end
 end
 
 -- Register the slashes that can be used to issue commands.
-SLASH_RTM1 = "/rtm"
-SlashCmdList["RTM"] = CommandHandler
+SLASH_RTU1 = "/rtu"
+SlashCmdList["RTU"] = CommandHandler

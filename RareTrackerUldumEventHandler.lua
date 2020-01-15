@@ -22,14 +22,14 @@ local UIParent = UIParent
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
 
 -- ####################################################################
 -- ##                         Event Handlers                         ##
 -- ####################################################################
 
 -- Listen to a given set of events and handle them accordingly.
-function RTM:OnEvent(event, ...)
+function RTU:OnEvent(event, ...)
 	if event == "PLAYER_TARGET_CHANGED" then
 		self:OnTargetChanged()
 	elseif event == "UNIT_HEALTH" and self.chat_frame_loaded then
@@ -42,8 +42,6 @@ function RTM:OnEvent(event, ...)
 		self:OnChatMsgAddon(...)
 	elseif event == "VIGNETTE_MINIMAP_UPDATED" and self.chat_frame_loaded then
 		self:OnVignetteMinimapUpdated(...)
-	elseif event == "CHAT_MSG_MONSTER_EMOTE" and self.chat_frame_loaded then
-		self:OnChatMsgMonsterEmote(...)
 	elseif event == "CHAT_MSG_MONSTER_YELL" and self.chat_frame_loaded then
 		self:OnChatMsgMonsterYell(...)
 	elseif event == "ADDON_LOADED" then
@@ -54,7 +52,7 @@ function RTM:OnEvent(event, ...)
 end
 
 -- Change from the original shard to the other.
-function RTM:ChangeShard(old_zone_uid, new_zone_uid)
+function RTU:ChangeShard(old_zone_uid, new_zone_uid)
 	-- Notify the users in your old shard that you have moved on to another shard.
 	self:RegisterDeparture(old_zone_uid)
 	
@@ -72,16 +70,16 @@ function RTM:ChangeShard(old_zone_uid, new_zone_uid)
 end
 
 -- Check whether the user has changed shards and proceed accordingly.
-function RTM:CheckForShardChange(zone_uid)
+function RTU:CheckForShardChange(zone_uid)
 	local has_changed = false
 
 	if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print(L["<RTM> Moving to shard "]..(zone_uid + 42)..".")
+		print(L["<RTU> Moving to shard "]..(zone_uid + 42)..".")
 		self:UpdateShardNumber(zone_uid)
 		has_changed = true
 		
 		if self.current_shard_id == nil then
-			-- Register yourRTM for the given shard.
+			-- Register yourRTU for the given shard.
 			self:RegisterArrival(zone_uid)
 		else
 			-- Move from one shard to another.
@@ -94,7 +92,7 @@ function RTM:CheckForShardChange(zone_uid)
 	return has_changed
 end
 
-function RTM.CheckForRedirectedRareIds(npc_id)
+function RTU.CheckForRedirectedRareIds(npc_id)
 	-- Next, we check whether this is Mecharantula.
 	if npc_id == 151672 then
 		-- Check if the player has the time displacement buff.
@@ -114,7 +112,7 @@ function RTM.CheckForRedirectedRareIds(npc_id)
 end
 
 -- Called when a target changed event is fired.
-function RTM:OnTargetChanged()
+function RTU:OnTargetChanged()
 	if UnitGUID("target") ~= nil then
 		-- Get information about the target.
 		local guid = UnitGUID("target")
@@ -126,7 +124,7 @@ function RTM:OnTargetChanged()
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
 		if not npc_id then return end
 		
-		if not self.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+		if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
 			if self:CheckForShardChange(zone_uid) then
 				self.Debug("[Target]", guid)
 			end
@@ -156,7 +154,7 @@ function RTM:OnTargetChanged()
 end
 
 -- Called when a unit health update event is fired.
-function RTM:OnUnitHealth(unit)
+function RTU:OnUnitHealth(unit)
 	-- If the unit is not the target, skip.
 	if unit ~= "target" then
 		return
@@ -173,7 +171,7 @@ function RTM:OnUnitHealth(unit)
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
 		if not npc_id then return end
 		
-		if not self.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+		if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
 			if self:CheckForShardChange(zone_uid) then
 				self.Debug("[OnUnitHealth]", guid)
 			end
@@ -203,10 +201,10 @@ local flag_mask = bit.bor(COMBATLOG_OBJECT_TYPE_GUARDIAN, COMBATLOG_OBJECT_TYPE_
 
 -- We track a list of entities that might cause erroneous shard changes.
 -- This list is updated dynamically.
-RTMDB.banned_NPC_ids = {}
+RTUDB.banned_NPC_ids = {}
 
 -- Called when a unit health update event is fired.
-function RTM:OnCombatLogEvent()
+function RTU:OnCombatLogEvent()
 	-- The event does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
 	-- timestamp, subevent, zero, sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
 	-- destGUID, destName, destFlags, destRaidFlags
@@ -220,15 +218,15 @@ function RTM:OnCombatLogEvent()
 	if not npc_id then return end
 	
 	-- Blacklist the entity.
-	if not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 and not self.rare_ids_set[npc_id] then
-		RTMDB.banned_NPC_ids[npc_id] = true
+	if not RTUDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 and not self.rare_ids_set[npc_id] then
+		RTUDB.banned_NPC_ids[npc_id] = true
 	end
 	
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	-- We exclude all pets and guardians, since they might have retained their old shard change.
 	if unittype == "Creature" and not self.banned_NPC_ids[npc_id]
-		and not RTMDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
+		and not RTUDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
 		
 		if self:CheckForShardChange(zone_uid) then
 			self.Debug("[OnCombatLogEvent]", sourceGUID, destGUID)
@@ -253,7 +251,7 @@ function RTM:OnCombatLogEvent()
 end
 
 -- Called when a vignette on the minimap is updated.
-function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
+function RTU:OnVignetteMinimapUpdated(vignetteGUID, _)
 	local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	local vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
 
@@ -267,7 +265,7 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 		if not npc_id then return end
 		
 		if unittype == "Creature" then
-			if not self.banned_NPC_ids[npc_id] and not RTMDB.banned_NPC_ids[npc_id] then
+			if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
 				if self:CheckForShardChange(zone_uid) then
 					self.Debug("[OnVignette]", vignetteInfo.objectGUID)
 				end
@@ -286,24 +284,8 @@ function RTM:OnVignetteMinimapUpdated(vignetteGUID, _)
 	end
 end
 
--- Called when a monster or entity does a self emote.
-function RTM:OnChatMsgMonsterEmote(...)
-    local text = select(1, ...)
-    
-    -- Check if any of the drill rig designations is contained in the broadcast text.
-    for designation, npc_id in pairs(self.drill_announcing_rares) do
-        if text:find(designation) then
-            -- We found a match.
-            self.is_alive[npc_id] = GetServerTime()
-            self.current_coordinates[npc_id] = self.rare_coordinates[npc_id]
-            self:PlaySoundNotification(npc_id, npc_id)
-            return
-        end
-    end
-end
-
 -- Called when a monster or entity does a yell emote.
-function RTM:OnChatMsgMonsterYell(...)
+function RTU:OnChatMsgMonsterYell(...)
     local entity_name = select(2, ...)
     local npc_id = self.yell_announcing_rares[entity_name]
     
@@ -316,7 +298,7 @@ function RTM:OnChatMsgMonsterYell(...)
 end
 
 -- Called whenever an event occurs that could indicate a zone change.
-function RTM:OnZoneTransition()
+function RTU:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 		
@@ -331,10 +313,10 @@ function RTM:OnZoneTransition()
 end
 
 -- Called on every addon message received by the addon.
-function RTM:OnChatMsgAddon(...)
+function RTU:OnChatMsgAddon(...)
 	local addon_prefix, message, _, sender = ...
 
-	if addon_prefix == "RTM" then
+	if addon_prefix == "RTU" then
 		local header, payload = strsplit(":", message)
 		local prefix, shard_id, addon_version_str = strsplit("-", header)
 		local addon_version = tonumber(addon_version_str)
@@ -344,13 +326,13 @@ function RTM:OnChatMsgAddon(...)
 end
 
 -- A counter that tracks the time stamp on which the displayed data was updated last.
-RTM.last_display_update = 0
+RTU.last_display_update = 0
 
 -- The last time the icon changed.
-RTM.last_icon_change = 0
+RTU.last_icon_change = 0
 
 -- Called on every addon message received by the addon.
-function RTM:OnUpdate()
+function RTU:OnUpdate()
 	if (self.last_display_update + 1 < GetTime()) then
 		for i=1, #self.rare_ids do
 			local npc_id = self.rare_ids[i]
@@ -375,72 +357,72 @@ function RTM:OnUpdate()
 		self.broadcast_icon.icon_state = not self.broadcast_icon.icon_state
 		
 		if self.broadcast_icon.icon_state then
-			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Broadcast.tga")
+			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Broadcast.tga")
 		else
-			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\Waypoint.tga")
+			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Waypoint.tga")
 		end
 	end
 end
 
 -- Called when the addon loaded event is fired.
-function RTM:OnAddonLoaded()
+function RTU:OnAddonLoaded()
 	-- OnAddonLoaded might be called multiple times. We only want it to do so once.
 	if not self.is_loaded then
 		
-		if RTMDB.show_window == nil then
-			RTMDB.show_window = true
+		if RTUDB.show_window == nil then
+			RTUDB.show_window = true
 		end
 		
-		if not RTMDB.favorite_rares then
-			RTMDB.favorite_rares = {}
+		if not RTUDB.favorite_rares then
+			RTUDB.favorite_rares = {}
 		end
 		
-		if not RTMDB.previous_records then
-			RTMDB.previous_records = {}
+		if not RTUDB.previous_records then
+			RTUDB.previous_records = {}
 		end
 		
-		if not RTMDB.selected_sound_number then
-			RTMDB.selected_sound_number = 552503
+		if not RTUDB.selected_sound_number then
+			RTUDB.selected_sound_number = 552503
 		end
 		
-		if RTMDB.minimap_icon_enabled == nil then
-			RTMDB.minimap_icon_enabled = true
+		if RTUDB.minimap_icon_enabled == nil then
+			RTUDB.minimap_icon_enabled = true
 		end
 		
-		if RTMDB.debug_enabled == nil then
-			RTMDB.debug_enabled = false
+		if RTUDB.debug_enabled == nil then
+			RTUDB.debug_enabled = false
 		end
 		
-		if not RTMDB.banned_NPC_ids then
-			RTMDB.banned_NPC_ids = {}
+		if not RTUDB.banned_NPC_ids then
+			RTUDB.banned_NPC_ids = {}
 		else
 			-- As a precaution, we remove all rares from the blacklist.
 			for i=1, #self.rare_ids do
 				local npc_id = self.rare_ids[i]
-				RTMDB.banned_NPC_ids[npc_id] = nil
+				RTUDB.banned_NPC_ids[npc_id] = nil
 			end
 		end
 		
-		if not RTMDB.window_scale then
-			RTMDB.window_scale = 1.0
+		if not RTUDB.window_scale then
+			RTUDB.window_scale = 1.0
 		end
 		
-		if RTMDB.enable_raid_communication == nil then
-			RTMDB.enable_raid_communication = true
+		if RTUDB.enable_raid_communication == nil then
+			RTUDB.enable_raid_communication = true
 		end
 		
-		if not RTMDB.ignore_rare then
-			RTMDB.ignore_rare = {}
+		if not RTUDB.ignore_rare then
+			RTUDB.ignore_rare = {}
 		end
 		
-		if not RTMDB.rare_ordering then
-			RTMDB.rare_ordering = LinkedSet:New()
+		if not RTUDB.rare_ordering then
+			RTUDB.rare_ordering = LinkedSet:New()
 			for i=1, #self.rare_ids do
 				local npc_id = self.rare_ids[i]
-				RTMDB.rare_ordering:AddBack(npc_id)
+				RTUDB.rare_ordering:AddBack(npc_id)
 			end
 		else
-			RTMDB.rare_ordering = LinkedSet:New(RTMDB.rare_ordering)
+			RTUDB.rare_ordering = LinkedSet:New(RTUDB.rare_ordering)
 		end
 		
 		-- Initialize the frame.
@@ -453,10 +435,10 @@ function RTM:OnAddonLoaded()
 		self:RegisterMapIcon()
 		
 		-- Remove any data in the previous records that has expired.
-		for key, _ in pairs(RTMDB.previous_records) do
-			if GetServerTime() - RTMDB.previous_records[key].time_stamp > 900 then
-				print(L["<RTM> Removing cached data for shard "]..(key + 42)..".")
-				RTMDB.previous_records[key] = nil
+		for key, _ in pairs(RTUDB.previous_records) do
+			if GetServerTime() - RTUDB.previous_records[key].time_stamp > 900 then
+				print(L["<RTU> Removing cached data for shard "]..(key + 42)..".")
+				RTUDB.previous_records[key] = nil
 			end
 		end
 		
@@ -465,57 +447,55 @@ function RTM:OnAddonLoaded()
 end
 
 -- Called when the player logs out, such that we can save the current time table for later use.
-function RTM:OnPlayerLogout()
+function RTU:OnPlayerLogout()
 	if self.current_shard_id then
 		-- Save the records, such that we can use them after a reload.
-		RTMDB.previous_records[self.current_shard_id] = {}
-		RTMDB.previous_records[self.current_shard_id].time_stamp = GetServerTime()
-		RTMDB.previous_records[self.current_shard_id].time_table = self.last_recorded_death
+		RTUDB.previous_records[self.current_shard_id] = {}
+		RTUDB.previous_records[self.current_shard_id].time_stamp = GetServerTime()
+		RTUDB.previous_records[self.current_shard_id].time_table = self.last_recorded_death
 	end
 end
 
 -- Register to the events required for the addon to function properly.
-function RTM:RegisterEvents()
+function RTU:RegisterEvents()
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("CHAT_MSG_ADDON")
 	self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
-	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 end
 
 -- Unregister from the events, to disable the tracking functionality.
-function RTM:UnregisterEvents()
+function RTU:UnregisterEvents()
 	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
 	self:UnregisterEvent("UNIT_HEALTH")
 	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:UnregisterEvent("CHAT_MSG_ADDON")
 	self:UnregisterEvent("VIGNETTE_MINIMAP_UPDATED")
-	self:UnregisterEvent("CHAT_MSG_MONSTER_EMOTE")
 	self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 end
 
 -- Create a frame that handles the frame updates of the addon.
-RTM.updateHandler = CreateFrame("Frame", "RTM.updateHandler", RTM)
-RTM.updateHandler:SetScript("OnUpdate",
+RTU.updateHandler = CreateFrame("Frame", "RTU.updateHandler", RTU)
+RTU.updateHandler:SetScript("OnUpdate",
 	function()
-		RTM:OnUpdate()
+		RTU:OnUpdate()
 	end
 )
 
 -- Register the event handling of the frame.
-RTM:SetScript("OnEvent",
+RTU:SetScript("OnEvent",
 	function(self, event, ...)
 		self:OnEvent(event, ...)
 	end
 )
 
-RTM:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-RTM:RegisterEvent("ZONE_CHANGED")
-RTM:RegisterEvent("PLAYER_ENTERING_WORLD")
-RTM:RegisterEvent("ADDON_LOADED")
-RTM:RegisterEvent("PLAYER_LOGOUT")
+RTU:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+RTU:RegisterEvent("ZONE_CHANGED")
+RTU:RegisterEvent("PLAYER_ENTERING_WORLD")
+RTU:RegisterEvent("ADDON_LOADED")
+RTU:RegisterEvent("PLAYER_LOGOUT")
 
 -- ####################################################################
 -- ##                      Daily Reset Handling                      ##
@@ -537,9 +517,9 @@ daily_reset_handling_frame:SetScript("OnUpdate",
 		if GetServerTime() > self.target_time then
 			self.target_time = self.target_time + 3600
             
-            if RTM.entities_frame ~= nil then
-                RTM:UpdateAllDailyKillMarks()
-                RTM.Debug("<RTM> Updating daily kill marks.")
+            if RTU.entities_frame ~= nil then
+                RTU:UpdateAllDailyKillMarks()
+                RTU.Debug("<RTU> Updating daily kill marks.")
             end
 		end
 	end
@@ -553,9 +533,9 @@ daily_reset_handling_frame:Show()
 -- One of the issues encountered is that the chat might be joined before the default channels.
 -- In such a situation, the order of the channels changes, which is undesirable.
 -- Thus, we block certain events until these chats have been loaded.
-RTM.chat_frame_loaded = false
+RTU.chat_frame_loaded = false
 
-local message_delay_frame = CreateFrame("Frame", "RTM.message_delay_frame", UIParent)
+local message_delay_frame = CreateFrame("Frame", "RTU.message_delay_frame", UIParent)
 message_delay_frame.start_time = GetServerTime()
 message_delay_frame:SetScript("OnUpdate",
 	function(self)
@@ -563,7 +543,7 @@ message_delay_frame:SetScript("OnUpdate",
 			if #{GetChannelList()} == 0 then
 				self.start_time = GetServerTime()
 			else
-				RTM.chat_frame_loaded = true
+				RTU.chat_frame_loaded = true
 				self:SetScript("OnUpdate", nil)
 				self:Hide()
 			end

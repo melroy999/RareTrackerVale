@@ -1,0 +1,25 @@
+## Interface: 80300
+## Title: RareTrackerUldum
+## Notes: Track and coordinate rare spawn timers in Uldum.
+## Author: Melroy
+## Version: 5.2.7
+##SavedVariables: RTUDB, RTU_ace_db
+
+libs\LibDBIcon-1.0\LibStub\LibStub.lua
+libs\LibDBIcon-1.0\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibDBIcon-1.0\LibDBIcon-1.0\LibDBIcon-1.0.lua
+libs\AceLocale-3.0\AceLocale-3.0.lua
+
+Locales\enUS.lua
+Locales\zhCN.lua
+
+RareTrackerUldum.lua
+Base64.lua
+LinkedList.lua
+RareTrackerUldumGlobals.lua
+RareTrackerUldumGUI.lua
+RareTrackerUldumOptions.lua
+RareTrackerUldumCommunication.lua
+RareTrackerUldumEventHandler.lua
+RareTrackerUldumCommands.lua

@@ -17,7 +17,7 @@ local C_Map = C_Map
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerMechagon", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
 
 -- ####################################################################
 -- ##                       Options Interface                        ##
@@ -53,15 +53,15 @@ for key, value in pairs(sound_options) do
 	sound_options_inverse[value] = key
 end
 
-function RTM.IntializeSoundSelectionMenu(parent_frame)
-	local f = CreateFrame("frame", "RTM.options_panel.sound_selection", parent_frame, "UIDropDownMenuTemplate")
+function RTU.IntializeSoundSelectionMenu(parent_frame)
+	local f = CreateFrame("frame", "RTU.options_panel.sound_selection", parent_frame, "UIDropDownMenuTemplate")
 	UIDropDownMenu_SetWidth(f, 140)
-	UIDropDownMenu_SetText(f, sound_options_inverse[RTMDB.selected_sound_number])
+	UIDropDownMenu_SetText(f, sound_options_inverse[RTUDB.selected_sound_number])
 	
 	f.onClick = function(_, sound_id, _, _)
-		RTMDB.selected_sound_number = sound_id
-		UIDropDownMenu_SetText(f, sound_options_inverse[RTMDB.selected_sound_number])
-		PlaySoundFile(RTMDB.selected_sound_number)
+		RTUDB.selected_sound_number = sound_id
+		UIDropDownMenu_SetText(f, sound_options_inverse[RTUDB.selected_sound_number])
+		PlaySoundFile(RTUDB.selected_sound_number)
 	end
 	
 	f.initialize = function()
@@ -72,7 +72,7 @@ function RTM.IntializeSoundSelectionMenu(parent_frame)
 			info.arg1 = value
 			info.func = f.onClick
 			info.menuList = key
-			info.checked = RTMDB.selected_sound_number == value
+			info.checked = RTUDB.selected_sound_number == value
 			UIDropDownMenu_AddButton(info)
 		end
 	end
@@ -87,30 +87,30 @@ function RTM.IntializeSoundSelectionMenu(parent_frame)
 	return f
 end
 
-function RTM:IntializeMinimapCheckbox(parent_frame)
+function RTU:IntializeMinimapCheckbox(parent_frame)
 	local f = CreateFrame(
-		"CheckButton", "RTM.options_panel.minimap_checkbox", parent_frame, "ChatConfigCheckButtonTemplate"
+		"CheckButton", "RTU.options_panel.minimap_checkbox", parent_frame, "ChatConfigCheckButtonTemplate"
 	)
 	
 	getglobal(f:GetName() .. 'Text'):SetText(L[" Show minimap icon"]);
 	f.tooltip = L["Show or hide the minimap button."];
 	f:SetScript("OnClick",
 		function()
-			RTMDB.minimap_icon_enabled = not RTMDB.minimap_icon_enabled
-			if not RTMDB.minimap_icon_enabled then
-				self.icon:Hide("RTM_icon")
-			elseif RTM.target_zones[C_Map.GetBestMapForUnit("player")] then
-				self.icon:Show("RTM_icon")
+			RTUDB.minimap_icon_enabled = not RTUDB.minimap_icon_enabled
+			if not RTUDB.minimap_icon_enabled then
+				self.icon:Hide("RTU_icon")
+			elseif RTU.target_zones[C_Map.GetBestMapForUnit("player")] then
+				self.icon:Show("RTU_icon")
 			end
 		end
 	);
-	f:SetChecked(RTMDB.minimap_icon_enabled)
+	f:SetChecked(RTUDB.minimap_icon_enabled)
 	f:SetPoint("TOPLEFT", parent_frame, 0, -53)
 end
 
-function RTM.IntializeRaidCommunicationCheckbox(parent_frame)
+function RTU.IntializeRaidCommunicationCheckbox(parent_frame)
 	local f = CreateFrame(
-		"CheckButton", "RTM.options_panel.raid_comms_checkbox", parent_frame, "ChatConfigCheckButtonTemplate"
+		"CheckButton", "RTU.options_panel.raid_comms_checkbox", parent_frame, "ChatConfigCheckButtonTemplate"
 	)
 	
 	getglobal(f:GetName() .. 'Text'):SetText(L[" Enable communication over part/raid channel"])
@@ -119,33 +119,33 @@ function RTM.IntializeRaidCommunicationCheckbox(parent_frame)
 
 	f:SetScript("OnClick",
 		function()
-			RTMDB.enable_raid_communication = not RTMDB.enable_raid_communication
+			RTUDB.enable_raid_communication = not RTUDB.enable_raid_communication
 		end
 	);
-	f:SetChecked(RTMDB.enable_raid_communication)
+	f:SetChecked(RTUDB.enable_raid_communication)
 	f:SetPoint("TOPLEFT", parent_frame, 0, -75)
 end
 
-function RTM.IntializeDebugCheckbox(parent_frame)
-	local f = CreateFrame("CheckButton", "RTM.options_panel.debug_checkbox", parent_frame, "ChatConfigCheckButtonTemplate")
+function RTU.IntializeDebugCheckbox(parent_frame)
+	local f = CreateFrame("CheckButton", "RTU.options_panel.debug_checkbox", parent_frame, "ChatConfigCheckButtonTemplate")
 	getglobal(f:GetName() .. 'Text'):SetText(L[" Enable debug mode"]);
 	f.tooltip = L["Show or hide the minimap button."];
 	f:SetScript("OnClick",
 		function()
-			RTMDB.debug_enabled = not RTMDB.debug_enabled
+			RTUDB.debug_enabled = not RTUDB.debug_enabled
 		end
 	);
-	f:SetChecked(RTMDB.debug_enabled)
+	f:SetChecked(RTUDB.debug_enabled)
 	f:SetPoint("TOPLEFT", parent_frame, 0, -97)
 end
 
-function RTM:IntializeScaleSlider(parent_frame)
-	local f = CreateFrame("Slider", "RTM.options_panel.scale_slider", parent_frame, "OptionsSliderTemplate")
+function RTU:IntializeScaleSlider(parent_frame)
+	local f = CreateFrame("Slider", "RTU.options_panel.scale_slider", parent_frame, "OptionsSliderTemplate")
 	f.tooltip = L["Set the scale of the rare window."];
 	f:SetMinMaxValues(0.5, 2)
 	f:SetValueStep(0.05)
-	f:SetValue(RTMDB.window_scale)
-	self:SetScale(RTMDB.window_scale)
+	f:SetValue(RTUDB.window_scale)
+	self:SetScale(RTUDB.window_scale)
 	f:Enable()
 	
 	f:SetScript("OnValueChanged",
@@ -153,23 +153,23 @@ function RTM:IntializeScaleSlider(parent_frame)
 			-- Round the value to the nearest step value.
 			value = math.floor(value * 20) / 20
 		
-			RTMDB.window_scale = value
-			self2.label:SetText(L["Rare window scale "]..string.format("(%.2f)", RTMDB.window_scale))
-			RTM:SetScale(RTMDB.window_scale)
+			RTUDB.window_scale = value
+			self2.label:SetText(L["Rare window scale "]..string.format("(%.2f)", RTUDB.window_scale))
+			RTU:SetScale(RTUDB.window_scale)
 		end
 	);
 	
 	f.label = f:CreateFontString(nil, "BORDER", "GameFontNormal")
 	f.label:SetJustifyH("LEFT")
-	f.label:SetText(L["Rare window scale "]..string.format("(%.2f)", RTMDB.window_scale))
+	f.label:SetText(L["Rare window scale "]..string.format("(%.2f)", RTUDB.window_scale))
 	f.label:SetPoint("TOPLEFT", parent_frame, 0, -125)
 	
 	f:SetPoint("TOPLEFT", f.label, 5, -15)
 end
 
-function RTM:InitializeButtons(parent_frame)
+function RTU:InitializeButtons(parent_frame)
 	parent_frame.reset_favorites_button = CreateFrame(
-		"Button", "RTM.options_panel.reset_favorites_button", parent_frame, 'UIPanelButtonTemplate'
+		"Button", "RTU.options_panel.reset_favorites_button", parent_frame, 'UIPanelButtonTemplate'
 	)
 	
 	parent_frame.reset_favorites_button:SetText(L["Reset Favorites"])
@@ -177,13 +177,13 @@ function RTM:InitializeButtons(parent_frame)
 	parent_frame.reset_favorites_button:SetPoint("TOPLEFT", parent_frame, 0, -175)
 	parent_frame.reset_favorites_button:SetScript("OnClick",
 		function()
-			RTMDB.favorite_rares = {}
+			RTUDB.favorite_rares = {}
 			self:CorrectFavoriteMarks()
 		end
 	)
 	
 	parent_frame.reset_blacklist_button = CreateFrame(
-		"Button", "RTM.options_panel.reset_blacklist_button", parent_frame, 'UIPanelButtonTemplate'
+		"Button", "RTU.options_panel.reset_blacklist_button", parent_frame, 'UIPanelButtonTemplate'
 	)
 	
 	parent_frame.reset_blacklist_button:SetText(L["Reset Blacklist"])
@@ -191,20 +191,20 @@ function RTM:InitializeButtons(parent_frame)
 	parent_frame.reset_blacklist_button:SetPoint("TOPRIGHT", parent_frame.reset_favorites_button, 155, 0)
 	parent_frame.reset_blacklist_button:SetScript("OnClick",
 		function()
-			RTMDB.banned_NPC_ids = {}
+			RTUDB.banned_NPC_ids = {}
 		end
 	)
 end
 
-function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
-	local f = CreateFrame("Frame", "RTM.options_panel.rare_selection.frame.list["..npc_id.."]", parent_frame);
+function RTU:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
+	local f = CreateFrame("Frame", "RTU.options_panel.rare_selection.frame.list["..npc_id.."]", parent_frame);
 	f:SetSize(500, 12)
 	
-	f.enable = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].enable", f);
+	f.enable = CreateFrame("Button", "RTU.options_panel.rare_selection.frame.list["..npc_id.."].enable", f);
 	f.enable:SetSize(10, 10)
 	local texture = f.enable:CreateTexture(nil, "BACKGROUND")
 	
-	if not RTMDB.ignore_rare[npc_id] then
+	if not RTUDB.ignore_rare[npc_id] then
 		texture:SetColorTexture(0, 1, 0, 1)
 	else
 		texture:SetColorTexture(1, 0, 0, 1)
@@ -215,26 +215,26 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	f.enable:SetPoint("TOPLEFT", f, 0, 0)
 	f.enable:SetScript("OnClick",
 		function()
-			if not RTMDB.ignore_rare[npc_id] then
-				if RTMDB.favorite_rares[npc_id] then
-					print(L["<RTM> Favorites cannot be hidden."])
+			if not RTUDB.ignore_rare[npc_id] then
+				if RTUDB.favorite_rares[npc_id] then
+					print(L["<RTU> Favorites cannot be hidden."])
 				else
-					RTMDB.ignore_rare[npc_id] = true
+					RTUDB.ignore_rare[npc_id] = true
 					f.enable.texture:SetColorTexture(1, 0, 0, 1)
-					RTM:ReorganizeRareTableFrame(RTM.entities_frame)
+					RTU:ReorganizeRareTableFrame(RTU.entities_frame)
 				end
 			else
-				RTMDB.ignore_rare[npc_id] = nil
+				RTUDB.ignore_rare[npc_id] = nil
 				f.enable.texture:SetColorTexture(0, 1, 0, 1)
-				RTM:ReorganizeRareTableFrame(RTM.entities_frame)
+				RTU:ReorganizeRareTableFrame(RTU.entities_frame)
 			end
 		end
 	)
 	
-	f.up = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].up", f);
+	f.up = CreateFrame("Button", "RTU.options_panel.rare_selection.frame.list["..npc_id.."].up", f);
 	f.up:SetSize(10, 10)
 	texture = f.up:CreateTexture(nil, "OVERLAY")
-	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\UpArrow.tga")
+	texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\UpArrow.tga")
 	texture:SetSize(10, 10)
 	texture:SetPoint("CENTER", f.up)
 	texture:SetAllPoints(f.up)
@@ -245,8 +245,8 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	f.up:SetScript("OnClick",
 		function()
       -- Here, we use the most up-to-date entry data, instead of the one passed as an argument.
-      local previous_entry = RTMDB.rare_ordering.__raw_data_table[npc_id].__previous
-			RTMDB.rare_ordering:SwapNeighbors(previous_entry, npc_id)
+      local previous_entry = RTUDB.rare_ordering.__raw_data_table[npc_id].__previous
+			RTUDB.rare_ordering:SwapNeighbors(previous_entry, npc_id)
 			self.ReorderRareSelectionEntryItems(parent_frame)
 			self:ReorganizeRareTableFrame(self.entities_frame)
 		end
@@ -256,10 +256,10 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 		f.up:Hide()
 	end
 	
-	f.down = CreateFrame("Button", "RTM.options_panel.rare_selection.frame.list["..npc_id.."].down", f);
+	f.down = CreateFrame("Button", "RTU.options_panel.rare_selection.frame.list["..npc_id.."].down", f);
 	f.down:SetSize(10, 10)
 	texture = f.down:CreateTexture(nil, "OVERLAY")
-	texture:SetTexture("Interface\\AddOns\\RareTrackerMechagon\\Icons\\DownArrow.tga")
+	texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\DownArrow.tga")
 	texture:SetSize(10, 10)
 	texture:SetPoint("CENTER", f.down)
 	texture:SetAllPoints(f.down)
@@ -269,8 +269,8 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	f.down:SetScript("OnClick",
 		function()
       -- Here, we use the most up-to-date entry data, instead of the one passed as an argument.
-      local next_entry = RTMDB.rare_ordering.__raw_data_table[npc_id].__next
-			RTMDB.rare_ordering:SwapNeighbors(npc_id, next_entry)
+      local next_entry = RTUDB.rare_ordering.__raw_data_table[npc_id].__next
+			RTUDB.rare_ordering:SwapNeighbors(npc_id, next_entry)
 			self.ReorderRareSelectionEntryItems(parent_frame)
 			self:ReorganizeRareTableFrame(self.entities_frame)
 		end
@@ -288,9 +288,9 @@ function RTM:CreateRareSelectionEntry(npc_id, parent_frame, entry_data)
 	return f
 end
 
-function RTM.ReorderRareSelectionEntryItems(parent_frame)
+function RTU.ReorderRareSelectionEntryItems(parent_frame)
 	local i = 1
-	RTMDB.rare_ordering:ForEach(
+	RTUDB.rare_ordering:ForEach(
 		function(npc_id, entry_data)
 			local f = parent_frame.list_item[npc_id]
 			if entry_data.__previous == nil then
@@ -311,9 +311,9 @@ function RTM.ReorderRareSelectionEntryItems(parent_frame)
 	)
 end
 
-function RTM:DisableAllRaresButton(parent_frame)
+function RTU:DisableAllRaresButton(parent_frame)
   parent_frame.reset_all_button = CreateFrame(
-		"Button", "RTM.options_panel.rare_selection.reset_all_button", parent_frame, 'UIPanelButtonTemplate'
+		"Button", "RTU.options_panel.rare_selection.reset_all_button", parent_frame, 'UIPanelButtonTemplate'
 	)
 	
 	parent_frame.reset_all_button:SetText(L["Disable All"])
@@ -323,8 +323,8 @@ function RTM:DisableAllRaresButton(parent_frame)
 		function()
 			for i=1, #self.rare_ids do
         local npc_id = self.rare_ids[i]
-        if RTMDB.favorite_rares[npc_id] ~= true then
-          RTMDB.ignore_rare[npc_id] = true
+        if RTUDB.favorite_rares[npc_id] ~= true then
+          RTUDB.ignore_rare[npc_id] = true
           parent_frame.list_item[npc_id].enable.texture:SetColorTexture(1, 0, 0, 1)
         end
       end
@@ -333,9 +333,9 @@ function RTM:DisableAllRaresButton(parent_frame)
 	)
 end
 
-function RTM:EnableAllRaresButton(parent_frame)
+function RTU:EnableAllRaresButton(parent_frame)
   parent_frame.enable_all_button = CreateFrame(
-		"Button", "RTM.options_panel.rare_selection.enable_all_button", parent_frame, 'UIPanelButtonTemplate'
+		"Button", "RTU.options_panel.rare_selection.enable_all_button", parent_frame, 'UIPanelButtonTemplate'
 	)
 	
 	parent_frame.enable_all_button:SetText(L["Enable All"])
@@ -345,7 +345,7 @@ function RTM:EnableAllRaresButton(parent_frame)
 		function()
       for i=1, #self.rare_ids do
         local npc_id = self.rare_ids[i]
-        RTMDB.ignore_rare[npc_id] = nil
+        RTUDB.ignore_rare[npc_id] = nil
         parent_frame.list_item[npc_id].enable.texture:SetColorTexture(0, 1, 0, 1)
       end
       self:ReorganizeRareTableFrame(self.entities_frame)
@@ -353,9 +353,9 @@ function RTM:EnableAllRaresButton(parent_frame)
 	)
 end
 
-function RTM:ResetRareOrderButton(parent_frame)
+function RTU:ResetRareOrderButton(parent_frame)
   parent_frame.reset_order_button = CreateFrame(
-		"Button", "RTM.options_panel.rare_selection.reset_order_button", parent_frame, 'UIPanelButtonTemplate'
+		"Button", "RTU.options_panel.rare_selection.reset_order_button", parent_frame, 'UIPanelButtonTemplate'
 	)
 	
 	parent_frame.reset_order_button:SetText(L["Reset Order"])
@@ -363,10 +363,10 @@ function RTM:ResetRareOrderButton(parent_frame)
 	parent_frame.reset_order_button:SetPoint("TOPRIGHT", parent_frame, 0, -50)
 	parent_frame.reset_order_button:SetScript("OnClick",
 		function()
-			RTMDB.rare_ordering:Clear()
+			RTUDB.rare_ordering:Clear()
       for i=1, #self.rare_ids do
         local npc_id = self.rare_ids[i]
-        RTMDB.rare_ordering:AddBack(npc_id)
+        RTUDB.rare_ordering:AddBack(npc_id)
       end
       self:ReorganizeRareTableFrame(self.entities_frame)
       self.ReorderRareSelectionEntryItems(parent_frame)
@@ -374,15 +374,15 @@ function RTM:ResetRareOrderButton(parent_frame)
 	)
 end
 
-function RTM:InitializeRareSelectionChildMenu(parent_frame)
-	parent_frame.rare_selection = CreateFrame("Frame", "RTM.options_panel.rare_selection", parent_frame)
+function RTU:InitializeRareSelectionChildMenu(parent_frame)
+	parent_frame.rare_selection = CreateFrame("Frame", "RTU.options_panel.rare_selection", parent_frame)
 	parent_frame.rare_selection.name = L["Rare ordering/selection"]
 	parent_frame.rare_selection.parent = parent_frame.name
 	InterfaceOptions_AddCategory(parent_frame.rare_selection)
 	
 	parent_frame.rare_selection.frame = CreateFrame(
       "Frame",
-      "RTM.options_panel.rare_selection.frame",
+      "RTU.options_panel.rare_selection.frame",
       parent_frame.rare_selection
   )
   
@@ -393,7 +393,7 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
 	local i = 1
 	f.list_item = {}
 	
-	RTMDB.rare_ordering:ForEach(
+	RTUDB.rare_ordering:ForEach(
 		function(npc_id, entry_data)
 			f.list_item[npc_id] = self:CreateRareSelectionEntry(npc_id, f, entry_data)
 			f.list_item[npc_id]:SetPoint("TOPLEFT", f, 1, -(i - 1) * 12 - 5)
@@ -402,17 +402,17 @@ function RTM:InitializeRareSelectionChildMenu(parent_frame)
 	)
   
   -- Add utility buttons.
-  RTM:DisableAllRaresButton(f)
-  RTM:EnableAllRaresButton(f)
-  RTM:ResetRareOrderButton(f)
+  RTU:DisableAllRaresButton(f)
+  RTU:EnableAllRaresButton(f)
+  RTU:ResetRareOrderButton(f)
 end
 
-function RTM:InitializeConfigMenu()
-	self.options_panel = CreateFrame("Frame", "RTM.options_panel", UIParent)
-	self.options_panel.name = "RareTrackerMechagon"
+function RTU:InitializeConfigMenu()
+	self.options_panel = CreateFrame("Frame", "RTU.options_panel", UIParent)
+	self.options_panel.name = "RareTrackerUldum"
 	InterfaceOptions_AddCategory(self.options_panel)
 	
-	self.options_panel.frame = CreateFrame("Frame", "RTM.options_panel.frame", self.options_panel)
+	self.options_panel.frame = CreateFrame("Frame", "RTU.options_panel.frame", self.options_panel)
 	self.options_panel.frame:SetPoint("TOPLEFT", self.options_panel, 11, -14)
 	self.options_panel.frame:SetSize(500, 500)
 
