@@ -55,6 +55,10 @@ RTU.last_zone_id = nil
 -- Check whether the addon has loaded.
 RTU.is_loaded = false
 
+-- Check which assault is currently active.
+RTU.assault_id = 0
+
+
 -- ####################################################################
 -- ##                         Saved Variables                        ##
 -- ####################################################################

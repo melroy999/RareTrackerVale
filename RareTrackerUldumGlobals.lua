@@ -9,6 +9,7 @@ local GetLocale = GetLocale
 RTU.target_zones = {
     [1527] = true
 }
+RTU.parent_zone = 1527
 
 -- NPCs that are banned during shard detection.
 -- Player followers sometimes spawn with the wrong zone id.
@@ -89,6 +90,86 @@ RTU.rare_ids = {
 
 -- Create a table, such that we can look up a rare in constant time.
 RTU.rare_ids_set = Set(RTU.rare_ids)
+
+-- Group rares by the assaults they are active in.
+-- Notes: used the values found in the HandyNotes_VisionsOfNZoth addon.
+RTU.assault_rare_ids = {
+    [3165083] = { -- West (AQR)
+        [155703] = true,
+        [154578] = true,
+        [154576] = true,
+        [162172] = true,
+        [162370] = true,
+        [162171] = true,
+        [162147] = true,
+        [162163] = true,
+        [155531] = true,
+        [157134] = true,
+        [154604] = true,
+        [156078] = true,
+        [162196] = true,
+        [162142] = true,
+        [156299] = true,
+        [162173] = true,
+        [160532] = true,
+        [162140] = true,
+        [162372] = true,
+        [162352] = true,
+        [151878] = true,
+        [162170] = true,
+    },
+    [3165092] = { -- South (EMP)
+        [158557] = true,
+        [155703] = true,
+        [154578] = true,
+        [154576] = true,
+        [162172] = true,
+        [158594] = true,
+        [158491] = true,
+        [158633] = true,
+        [158597] = true,
+        [158528] = true,
+        [160623] = true,
+        [155531] = true,
+        [157134] = true,
+        [156655] = true,
+        [162196] = true,
+        [156299] = true,
+        [161033] = true,
+        [156654] = true,
+        [160532] = true,
+        [151878] = true,
+        [158636] = true,
+    },
+    [3165098] = { -- East (AMA)
+        [157170] = true,
+        [151883] = true,
+        [155703] = true,
+        [154578] = true,
+        [154576] = true,
+        [162172] = true,
+        [152757] = true,
+        [157120] = true,
+        [151995] = true,
+        [155531] = true,
+        [157134] = true,
+        [157157] = true,
+        [152677] = true,
+        [162196] = true,
+        [157146] = true,
+        [152040] = true,
+        [151948] = true,
+        [162372] = true,
+        [162352] = true,
+        [151878] = true,
+        [151897] = true,
+        [151609] = true,
+        [152657] = true,
+        [151852] = true,
+        [157164] = true,
+        [162141] = true,
+    }
+}
 
 -- Get the rare names in the correct localization.
 RTU.localization = GetLocale()

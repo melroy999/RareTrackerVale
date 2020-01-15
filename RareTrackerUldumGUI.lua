@@ -209,11 +209,19 @@ function RTU:InitializeRareTableEntries(parent_frame)
 end
 
 function RTU:ReorganizeRareTableFrame(f)
+    -- Filter out the rares that are not part of the current assault.
+    local assault_rares = RTU.rare_ids_set
+    if self.assault_id ~= 0 then
+        assault_rares = RTU.assault_rare_ids[self.assault_id]
+    end
+    
 	-- How many ignored rares do we have?
 	local n = 0
-	for _, _ in pairs(RTUDB.ignore_rare) do
-		n = n + 1
-	end
+    for _, npc_id in pairs(RTU.rare_ids) do
+        if RTUDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
+            n = n + 1
+        end
+    end
 	
 	-- Resize all the frames.
 	self:SetSize(
@@ -231,7 +239,7 @@ function RTU:ReorganizeRareTableFrame(f)
 	local i = 1
 	RTUDB.rare_ordering:ForEach(
 		function(npc_id, _)
-			if RTUDB.ignore_rare[npc_id] then
+			if RTUDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
 				f.entities[npc_id]:Hide()
 			else
 				f.entities[npc_id]:SetPoint("TOPLEFT", f, 0, -(i - 1) * 12 - 5)

@@ -16,6 +16,7 @@ local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET
 local COMBATLOG_OBJECT_TYPE_OBJECT = COMBATLOG_OBJECT_TYPE_OBJECT
 local UIParent = UIParent
+local C_MapExplorationInfo = C_MapExplorationInfo
 
 -- ####################################################################
 -- ##                      Localization Support                      ##
@@ -85,29 +86,24 @@ function RTU:CheckForShardChange(zone_uid)
 			-- Move from one shard to another.
 			self:ChangeShard(self.current_shard_id, zone_uid)
 		end
-		
 		self.current_shard_id = zone_uid
 	end
+        
+    -- Take the opportunity to check for assault updates as well.
+    local map_texture = C_MapExplorationInfo.GetExploredMapTextures(self.parent_zone)
+    if map_texture then
+        local new_assault_id = map_texture[1].fileDataIDs[1]
+        if self.assault_id ~= new_assault_id then
+            self.assault_id = new_assault_id
+            self:ReorganizeRareTableFrame(self.entities_frame)
+        end
+    end
 	
 	return has_changed
 end
 
 function RTU.CheckForRedirectedRareIds(npc_id)
-	-- Next, we check whether this is Mecharantula.
-	if npc_id == 151672 then
-		-- Check if the player has the time displacement buff.
-		for i=1, 40 do
-			local spell_id = select(10, UnitBuff("player", i))
-			if spell_id == nil then
-				break
-			elseif spell_id == 296644 then
-				-- Chance the NPC id to a bogus id.
-				npc_id = 8821909
-				break
-			end
-		end
-	end
-
+	-- Unused by RTU.
 	return npc_id
 end
 
@@ -304,6 +300,16 @@ function RTU:OnZoneTransition()
 		
 	if self.target_zones[zone_id] and not self.target_zones[self.last_zone_id] then
 		self:StartInterface()
+        
+        local map_texture = C_MapExplorationInfo.GetExploredMapTextures(self.parent_zone)
+        if map_texture then
+            local new_assault_id = map_texture[1].fileDataIDs[1]
+            if self.assault_id ~= new_assault_id then
+                self.assault_id = new_assault_id
+                self:ReorganizeRareTableFrame(self.entities_frame)
+            end
+        end
+    
 	elseif not self.target_zones[zone_id] then
 		self:RegisterDeparture(self.current_shard_id)
 		self:CloseInterface()
