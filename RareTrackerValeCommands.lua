@@ -25,5 +25,5 @@ function CommandHandler(msg, _)
 end
 
 -- Register the slashes that can be used to issue commands.
-SLASH_RTV1 = "/rtu"
+SLASH_RTV1 = "/rtv"
 SlashCmdList["RTV"] = CommandHandler
