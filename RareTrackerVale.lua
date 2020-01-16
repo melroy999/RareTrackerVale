@@ -15,34 +15,34 @@ local C_ChatInfo = C_ChatInfo
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerVale", true)
 
 -- ####################################################################
 -- ##                              Core                              ##
 -- ####################################################################
 
-local RTU = CreateFrame("Frame", "RTU", UIParent);
+local RTV = CreateFrame("Frame", "RTV", UIParent);
 
 -- The current data we have of the rares.
-RTU.is_alive = {}
-RTU.current_health = {}
-RTU.last_recorded_death = {}
-RTU.current_coordinates = {}
+RTV.is_alive = {}
+RTV.current_health = {}
+RTV.last_recorded_death = {}
+RTV.current_coordinates = {}
 
 -- The zone_uid can be used to distinguish different shards of the zone.
-RTU.current_shard_id = nil
+RTV.current_shard_id = nil
 
 -- A table containing all UID deaths reported by the player.
-RTU.recorded_entity_death_ids = {}
+RTV.recorded_entity_death_ids = {}
 
 -- A table containing all vignette UIDs reported by the player.
-RTU.reported_vignettes = {}
+RTV.reported_vignettes = {}
 
 -- A table containing all spawn UIDs that have been reported through a sound warning.
-RTU.reported_spawn_uids = {}
+RTV.reported_spawn_uids = {}
 
 -- The version of the addon.
-RTU.version = 6
+RTV.version = 6
 -- Version 2: changed the order of the rares.
 -- Version 3: death messages now send the spawn id.
 -- Version 4: changed the interface of the alive message to include coordinates.
@@ -50,13 +50,13 @@ RTU.version = 6
 -- Version 6: the time stamp that was used to generate the compressed table is now included in group messages.
 
 -- The last zone the user was in.
-RTU.last_zone_id = nil
+RTV.last_zone_id = nil
 
 -- Check whether the addon has loaded.
-RTU.is_loaded = false
+RTV.is_loaded = false
 
 -- Check which assault is currently active.
-RTU.assault_id = 0
+RTV.assault_id = 0
 
 
 -- ####################################################################
@@ -64,23 +64,23 @@ RTU.assault_id = 0
 -- ####################################################################
 
 -- Setting saved in the saved variables.
-RTUDB = {}
+RTVDB = {}
 
--- The rares marked as RTUDB.favorite_rares by the player.
-RTUDB.favorite_rares = {}
+-- The rares marked as RTVDB.favorite_rares by the player.
+RTVDB.favorite_rares = {}
 
 -- Remember whether the user wants to see the window or not.
-RTUDB.show_window = nil
+RTVDB.show_window = nil
 
 -- Keep a cache of previous data, that we can restore if appropriate.
-RTUDB.previous_records = {}
+RTVDB.previous_records = {}
 
 -- ####################################################################
 -- ##                        Helper functions                        ##
 -- ####################################################################
 
 -- Get the current health of the entity, rounded down to an integer.
-function RTU.GetTargetHealthPercentage()
+function RTV.GetTargetHealthPercentage()
 	-- Find the current and maximum health of the current target.
 	local max_hp = UnitHealthMax("target")
 	
@@ -93,14 +93,14 @@ function RTU.GetTargetHealthPercentage()
 end
 
 -- A print function used for debug purposes.
-function RTU.Debug(...)
-	if RTUDB.debug_enabled then
+function RTV.Debug(...)
+	if RTVDB.debug_enabled then
 		print(...)
 	end
 end
 
--- Open and start the RTU interface and subscribe to all the required events.
-function RTU:StartInterface()
+-- Open and start the RTV interface and subscribe to all the required events.
+function RTV:StartInterface()
 	-- Reset the data, since we cannot guarantee its correctness.
 	self.is_alive = {}
 	self.current_health = {}
@@ -115,23 +115,23 @@ function RTU:StartInterface()
 	
 	self:RegisterEvents()
 	
-	if RTUDB.minimap_icon_enabled then
-		self.icon:Show("RTU_icon")
+	if RTVDB.minimap_icon_enabled then
+		self.icon:Show("RTV_icon")
 	else
-		self.icon:Hide("RTU_icon")
+		self.icon:Hide("RTV_icon")
 	end
 	
-	if C_ChatInfo.RegisterAddonMessagePrefix("RTU") ~= true then
-		print(L["<RTU> Failed to register AddonPrefix 'RTU'. RTU will not function properly."])
+	if C_ChatInfo.RegisterAddonMessagePrefix("RTV") ~= true then
+		print(L["<RTV> Failed to register AddonPrefix 'RTV'. RTV will not function properly."])
 	end
 	
-	if RTUDB.show_window then
+	if RTVDB.show_window then
 		self:Show()
 	end
 end
 
--- Open and start the RTU interface and unsubscribe to all the required events.
-function RTU:CloseInterface()
+-- Open and start the RTV interface and unsubscribe to all the required events.
+function RTV:CloseInterface()
 	-- Reset the data.
 	self.is_alive = {}
 	self.current_health = {}
@@ -145,7 +145,7 @@ function RTU:CloseInterface()
 	-- Register the user's departure and disable event listeners.
 	self:RegisterDeparture(self.current_shard_id)
 	self:UnregisterEvents()
-	self.icon:Hide("RTU_icon")
+	self.icon:Hide("RTV_icon")
 	
 	-- Hide the interface.
 	self:Hide()
@@ -155,46 +155,46 @@ end
 -- ##                          Minimap Icon                          ##
 -- ####################################################################
 
-local RTU_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTU_icon_object", {
+local RTV_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTV_icon_object", {
 	type = "data source",
-	text = "RTU",
-	icon = "Interface\\AddOns\\RareTrackerUldum\\Icons\\RareTrackerIcon",
+	text = "RTV",
+	icon = "Interface\\AddOns\\RareTrackerVale\\Icons\\RareTrackerIcon",
 	OnClick = function(_, button)
 		if button == "LeftButton" then
-			if RTU.last_zone_id and RTU.target_zones[RTU.last_zone_id] then
-				if RTU:IsShown() then
-					RTU:Hide()
-					RTUDB.show_window = false
+			if RTV.last_zone_id and RTV.target_zones[RTV.last_zone_id] then
+				if RTV:IsShown() then
+					RTV:Hide()
+					RTVDB.show_window = false
 				else
-					RTU:Show()
-					RTUDB.show_window = true
+					RTV:Show()
+					RTVDB.show_window = true
 				end
 			end
 		else
 			InterfaceOptionsFrame_Show()
-			InterfaceOptionsFrame_OpenToCategory(RTU.options_panel)
+			InterfaceOptionsFrame_OpenToCategory(RTV.options_panel)
 		end
 	end,
 	OnTooltipShow = function(tooltip)
-		tooltip:SetText("RTU")
-		tooltip:AddLine(L["Left-click: hide/show RTU"], 1, 1, 1)
+		tooltip:SetText("RTV")
+		tooltip:AddLine(L["Left-click: hide/show RTV"], 1, 1, 1)
 		tooltip:AddLine(L["Right-click: show options"], 1, 1, 1)
 		tooltip:Show()
 	end
 })
 
-RTU.icon = LibStub("LibDBIcon-1.0")
-RTU.icon:Hide("RTU_icon")
+RTV.icon = LibStub("LibDBIcon-1.0")
+RTV.icon:Hide("RTV_icon")
 
-function RTU:RegisterMapIcon()
-	self.ace_db = LibStub("AceDB-3.0"):New("RTU_ace_db", {
+function RTV:RegisterMapIcon()
+	self.ace_db = LibStub("AceDB-3.0"):New("RTV_ace_db", {
 		profile = {
 			minimap = {
 				hide = false,
 			},
 		},
 	})
-	RTU.icon:Register("RTU_icon", RTU_LDB, self.ace_db.profile.minimap)
+	RTV.icon:Register("RTV_icon", RTV_LDB, self.ace_db.profile.minimap)
 end
 
 

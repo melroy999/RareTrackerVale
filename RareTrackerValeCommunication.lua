@@ -23,14 +23,14 @@ local UIParent = UIParent
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerVale", true)
 
 -- ####################################################################
 -- ##                         Communication                          ##
 -- ####################################################################
 
 -- The time at which you broad-casted the joined the shard group.
-RTU.arrival_register_time = nil
+RTV.arrival_register_time = nil
 
 -- The name and realm of the player.
 local player_name = UnitName("player").."-"..GetRealmName()
@@ -40,7 +40,7 @@ local reported_version_mismatch = false
 
 -- The last time the health of an entity has been reported.
 -- Used for limiting the number of messages sent to the channel.
-RTU.last_health_report = {
+RTV.last_health_report = {
     ["CHANNEL"] = {},
     ["RAID"] = {},
 }
@@ -50,25 +50,25 @@ RTU.last_health_report = {
 -- ####################################################################
 
 -- A time stamp at which the last message was sent in the rate limited message sender.
-RTU.last_message_sent = {
+RTV.last_message_sent = {
     ["CHANNEL"] = 0,
     ["RAID"] = 0,
 }
 
 -- A function that acts as a rate limiter for channel messages.
-function RTU:SendRateLimitedAddonMessage(message, target, target_id, target_channel)
+function RTV:SendRateLimitedAddonMessage(message, target, target_id, target_channel)
 	-- We only allow one message to be sent every ~5 seconds.
 	if GetTime() - self.last_message_sent[target_channel] > 5 then
-		C_ChatInfo.SendAddonMessage("RTU", message, target, target_id)
+		C_ChatInfo.SendAddonMessage("RTV", message, target, target_id)
 		self.last_message_sent[target_channel] = GetTime()
 	end
 end
 
 -- Compress all the kill data the user has to Base64.
-function RTU:GetCompressedSpawnData(time_stamp)
+function RTV:GetCompressedSpawnData(time_stamp)
 	local result = ""
 	
-	for i=1, #RTU.rare_ids do
+	for i=1, #RTV.rare_ids do
 		local npc_id = self.rare_ids[i]
 		local kill_time = self.last_recorded_death[npc_id]
 		
@@ -83,7 +83,7 @@ function RTU:GetCompressedSpawnData(time_stamp)
 end
 
 -- Decompress all the Base64 data sent by a peer to decimal and update the timers.
-function RTU:DecompressSpawnData(spawn_data, time_stamp)
+function RTV:DecompressSpawnData(spawn_data, time_stamp)
 	local spawn_data_entries = {strsplit(",", spawn_data, #self.rare_ids)}
 
 	for i=1, #self.rare_ids do
@@ -104,7 +104,7 @@ function RTU:DecompressSpawnData(spawn_data, time_stamp)
 end
 
 -- A function that enables the delayed execution of a function.
-function RTU.DelayedExecution(delay, _function)
+function RTV.DelayedExecution(delay, _function)
 	local frame = CreateFrame("Frame", nil, UIParent)
 	frame.start_time = GetTime()
 	frame:SetScript("OnUpdate",
@@ -121,7 +121,7 @@ function RTU.DelayedExecution(delay, _function)
 end
 
 -- Get the id of the general chat.
-function RTU.GetGeneralChatId()
+function RTV.GetGeneralChatId()
     local channel_list = {GetChannelList()}
     
     for i=2,#channel_list,3 do
@@ -138,21 +138,21 @@ end
 -- ####################################################################
 
 -- Inform other clients of your arrival.
-function RTU:RegisterArrival(shard_id)
+function RTV:RegisterArrival(shard_id)
 	-- Attempt to load previous data from our cache.
-	if RTUDB.previous_records[shard_id] then
-		if GetServerTime() - RTUDB.previous_records[shard_id].time_stamp < 900 then
-			print(L["<RTU> Restoring data from previous session in shard "]..(shard_id + 42)..".")
-			self.last_recorded_death = RTUDB.previous_records[shard_id].time_table
+	if RTVDB.previous_records[shard_id] then
+		if GetServerTime() - RTVDB.previous_records[shard_id].time_stamp < 900 then
+			print(L["<RTV> Restoring data from previous session in shard "]..(shard_id + 42)..".")
+			self.last_recorded_death = RTVDB.previous_records[shard_id].time_table
 		else
-			RTUDB.previous_records[shard_id] = nil
+			RTVDB.previous_records[shard_id] = nil
 		end
 	end
 
-	self.channel_name = "RTU"..shard_id
+	self.channel_name = "RTV"..shard_id
 	
 	local is_in_channel = false
-	if select(1, GetChannelName(RTU.channel_name)) ~= 0 then
+	if select(1, GetChannelName(RTV.channel_name)) ~= 0 then
 		is_in_channel = true
 	end
 
@@ -166,9 +166,9 @@ function RTU:RegisterArrival(shard_id)
 		
 		-- We want to avoid overwriting existing channel numbers. So delay the channel join.
 		self.DelayedExecution(1, function()
-				print(L["<RTU> Requesting rare kill data for shard "]..(shard_id + 42)..".")
+				print(L["<RTV> Requesting rare kill data for shard "]..(shard_id + 42)..".")
 				C_ChatInfo.SendAddonMessage(
-					"RTU",
+					"RTV",
 					"A-"..shard_id.."-"..self.version..":"..self.arrival_register_time,
 					"CHANNEL",
 					select(1, GetChannelName(self.channel_name))
@@ -176,9 +176,9 @@ function RTU:RegisterArrival(shard_id)
 			end
 		)
 	else
-    print(L["<RTU> Requesting rare kill data for shard "]..(shard_id + 42)..".")
+    print(L["<RTV> Requesting rare kill data for shard "]..(shard_id + 42)..".")
 		C_ChatInfo.SendAddonMessage(
-			"RTU",
+			"RTV",
 			"A-"..shard_id.."-"..self.version..":"..self.arrival_register_time,
 			"CHANNEL",
 			select(1, GetChannelName(self.channel_name))
@@ -186,17 +186,17 @@ function RTU:RegisterArrival(shard_id)
 	end
 	
 	-- Register your arrival within the group.
-	if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
-		C_ChatInfo.SendAddonMessage("RTU", "AP-"..shard_id.."-"..self.version..":"..self.arrival_register_time, "RAID", nil)
+	if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+		C_ChatInfo.SendAddonMessage("RTV", "AP-"..shard_id.."-"..self.version..":"..self.arrival_register_time, "RAID", nil)
 	end
 end
 
 -- Inform the others that you are still present and give them your data.
-function RTU:RegisterPresenceWhisper(shard_id, target, time_stamp)
+function RTV:RegisterPresenceWhisper(shard_id, target, time_stamp)
 	if next(self.last_recorded_death) ~= nil then
 		-- Announce to the others that you are still present on the shard.
 		C_ChatInfo.SendAddonMessage(
-			"RTU",
+			"RTV",
 			"PW-"..shard_id.."-"..self.version..":"..self:GetCompressedSpawnData(time_stamp),
 			"WHISPER",
 			target
@@ -205,11 +205,11 @@ function RTU:RegisterPresenceWhisper(shard_id, target, time_stamp)
 end
 
 -- Inform the others that you are still present and give them your data through the group/raid channel.
-function RTU:RegisterPresenceGroup(shard_id, time_stamp)
+function RTV:RegisterPresenceGroup(shard_id, time_stamp)
 	if next(self.last_recorded_death) ~= nil then
 		-- Announce to the others that you are still present on the shard.
 		C_ChatInfo.SendAddonMessage(
-			"RTU",
+			"RTV",
 			"PP-"..shard_id.."-"..self.version..":"..self:GetCompressedSpawnData(time_stamp).."-"..time_stamp,
 			"RAID",
 			nil
@@ -218,14 +218,14 @@ function RTU:RegisterPresenceGroup(shard_id, time_stamp)
 end
 
 --Leave the channel.
-function RTU:RegisterDeparture(shard_id)
+function RTV:RegisterDeparture(shard_id)
 	local n_channels = GetNumDisplayChannels()
 	local channels_to_leave = {}
 	
-	-- Leave all channels with an RTU prefix.
+	-- Leave all channels with an RTV prefix.
 	for i = 1, n_channels do
 		local _, channel_name = GetChannelName(i)
-		if channel_name and channel_name:find("RTU") then
+		if channel_name and channel_name:find("RTV") then
 			channels_to_leave[channel_name] = true
 		end
 	end
@@ -236,9 +236,9 @@ function RTU:RegisterDeparture(shard_id)
 	
 	-- Store any timer data we previously had in the saved variables.
 	if shard_id then
-		RTUDB.previous_records[shard_id] = {}
-		RTUDB.previous_records[shard_id].time_stamp = GetServerTime()
-		RTUDB.previous_records[shard_id].time_table = self.last_recorded_death
+		RTVDB.previous_records[shard_id] = {}
+		RTVDB.previous_records[shard_id].time_stamp = GetServerTime()
+		RTVDB.previous_records[shard_id].time_table = self.last_recorded_death
 	end
 end
 
@@ -247,7 +247,7 @@ end
 -- ####################################################################
 
 -- Acknowledge that the player has arrived and whisper your data table.
-function RTU:AcknowledgeArrival(player, time_stamp)
+function RTV:AcknowledgeArrival(player, time_stamp)
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
 		self:RegisterPresenceWhisper(self.current_shard_id, player, time_stamp)
@@ -255,17 +255,17 @@ function RTU:AcknowledgeArrival(player, time_stamp)
 end
 
 -- Acknowledge that the player has arrived and whisper your data table.
-function RTU:AcknowledgeArrivalGroup(player, time_stamp)
+function RTV:AcknowledgeArrivalGroup(player, time_stamp)
 	-- Notify the newly arrived user of your presence through a whisper.
 	if player_name ~= player then
-		if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+		if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 			self:RegisterPresenceGroup(self.current_shard_id, time_stamp)
 		end
 	end
 end
 
 -- Acknowledge the welcome message of other players and parse and import their tables.
-function RTU:AcknowledgePresence(spawn_data)
+function RTV:AcknowledgePresence(spawn_data)
 	self:DecompressSpawnData(spawn_data, self.arrival_register_time)
 end
 
@@ -274,7 +274,7 @@ end
 -- ####################################################################
 
 -- Inform the others that a specific entity has died.
-function RTU:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
+function RTV:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		-- Mark the entity as dead.
 		self.last_recorded_death[npc_id] = GetServerTime()
@@ -289,15 +289,15 @@ function RTU:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 		
 		-- Send the death message.
 		C_ChatInfo.SendAddonMessage(
-			"RTU",
+			"RTV",
 			"ED-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid,
 			"CHANNEL",
 			select(1, GetChannelName(self.channel_name))
 		)
 	
-		if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+		if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 			C_ChatInfo.SendAddonMessage(
-				"RTU",
+				"RTV",
 				"EDP-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid,
 				"RAID",
 				nil
@@ -307,7 +307,7 @@ function RTU:RegisterEntityDeath(shard_id, npc_id, spawn_uid)
 end
 
 -- Inform the others that you have spotted an alive entity.
-function RTU:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
+function RTV:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 	if self.recorded_entity_death_ids[spawn_uid..npc_id] == nil then
 		-- Mark the entity as alive.
 		self.is_alive[npc_id] = GetServerTime()
@@ -323,15 +323,15 @@ function RTU:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 			self.current_coordinates[npc_id] = {["x"] = x, ["y"] = y}
             
 			C_ChatInfo.SendAddonMessage(
-				"RTU",
+				"RTV",
 				"EA-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y,
 				"CHANNEL",
 				select(1, GetChannelName(self.channel_name))
 			)
 		
-			if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+			if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 				C_ChatInfo.SendAddonMessage(
-					"RTU",
+					"RTV",
 					"EAP-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."-"..x.."-"..y,
 					"RAID",
 					nil
@@ -339,15 +339,15 @@ function RTU:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 			end
 		else
 			C_ChatInfo.SendAddonMessage(
-				"RTU",
+				"RTV",
 				"EA-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."--",
 				"CHANNEL",
 				select(1, GetChannelName(self.channel_name))
 			)
 		
-			if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+			if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 				C_ChatInfo.SendAddonMessage(
-					"RTU",
+					"RTV",
 					"EAP-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."--",
 					"RAID",
 					nil
@@ -358,7 +358,7 @@ function RTU:RegisterEntityAlive(shard_id, npc_id, spawn_uid, x, y)
 end
 
 -- Inform the others that you have spotted an alive entity.
-function RTU:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
+function RTV:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
 	if self.recorded_entity_death_ids[spawn_uid..npc_id] == nil then
 		-- Mark the entity as targeted and alive.
 		self.is_alive[npc_id] = GetServerTime()
@@ -368,15 +368,15 @@ function RTU:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
 	
 		-- Send the target message.
 		C_ChatInfo.SendAddonMessage(
-			"RTU",
+			"RTV",
 			"ET-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y,
 			"CHANNEL",
 			select(1, GetChannelName(self.channel_name))
 		)
 		
-		if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+		if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 			C_ChatInfo.SendAddonMessage(
-				"RTU",
+				"RTV",
 				"ETP-"..shard_id.."-"..self.version..":"..npc_id.."-"..spawn_uid.."-"..percentage.."-"..x.."-"..y,
 				"RAID",
 				nil
@@ -386,7 +386,7 @@ function RTU:RegisterEntityTarget(shard_id, npc_id, spawn_uid, percentage, x, y)
 end
 
 -- Inform the others the health of a specific entity.
-function RTU:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
+function RTV:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
 	if not self.last_health_report["CHANNEL"][npc_id]
 		or GetTime() - self.last_health_report["CHANNEL"][npc_id] > 2 then
 		-- Mark the entity as targeted and alive.
@@ -403,7 +403,7 @@ function RTU:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
 		)
 	end
 	
-	if RTUDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
+	if RTVDB.enable_raid_communication and (UnitInRaid("player") or UnitInParty("player")) then
 		if not self.last_health_report["RAID"][npc_id] or GetTime() - self.last_health_report["RAID"][npc_id] > 2 then
 			-- Mark the entity as targeted and alive.
 			self.is_alive[npc_id] = GetServerTime()
@@ -422,7 +422,7 @@ function RTU:RegisterEntityHealth(shard_id, npc_id, spawn_uid, percentage)
 end
 
 -- Acknowledge that the entity has died and set the according flags.
-function RTU:AcknowledgeEntityDeath(npc_id, spawn_uid)
+function RTV:AcknowledgeEntityDeath(npc_id, spawn_uid)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		-- Mark the entity as dead.
 		self.last_recorded_death[npc_id] = GetServerTime()
@@ -441,8 +441,8 @@ function RTU:AcknowledgeEntityDeath(npc_id, spawn_uid)
 	end
 end
 
-function RTU:PlaySoundNotification(npc_id, spawn_uid)
-    if RTUDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid]
+function RTV:PlaySoundNotification(npc_id, spawn_uid)
+    if RTVDB.favorite_rares[npc_id] and not self.reported_spawn_uids[spawn_uid]
         and not self.reported_spawn_uids[npc_id] then
             
         -- Play a sound file.
@@ -450,13 +450,13 @@ function RTU:PlaySoundNotification(npc_id, spawn_uid)
         self.reported_spawn_uids[spawn_uid] = true
         
         if not IsQuestFlaggedCompleted(completion_quest_id) then
-            PlaySoundFile(RTUDB.selected_sound_number)
+            PlaySoundFile(RTVDB.selected_sound_number)
         end
     end
 end
 
 -- Acknowledge that the entity is alive and set the according flags.
-function RTU:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
+function RTV:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		self.is_alive[npc_id] = GetServerTime()
 		self:UpdateStatus(npc_id)
@@ -471,7 +471,7 @@ function RTU:AcknowledgeEntityAlive(npc_id, spawn_uid, x, y)
 end
 
 -- Acknowledge that the entity is alive and set the according flags.
-function RTU:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
+function RTV:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		self.last_recorded_death[npc_id] = nil
 		self.is_alive[npc_id] = GetServerTime()
@@ -483,7 +483,7 @@ function RTU:AcknowledgeEntityTarget(npc_id, spawn_uid, percentage, x, y)
 end
 
 -- Acknowledge the health change of the entity and set the according flags.
-function RTU:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
+function RTV:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		self.last_recorded_death[npc_id] = nil
 		self.is_alive[npc_id] = GetServerTime()
@@ -495,7 +495,7 @@ function RTU:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
 end
 
 -- Acknowledge the health change of the entity and set the according flags.
-function RTU:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
+function RTV:AcknowledgeEntityHealthRaid(npc_id, spawn_uid, percentage)
 	if not self.recorded_entity_death_ids[spawn_uid..npc_id] then
 		self.last_recorded_death[npc_id] = nil
 		self.is_alive[npc_id] = GetServerTime()
@@ -511,11 +511,11 @@ end
 -- ####################################################################
 
 -- Determine what to do with the received chat message.
-function RTU:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
+function RTV:OnChatMessageReceived(player, prefix, shard_id, addon_version, payload)
 	-- The format of messages might change over time and as such, versioning is needed.
 	-- To ensure optimal performance, all users should use the latest version.
 	if not reported_version_mismatch and self.version < addon_version and addon_version ~= 9001 then
-		print(L["<RTU> Your version or RareTrackerUldum is outdated. "..
+		print(L["<RTV> Your version or RareTrackerVale is outdated. "..
 			"Please update to the most recent version at the earliest convenience."])
 		reported_version_mismatch = true
 	end
@@ -545,7 +545,7 @@ function RTU:OnChatMessageReceived(player, prefix, shard_id, addon_version, payl
 			local npc_id_str, spawn_uid, percentage_str = strsplit("-", payload)
 			local npc_id, percentage = tonumber(npc_id_str), tonumber(percentage_str)
 			self:AcknowledgeEntityHealth(npc_id, spawn_uid, percentage)
-		elseif RTUDB.enable_raid_communication then
+		elseif RTVDB.enable_raid_communication then
 			if prefix == "AP" then
 				local time_stamp = tonumber(payload)
 				self:AcknowledgeArrivalGroup(player, time_stamp)

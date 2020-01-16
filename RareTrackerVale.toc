@@ -1,9 +1,9 @@
 ## Interface: 80300
-## Title: RareTrackerUldum
-## Notes: Track and coordinate rare spawn timers in Uldum.
+## Title: RareTrackerVale
+## Notes: Track and coordinate rare spawn timers in Vale.
 ## Author: Melroy
-## Version: 5.2.7
-##SavedVariables: RTUDB, RTU_ace_db
+## Version: 5.2.8
+##SavedVariables: RTVDB, RTV_ace_db
 
 libs\LibDBIcon-1.0\LibStub\LibStub.lua
 libs\LibDBIcon-1.0\LibDataBroker-1.1\LibDataBroker-1.1.lua
@@ -14,12 +14,12 @@ libs\AceLocale-3.0\AceLocale-3.0.lua
 Locales\enUS.lua
 Locales\zhCN.lua
 
-RareTrackerUldum.lua
+RareTrackerVale.lua
 Base64.lua
 LinkedList.lua
-RareTrackerUldumGlobals.lua
-RareTrackerUldumGUI.lua
-RareTrackerUldumOptions.lua
-RareTrackerUldumCommunication.lua
-RareTrackerUldumEventHandler.lua
-RareTrackerUldumCommands.lua
+RareTrackerValeGlobals.lua
+RareTrackerValeGUI.lua
+RareTrackerValeOptions.lua
+RareTrackerValeCommunication.lua
+RareTrackerValeEventHandler.lua
+RareTrackerValeCommands.lua

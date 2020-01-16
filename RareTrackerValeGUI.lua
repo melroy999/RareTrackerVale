@@ -28,16 +28,16 @@ local front_opacity = 0.6
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerVale", true)
 
 -- ####################################################################
 -- ##                              GUI                               ##
 -- ####################################################################
 
-RTU.last_reload_time = 0
+RTV.last_reload_time = 0
 
-function RTU:InitializeShardNumberFrame()
-	local f = CreateFrame("Frame", "RTU.shard_id_frame", self)
+function RTV:InitializeShardNumberFrame()
+	local f = CreateFrame("Frame", "RTV.shard_id_frame", self)
 	f:SetSize(
       entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width,
       shard_id_frame_height
@@ -56,12 +56,12 @@ function RTU:InitializeShardNumberFrame()
 	return f
 end
 
-function RTU:CreateRareTableEntry(npc_id, parent_frame)
-	local f = CreateFrame("Frame", "RTU.entities_frame.entities["..npc_id.."]", parent_frame);
+function RTV:CreateRareTableEntry(npc_id, parent_frame)
+	local f = CreateFrame("Frame", "RTV.entities_frame.entities["..npc_id.."]", parent_frame);
 	f:SetSize(entity_name_width + entity_status_width + 3 * frame_padding + 2 * favorite_rares_width, 12)
 	
 	-- Add the favorite button.
-	f.favorite = CreateFrame("CheckButton", "RTU.entities_frame.entities["..npc_id.."].favorite", f)
+	f.favorite = CreateFrame("CheckButton", "RTV.entities_frame.entities["..npc_id.."].favorite", f)
 	f.favorite:SetSize(10, 10)
 	local texture = f.favorite:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
@@ -72,18 +72,18 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 	-- Add an action listener.
 	f.favorite:SetScript("OnClick",
 		function()
-			if RTUDB.favorite_rares[npc_id] then
-				RTUDB.favorite_rares[npc_id] = nil
+			if RTVDB.favorite_rares[npc_id] then
+				RTVDB.favorite_rares[npc_id] = nil
 				f.favorite.texture:SetColorTexture(0, 0, 0, front_opacity)
 			else
-				RTUDB.favorite_rares[npc_id] = true
+				RTVDB.favorite_rares[npc_id] = true
 				f.favorite.texture:SetColorTexture(0, 1, 0, 1)
 			end
 		end
 	);
 	
 	-- Add the announce/waypoint button.
-	f.announce = CreateFrame("Button", "RTU.entities_frame.entities["..npc_id.."].announce", f)
+	f.announce = CreateFrame("Button", "RTV.entities_frame.entities["..npc_id.."].announce", f)
 	f.announce:SetSize(10, 10)
 	texture = f.announce:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
@@ -119,14 +119,14 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 					-- SendChatMessage
 					if loc then
 						SendChatMessage(
-							string.format(L["<RTU> %s (%s%%) seen at ~(%.2f, %.2f)"], name, health, loc.x, loc.y),
+							string.format(L["<RTV> %s (%s%%) seen at ~(%.2f, %.2f)"], name, health, loc.x, loc.y),
 							target,
 							nil,
 							channel_id
 						)
 					else
 						SendChatMessage(
-							string.format(L["<RTU> %s (%s%%)"], name, health),
+							string.format(L["<RTV> %s (%s%%)"], name, health),
 							target,
 							nil,
 							channel_id
@@ -135,7 +135,7 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 				elseif self.last_recorded_death[npc_id] ~= nil then
 					if GetServerTime() - last_death < 60 then
 						SendChatMessage(
-							string.format(L["<RTU> %s has died"], name, GetServerTime() - last_death),
+							string.format(L["<RTV> %s has died"], name, GetServerTime() - last_death),
 							target,
 							nil,
 							channel_id
@@ -143,7 +143,7 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 					else
 						SendChatMessage(
 							string.format(
-								L["<RTU> %s was last seen ~%s minutes ago"],
+								L["<RTV> %s was last seen ~%s minutes ago"],
 								name,
 								math.floor((GetServerTime() - last_death) / 60)
 							),
@@ -155,14 +155,14 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 				elseif self.is_alive[npc_id] then
 					if loc then
 						SendChatMessage(
-							string.format(L["<RTU> %s seen alive, vignette at ~(%.2f, %.2f)"], name, loc.x, loc.y),
+							string.format(L["<RTV> %s seen alive, vignette at ~(%.2f, %.2f)"], name, loc.x, loc.y),
 							target,
 							nil,
 							channel_id
 						)
 					else
 						SendChatMessage(
-							string.format(L["<RTU> %s seen alive (combat log)"], name),
+							string.format(L["<RTV> %s seen alive (combat log)"], name),
 							target,
 							nil,
 							channel_id
@@ -196,7 +196,7 @@ function RTU:CreateRareTableEntry(npc_id, parent_frame)
 	return f
 end
 
-function RTU:InitializeRareTableEntries(parent_frame)
+function RTV:InitializeRareTableEntries(parent_frame)
 	-- Create a holder for all the entries.
 	parent_frame.entities = {}
 	
@@ -208,17 +208,17 @@ function RTU:InitializeRareTableEntries(parent_frame)
 	end
 end
 
-function RTU:ReorganizeRareTableFrame(f)
+function RTV:ReorganizeRareTableFrame(f)
     -- Filter out the rares that are not part of the current assault.
-    local assault_rares = RTU.rare_ids_set
+    local assault_rares = RTV.rare_ids_set
     if self.assault_id ~= 0 then
-        assault_rares = RTU.assault_rare_ids[self.assault_id]
+        assault_rares = RTV.assault_rare_ids[self.assault_id]
     end
     
 	-- How many ignored rares do we have?
 	local n = 0
-    for _, npc_id in pairs(RTU.rare_ids) do
-        if RTUDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
+    for _, npc_id in pairs(RTV.rare_ids) do
+        if RTVDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
             n = n + 1
         end
     end
@@ -237,9 +237,9 @@ function RTU:ReorganizeRareTableFrame(f)
 	
 	-- Give all of the table entries their new positions.
 	local i = 1
-	RTUDB.rare_ordering:ForEach(
+	RTVDB.rare_ordering:ForEach(
 		function(npc_id, _)
-			if RTUDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
+			if RTVDB.ignore_rare[npc_id] or assault_rares[npc_id] == nil then
 				f.entities[npc_id]:Hide()
 			else
 				f.entities[npc_id]:SetPoint("TOPLEFT", f, 0, -(i - 1) * 12 - 5)
@@ -250,18 +250,18 @@ function RTU:ReorganizeRareTableFrame(f)
 	)
 end
 
-function RTU:InitializeRareTableFrame(f)
+function RTV:InitializeRareTableFrame(f)
 	-- First, add the frames for the backdrop and make sure that the hierarchy is created.
 	f:SetPoint("TOPLEFT", frame_padding, -(2 * frame_padding + shard_id_frame_height))
 	
-	f.entity_name_backdrop = CreateFrame("Frame", "RTU.entities_frame.entity_name_backdrop", f)
+	f.entity_name_backdrop = CreateFrame("Frame", "RTV.entities_frame.entity_name_backdrop", f)
 	local texture = f.entity_name_backdrop:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
 	texture:SetAllPoints(f.entity_name_backdrop)
 	f.entity_name_backdrop.texture = texture
 	f.entity_name_backdrop:SetPoint("TOPLEFT", f, 2 * frame_padding + 2 * favorite_rares_width, 0)
 	
-	f.entity_status_backdrop = CreateFrame("Frame", "RTU.entities_frame.entity_status_backdrop", f)
+	f.entity_status_backdrop = CreateFrame("Frame", "RTV.entities_frame.entity_status_backdrop", f)
 	texture = f.entity_status_backdrop:CreateTexture(nil, "BACKGROUND")
 	texture:SetColorTexture(0, 0, 0, front_opacity)
 	texture:SetAllPoints(f.entity_status_backdrop)
@@ -275,7 +275,7 @@ function RTU:InitializeRareTableFrame(f)
 	self:ReorganizeRareTableFrame(f)
 end
 
-function RTU:UpdateStatus(npc_id)
+function RTV:UpdateStatus(npc_id)
 	local target = self.entities_frame.entities[npc_id]
 
 	if self.current_health[npc_id] then
@@ -298,7 +298,7 @@ function RTU:UpdateStatus(npc_id)
 	end
 end
 
-function RTU:UpdateShardNumber(shard_number)
+function RTV:UpdateShardNumber(shard_number)
 	if shard_number then
 		self.shard_id_frame.status_text:SetText(L["Shard ID: "]..(shard_number + 42))
 	else
@@ -306,11 +306,11 @@ function RTU:UpdateShardNumber(shard_number)
 	end
 end
 
-function RTU:CorrectFavoriteMarks()
+function RTV:CorrectFavoriteMarks()
 	for i=1, #self.rare_ids do
 		local npc_id = self.rare_ids[i]
 		
-		if RTUDB.favorite_rares[npc_id] then
+		if RTVDB.favorite_rares[npc_id] then
 			self.entities_frame.entities[npc_id].favorite.texture:SetColorTexture(0, 1, 0, 1)
 		else
 			self.entities_frame.entities[npc_id].favorite.texture:SetColorTexture(0, 0, 0, front_opacity)
@@ -318,7 +318,7 @@ function RTU:CorrectFavoriteMarks()
 	end
 end
 
-function RTU:UpdateDailyKillMark(npc_id)
+function RTV:UpdateDailyKillMark(npc_id)
 	if not self.completion_quest_ids[npc_id] then
 		return
 	end
@@ -338,20 +338,20 @@ function RTU:UpdateDailyKillMark(npc_id)
 	end
 end
 
-function RTU:UpdateAllDailyKillMarks()
-	for i=1, #RTU.rare_ids do
-		local npc_id = RTU.rare_ids[i]
+function RTV:UpdateAllDailyKillMarks()
+	for i=1, #RTV.rare_ids do
+		local npc_id = RTV.rare_ids[i]
 		self:UpdateDailyKillMark(npc_id)
 	end
 end
 
-function RTU.InitializeFavoriteIconFrame(f)
-	f.favorite_icon = CreateFrame("Frame", "RTU.favorite_icon", f)
+function RTV.InitializeFavoriteIconFrame(f)
+	f.favorite_icon = CreateFrame("Frame", "RTV.favorite_icon", f)
 	f.favorite_icon:SetSize(10, 10)
 	f.favorite_icon:SetPoint("TOPLEFT", f, frame_padding + 1, -(frame_padding + 3))
 
 	f.favorite_icon.texture = f.favorite_icon:CreateTexture(nil, "OVERLAY")
-	f.favorite_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Favorite.tga")
+	f.favorite_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerVale\\Icons\\Favorite.tga")
 	f.favorite_icon.texture:SetSize(10, 10)
 	f.favorite_icon.texture:SetPoint("CENTER", f.favorite_icon)
 	
@@ -384,13 +384,13 @@ function RTU.InitializeFavoriteIconFrame(f)
 	);
 end
 
-function RTU.InitializeAnnounceIconFrame(f)
-	f.broadcast_icon = CreateFrame("Frame", "RTU.broadcast_icon", f)
+function RTV.InitializeAnnounceIconFrame(f)
+	f.broadcast_icon = CreateFrame("Frame", "RTV.broadcast_icon", f)
 	f.broadcast_icon:SetSize(10, 10)
 	f.broadcast_icon:SetPoint("TOPLEFT", f, 2 * frame_padding + favorite_rares_width + 1, -(frame_padding + 3))
 
 	f.broadcast_icon.texture = f.broadcast_icon:CreateTexture(nil, "OVERLAY")
-	f.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Broadcast.tga")
+	f.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerVale\\Icons\\Broadcast.tga")
 	f.broadcast_icon.texture:SetSize(10, 10)
 	f.broadcast_icon.texture:SetPoint("CENTER", f.broadcast_icon)
 	f.broadcast_icon.icon_state = false
@@ -448,13 +448,13 @@ function RTU.InitializeAnnounceIconFrame(f)
 	);
 end
 
-function RTU:InitializeReloadButton(f)
-	f.reload_button = CreateFrame("Button", "RTU.reload_button", f)
+function RTV:InitializeReloadButton(f)
+	f.reload_button = CreateFrame("Button", "RTV.reload_button", f)
 	f.reload_button:SetSize(10, 10)
 	f.reload_button:SetPoint("TOPRIGHT", f, -2 * frame_padding, -(frame_padding + 3))
 
 	f.reload_button.texture = f.reload_button:CreateTexture(nil, "OVERLAY")
-	f.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Reload.tga")
+	f.reload_button.texture:SetTexture("Interface\\AddOns\\RareTrackerVale\\Icons\\Reload.tga")
 	f.reload_button.texture:SetSize(10, 10)
 	f.reload_button.texture:SetPoint("CENTER", f.reload_button)
 	
@@ -497,7 +497,7 @@ function RTU:InitializeReloadButton(f)
 	f.reload_button:SetScript("OnClick",
 		function()
 			if self.current_shard_id ~= nil and GetServerTime() - self.last_reload_time > 600 then
-				print(L["<RTU> Resetting current rare timers and requesting up-to-date data."])
+				print(L["<RTV> Resetting current rare timers and requesting up-to-date data."])
 				self.is_alive = {}
 				self.current_health = {}
 				self.last_recorded_death = {}
@@ -508,15 +508,15 @@ function RTU:InitializeReloadButton(f)
 				self.last_reload_time = GetServerTime()
 				
 				-- Reset the cache.
-				RTUDB.previous_records[self.current_shard_id] = nil
+				RTVDB.previous_records[self.current_shard_id] = nil
 				
 				-- Re-register your arrival in the shard.
-				RTU:RegisterArrival(self.current_shard_id)
+				RTV:RegisterArrival(self.current_shard_id)
 			elseif self.current_shard_id == nil then
-				print(L["<RTU> Please target a non-player entity prior to resetting, "..
+				print(L["<RTV> Please target a non-player entity prior to resetting, "..
 						"such that the addon can determine the current shard id."])
 			else
-				print(L["<RTU> The reset button is on cooldown. Please note that a reset is not needed "..
+				print(L["<RTV> The reset button is on cooldown. Please note that a reset is not needed "..
 					"to receive new timers. If it is your intention to reset the data, "..
 					"please do a /reload and click the reset button again."])
 			end
@@ -525,7 +525,7 @@ function RTU:InitializeReloadButton(f)
 end
 
 
-function RTU:InitializeInterface()
+function RTV:InitializeInterface()
 	self:SetSize(
 		entity_name_width + entity_status_width + 2 * favorite_rares_width + 5 * frame_padding,
 		shard_id_frame_height + 3 * frame_padding + #self.rare_ids * 12 + 8
@@ -539,7 +539,7 @@ function RTU:InitializeInterface()
 	
 	-- Create a sub-frame for the entity names.
 	self.shard_id_frame = self:InitializeShardNumberFrame()
-	self.entities_frame = CreateFrame("Frame", "RTU.entities_frame", self)
+	self.entities_frame = CreateFrame("Frame", "RTV.entities_frame", self)
 	self:InitializeRareTableFrame(self.entities_frame)
 
 	self:SetMovable(true)

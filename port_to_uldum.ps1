@@ -1,7 +1,0 @@
-(gc "../RareTrackerMechagon/RareTrackerMechagon.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldum.lua
-(gc "../RareTrackerMechagon/RareTrackerMechagon.toc") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldum.toc
-(gc "../RareTrackerMechagon/RareTrackerMechagonCommands.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldumCommands.lua
-(gc "../RareTrackerMechagon/RareTrackerMechagonCommunication.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldumCommunication.lua
-(gc "../RareTrackerMechagon/RareTrackerMechagonEventHandler.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldumEventHandler.lua
-(gc "../RareTrackerMechagon/RareTrackerMechagonGUI.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldumGUI.lua
-(gc "../RareTrackerMechagon/RareTrackerMechagonOptions.lua") -creplace 'RTM', 'RTU' -creplace 'rtm', 'rtu' -creplace 'Mechagon', 'Uldum' | Out-File -encoding ASCII RareTrackerUldumOptions.lua

@@ -1,7 +1,6 @@
 -- Redefine often used functions locally.
 local UnitGUID = UnitGUID
 local strsplit = strsplit
-local UnitBuff = UnitBuff
 local UnitHealth = UnitHealth
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local C_VignetteInfo = C_VignetteInfo
@@ -23,14 +22,14 @@ local C_MapExplorationInfo = C_MapExplorationInfo
 -- ####################################################################
 
 -- Get an object we can use for the localization of the addon.
-local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerUldum", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerVale", true)
 
 -- ####################################################################
 -- ##                         Event Handlers                         ##
 -- ####################################################################
 
 -- Listen to a given set of events and handle them accordingly.
-function RTU:OnEvent(event, ...)
+function RTV:OnEvent(event, ...)
 	if event == "PLAYER_TARGET_CHANGED" then
 		self:OnTargetChanged()
 	elseif event == "UNIT_HEALTH" and self.chat_frame_loaded then
@@ -53,7 +52,7 @@ function RTU:OnEvent(event, ...)
 end
 
 -- Change from the original shard to the other.
-function RTU:ChangeShard(old_zone_uid, new_zone_uid)
+function RTV:ChangeShard(old_zone_uid, new_zone_uid)
 	-- Notify the users in your old shard that you have moved on to another shard.
 	self:RegisterDeparture(old_zone_uid)
 	
@@ -71,16 +70,16 @@ function RTU:ChangeShard(old_zone_uid, new_zone_uid)
 end
 
 -- Check whether the user has changed shards and proceed accordingly.
-function RTU:CheckForShardChange(zone_uid)
+function RTV:CheckForShardChange(zone_uid)
 	local has_changed = false
 
 	if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print(L["<RTU> Moving to shard "]..(zone_uid + 42)..".")
+		print(L["<RTV> Moving to shard "]..(zone_uid + 42)..".")
 		self:UpdateShardNumber(zone_uid)
 		has_changed = true
 		
 		if self.current_shard_id == nil then
-			-- Register yourRTU for the given shard.
+			-- Register yourRTV for the given shard.
 			self:RegisterArrival(zone_uid)
 		else
 			-- Move from one shard to another.
@@ -102,13 +101,13 @@ function RTU:CheckForShardChange(zone_uid)
 	return has_changed
 end
 
-function RTU.CheckForRedirectedRareIds(npc_id)
-	-- Unused by RTU.
+function RTV.CheckForRedirectedRareIds(npc_id)
+	-- Unused by RTV.
 	return npc_id
 end
 
 -- Called when a target changed event is fired.
-function RTU:OnTargetChanged()
+function RTV:OnTargetChanged()
 	if UnitGUID("target") ~= nil then
 		-- Get information about the target.
 		local guid = UnitGUID("target")
@@ -120,7 +119,7 @@ function RTU:OnTargetChanged()
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
 		if not npc_id then return end
 		
-		if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
+		if not self.banned_NPC_ids[npc_id] and not RTVDB.banned_NPC_ids[npc_id] then
 			if self:CheckForShardChange(zone_uid) then
 				self.Debug("[Target]", guid)
 			end
@@ -150,7 +149,7 @@ function RTU:OnTargetChanged()
 end
 
 -- Called when a unit health update event is fired.
-function RTU:OnUnitHealth(unit)
+function RTV:OnUnitHealth(unit)
 	-- If the unit is not the target, skip.
 	if unit ~= "target" then
 		return
@@ -167,7 +166,7 @@ function RTU:OnUnitHealth(unit)
 		-- It might occur that the NPC id is nil. Do not proceed in such a case.
 		if not npc_id then return end
 		
-		if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
+		if not self.banned_NPC_ids[npc_id] and not RTVDB.banned_NPC_ids[npc_id] then
 			if self:CheckForShardChange(zone_uid) then
 				self.Debug("[OnUnitHealth]", guid)
 			end
@@ -197,10 +196,10 @@ local flag_mask = bit.bor(COMBATLOG_OBJECT_TYPE_GUARDIAN, COMBATLOG_OBJECT_TYPE_
 
 -- We track a list of entities that might cause erroneous shard changes.
 -- This list is updated dynamically.
-RTUDB.banned_NPC_ids = {}
+RTVDB.banned_NPC_ids = {}
 
 -- Called when a unit health update event is fired.
-function RTU:OnCombatLogEvent()
+function RTV:OnCombatLogEvent()
 	-- The event does not have a payload (8.0 change). Use CombatLogGetCurrentEventInfo() instead.
 	-- timestamp, subevent, zero, sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
 	-- destGUID, destName, destFlags, destRaidFlags
@@ -214,15 +213,15 @@ function RTU:OnCombatLogEvent()
 	if not npc_id then return end
 	
 	-- Blacklist the entity.
-	if not RTUDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 and not self.rare_ids_set[npc_id] then
-		RTUDB.banned_NPC_ids[npc_id] = true
+	if not RTVDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) > 0 and not self.rare_ids_set[npc_id] then
+		RTVDB.banned_NPC_ids[npc_id] = true
 	end
 	
 	-- We can always check for a shard change.
 	-- We only take fights between creatures, since they seem to be the only reliable option.
 	-- We exclude all pets and guardians, since they might have retained their old shard change.
 	if unittype == "Creature" and not self.banned_NPC_ids[npc_id]
-		and not RTUDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
+		and not RTVDB.banned_NPC_ids[npc_id] and bit.band(destFlags, flag_mask) == 0 then
 		
 		if self:CheckForShardChange(zone_uid) then
 			self.Debug("[OnCombatLogEvent]", sourceGUID, destGUID)
@@ -247,7 +246,7 @@ function RTU:OnCombatLogEvent()
 end
 
 -- Called when a vignette on the minimap is updated.
-function RTU:OnVignetteMinimapUpdated(vignetteGUID, _)
+function RTV:OnVignetteMinimapUpdated(vignetteGUID, _)
 	local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	local vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
 
@@ -261,7 +260,7 @@ function RTU:OnVignetteMinimapUpdated(vignetteGUID, _)
 		if not npc_id then return end
 		
 		if unittype == "Creature" then
-			if not self.banned_NPC_ids[npc_id] and not RTUDB.banned_NPC_ids[npc_id] then
+			if not self.banned_NPC_ids[npc_id] and not RTVDB.banned_NPC_ids[npc_id] then
 				if self:CheckForShardChange(zone_uid) then
 					self.Debug("[OnVignette]", vignetteInfo.objectGUID)
 				end
@@ -281,7 +280,7 @@ function RTU:OnVignetteMinimapUpdated(vignetteGUID, _)
 end
 
 -- Called when a monster or entity does a yell emote.
-function RTU:OnChatMsgMonsterYell(...)
+function RTV:OnChatMsgMonsterYell(...)
     local entity_name = select(2, ...)
     local npc_id = self.yell_announcing_rares[entity_name]
     
@@ -294,7 +293,7 @@ function RTU:OnChatMsgMonsterYell(...)
 end
 
 -- Called whenever an event occurs that could indicate a zone change.
-function RTU:OnZoneTransition()
+function RTV:OnZoneTransition()
 	-- The zone the player is in.
 	local zone_id = C_Map.GetBestMapForUnit("player")
 		
@@ -319,10 +318,10 @@ function RTU:OnZoneTransition()
 end
 
 -- Called on every addon message received by the addon.
-function RTU:OnChatMsgAddon(...)
+function RTV:OnChatMsgAddon(...)
 	local addon_prefix, message, _, sender = ...
 
-	if addon_prefix == "RTU" then
+	if addon_prefix == "RTV" then
 		local header, payload = strsplit(":", message)
 		local prefix, shard_id, addon_version_str = strsplit("-", header)
 		local addon_version = tonumber(addon_version_str)
@@ -332,13 +331,13 @@ function RTU:OnChatMsgAddon(...)
 end
 
 -- A counter that tracks the time stamp on which the displayed data was updated last.
-RTU.last_display_update = 0
+RTV.last_display_update = 0
 
 -- The last time the icon changed.
-RTU.last_icon_change = 0
+RTV.last_icon_change = 0
 
 -- Called on every addon message received by the addon.
-function RTU:OnUpdate()
+function RTV:OnUpdate()
 	if (self.last_display_update + 1 < GetTime()) then
 		for i=1, #self.rare_ids do
 			local npc_id = self.rare_ids[i]
@@ -363,72 +362,72 @@ function RTU:OnUpdate()
 		self.broadcast_icon.icon_state = not self.broadcast_icon.icon_state
 		
 		if self.broadcast_icon.icon_state then
-			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Broadcast.tga")
+			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerVale\\Icons\\Broadcast.tga")
 		else
-			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerUldum\\Icons\\Waypoint.tga")
+			self.broadcast_icon.texture:SetTexture("Interface\\AddOns\\RareTrackerVale\\Icons\\Waypoint.tga")
 		end
 	end
 end
 
 -- Called when the addon loaded event is fired.
-function RTU:OnAddonLoaded()
+function RTV:OnAddonLoaded()
 	-- OnAddonLoaded might be called multiple times. We only want it to do so once.
 	if not self.is_loaded then
 		
-		if RTUDB.show_window == nil then
-			RTUDB.show_window = true
+		if RTVDB.show_window == nil then
+			RTVDB.show_window = true
 		end
 		
-		if not RTUDB.favorite_rares then
-			RTUDB.favorite_rares = {}
+		if not RTVDB.favorite_rares then
+			RTVDB.favorite_rares = {}
 		end
 		
-		if not RTUDB.previous_records then
-			RTUDB.previous_records = {}
+		if not RTVDB.previous_records then
+			RTVDB.previous_records = {}
 		end
 		
-		if not RTUDB.selected_sound_number then
-			RTUDB.selected_sound_number = 552503
+		if not RTVDB.selected_sound_number then
+			RTVDB.selected_sound_number = 552503
 		end
 		
-		if RTUDB.minimap_icon_enabled == nil then
-			RTUDB.minimap_icon_enabled = true
+		if RTVDB.minimap_icon_enabled == nil then
+			RTVDB.minimap_icon_enabled = true
 		end
 		
-		if RTUDB.debug_enabled == nil then
-			RTUDB.debug_enabled = false
+		if RTVDB.debug_enabled == nil then
+			RTVDB.debug_enabled = false
 		end
 		
-		if not RTUDB.banned_NPC_ids then
-			RTUDB.banned_NPC_ids = {}
+		if not RTVDB.banned_NPC_ids then
+			RTVDB.banned_NPC_ids = {}
 		else
 			-- As a precaution, we remove all rares from the blacklist.
 			for i=1, #self.rare_ids do
 				local npc_id = self.rare_ids[i]
-				RTUDB.banned_NPC_ids[npc_id] = nil
+				RTVDB.banned_NPC_ids[npc_id] = nil
 			end
 		end
 		
-		if not RTUDB.window_scale then
-			RTUDB.window_scale = 1.0
+		if not RTVDB.window_scale then
+			RTVDB.window_scale = 1.0
 		end
 		
-		if RTUDB.enable_raid_communication == nil then
-			RTUDB.enable_raid_communication = true
+		if RTVDB.enable_raid_communication == nil then
+			RTVDB.enable_raid_communication = true
 		end
 		
-		if not RTUDB.ignore_rare then
-			RTUDB.ignore_rare = {}
+		if not RTVDB.ignore_rare then
+			RTVDB.ignore_rare = {}
 		end
 		
-		if not RTUDB.rare_ordering then
-			RTUDB.rare_ordering = LinkedSet:New()
+		if not RTVDB.rare_ordering then
+			RTVDB.rare_ordering = LinkedSet:New()
 			for i=1, #self.rare_ids do
 				local npc_id = self.rare_ids[i]
-				RTUDB.rare_ordering:AddBack(npc_id)
+				RTVDB.rare_ordering:AddBack(npc_id)
 			end
 		else
-			RTUDB.rare_ordering = LinkedSet:New(RTUDB.rare_ordering)
+			RTVDB.rare_ordering = LinkedSet:New(RTVDB.rare_ordering)
 		end
 		
 		-- Initialize the frame.
@@ -441,10 +440,10 @@ function RTU:OnAddonLoaded()
 		self:RegisterMapIcon()
 		
 		-- Remove any data in the previous records that has expired.
-		for key, _ in pairs(RTUDB.previous_records) do
-			if GetServerTime() - RTUDB.previous_records[key].time_stamp > 900 then
-				print(L["<RTU> Removing cached data for shard "]..(key + 42)..".")
-				RTUDB.previous_records[key] = nil
+		for key, _ in pairs(RTVDB.previous_records) do
+			if GetServerTime() - RTVDB.previous_records[key].time_stamp > 900 then
+				print(L["<RTV> Removing cached data for shard "]..(key + 42)..".")
+				RTVDB.previous_records[key] = nil
 			end
 		end
 		
@@ -453,17 +452,17 @@ function RTU:OnAddonLoaded()
 end
 
 -- Called when the player logs out, such that we can save the current time table for later use.
-function RTU:OnPlayerLogout()
+function RTV:OnPlayerLogout()
 	if self.current_shard_id then
 		-- Save the records, such that we can use them after a reload.
-		RTUDB.previous_records[self.current_shard_id] = {}
-		RTUDB.previous_records[self.current_shard_id].time_stamp = GetServerTime()
-		RTUDB.previous_records[self.current_shard_id].time_table = self.last_recorded_death
+		RTVDB.previous_records[self.current_shard_id] = {}
+		RTVDB.previous_records[self.current_shard_id].time_stamp = GetServerTime()
+		RTVDB.previous_records[self.current_shard_id].time_table = self.last_recorded_death
 	end
 end
 
 -- Register to the events required for the addon to function properly.
-function RTU:RegisterEvents()
+function RTV:RegisterEvents()
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -473,7 +472,7 @@ function RTU:RegisterEvents()
 end
 
 -- Unregister from the events, to disable the tracking functionality.
-function RTU:UnregisterEvents()
+function RTV:UnregisterEvents()
 	self:UnregisterEvent("PLAYER_TARGET_CHANGED")
 	self:UnregisterEvent("UNIT_HEALTH")
 	self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -483,25 +482,25 @@ function RTU:UnregisterEvents()
 end
 
 -- Create a frame that handles the frame updates of the addon.
-RTU.updateHandler = CreateFrame("Frame", "RTU.updateHandler", RTU)
-RTU.updateHandler:SetScript("OnUpdate",
+RTV.updateHandler = CreateFrame("Frame", "RTV.updateHandler", RTV)
+RTV.updateHandler:SetScript("OnUpdate",
 	function()
-		RTU:OnUpdate()
+		RTV:OnUpdate()
 	end
 )
 
 -- Register the event handling of the frame.
-RTU:SetScript("OnEvent",
+RTV:SetScript("OnEvent",
 	function(self, event, ...)
 		self:OnEvent(event, ...)
 	end
 )
 
-RTU:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-RTU:RegisterEvent("ZONE_CHANGED")
-RTU:RegisterEvent("PLAYER_ENTERING_WORLD")
-RTU:RegisterEvent("ADDON_LOADED")
-RTU:RegisterEvent("PLAYER_LOGOUT")
+RTV:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+RTV:RegisterEvent("ZONE_CHANGED")
+RTV:RegisterEvent("PLAYER_ENTERING_WORLD")
+RTV:RegisterEvent("ADDON_LOADED")
+RTV:RegisterEvent("PLAYER_LOGOUT")
 
 -- ####################################################################
 -- ##                      Daily Reset Handling                      ##
@@ -523,9 +522,9 @@ daily_reset_handling_frame:SetScript("OnUpdate",
 		if GetServerTime() > self.target_time then
 			self.target_time = self.target_time + 3600
             
-            if RTU.entities_frame ~= nil then
-                RTU:UpdateAllDailyKillMarks()
-                RTU.Debug("<RTU> Updating daily kill marks.")
+            if RTV.entities_frame ~= nil then
+                RTV:UpdateAllDailyKillMarks()
+                RTV.Debug("<RTV> Updating daily kill marks.")
             end
 		end
 	end
@@ -539,9 +538,9 @@ daily_reset_handling_frame:Show()
 -- One of the issues encountered is that the chat might be joined before the default channels.
 -- In such a situation, the order of the channels changes, which is undesirable.
 -- Thus, we block certain events until these chats have been loaded.
-RTU.chat_frame_loaded = false
+RTV.chat_frame_loaded = false
 
-local message_delay_frame = CreateFrame("Frame", "RTU.message_delay_frame", UIParent)
+local message_delay_frame = CreateFrame("Frame", "RTV.message_delay_frame", UIParent)
 message_delay_frame.start_time = GetServerTime()
 message_delay_frame:SetScript("OnUpdate",
 	function(self)
@@ -549,7 +548,7 @@ message_delay_frame:SetScript("OnUpdate",
 			if #{GetChannelList()} == 0 then
 				self.start_time = GetServerTime()
 			else
-				RTU.chat_frame_loaded = true
+				RTV.chat_frame_loaded = true
 				self:SetScript("OnUpdate", nil)
 				self:Hide()
 			end

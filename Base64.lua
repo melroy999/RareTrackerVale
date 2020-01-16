@@ -12,7 +12,7 @@ for i = 1, #digits do
 end
 
 -- Convert a decimal number to a base64 string.
-function RTM.toBase64(number)
+function RTU.toBase64(number)
     local t = {}
 	
 	if number < 0 then
@@ -29,7 +29,7 @@ function RTM.toBase64(number)
 end
 
 -- Convert a decimal number to a base64 string.
-function RTM.toBase10(base64)
+function RTU.toBase10(base64)
 	local n = 0
 	local j = 1
 	
