@@ -2,7 +2,7 @@
 ## Title: RareTrackerVale
 ## Notes: Track and coordinate rare spawn timers in Vale.
 ## Author: Melroy
-## Version: 5.2.8
+## Version: 5.2.9
 ##SavedVariables: RTVDB, RTV_ace_db
 
 libs\LibDBIcon-1.0\LibStub\LibStub.lua
