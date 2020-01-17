@@ -7,7 +7,8 @@ local GetLocale = GetLocale
 
 -- The zones in which the addon is active.
 RTV.target_zones = {
-    [1530] = true
+    [1530] = true,
+    [1579] = true,
 }
 RTV.parent_zone = 1530
 
