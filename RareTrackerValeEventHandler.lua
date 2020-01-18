@@ -420,12 +420,14 @@ function RTV:OnAddonLoaded()
 			RTVDB.ignore_rare = {}
 		end
 		
-		if not RTVDB.rare_ordering then
+		if not RTVDB.rare_ordering or not RTVDB.version or RTVDB.version ~= self.version then
+            self.Debug("<RTV> Resetting ordering")
 			RTVDB.rare_ordering = LinkedSet:New()
 			for i=1, #self.rare_ids do
 				local npc_id = self.rare_ids[i]
 				RTVDB.rare_ordering:AddBack(npc_id)
 			end
+            RTVDB.version = self.version
 		else
 			RTVDB.rare_ordering = LinkedSet:New(RTVDB.rare_ordering)
 		end

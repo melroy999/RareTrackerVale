@@ -45,6 +45,7 @@ RTV.rare_ids = {
     160893, -- "Captain Vor'lek"
     154467, -- "Chief Mek-mek"
     157183, -- "Coagulated Anima"
+    159087, -- "Corrupted Bonestripper"
     154559, -- "Deeplord Zrihj"
     160872, -- "Destroyer Krox'tazar"
     157287, -- "Dokani Obliterator"
@@ -68,6 +69,7 @@ RTV.rare_ids = {
     157162, -- "Rei Lun"
     154490, -- "Rijz'x the Devourer"
     156083, -- "Sanguifang"
+    160906, -- "Skiver"
     157291, -- "Spymaster Hul'ach"
     157279, -- "Stormhowl"
     156424, -- "Tashara"
@@ -102,6 +104,7 @@ RTV.assault_rare_ids = {
         160867,
         160922,
         157468,
+        160906, -- "Skiver"
     }),
     [3155832] = Set({ -- Mid (MOG)
         157466,
@@ -120,6 +123,7 @@ RTV.assault_rare_ids = {
         154600,
         157468,
         157443,
+        160906, -- "Skiver"
     }),
     [3155841] = Set({ -- East (EMP)
         154447,
@@ -135,6 +139,8 @@ RTV.assault_rare_ids = {
         154332,
         154495,
         154087,
+        159087, -- "Corrupted Bonestripper"
+        160906, -- "Skiver"
     })
 }
 
@@ -151,6 +157,7 @@ RTV.rare_names = {
     [160893] = "Captain Vor'lek",
     [154467] = "Chief Mek-mek",
     [157183] = "Coagulated Anima",
+    [159087] = "Corrupted Bonestripper",
     [154559] = "Deeplord Zrihj",
     [160872] = "Destroyer Krox'tazar",
     [157287] = "Dokani Obliterator",
@@ -174,6 +181,7 @@ RTV.rare_names = {
     [157162] = "Rei Lun",
     [154490] = "Rijz'x the Devourer",
     [156083] = "Sanguifang",
+    [160906] = "Skiver",
     [157291] = "Spymaster Hul'ach",
     [157279] = "Stormhowl",
     [156424] = "Tashara",
@@ -222,6 +230,7 @@ RTV.completion_quest_ids = {
     [160893] = 58308, -- "Captain Vor'lek"
     [154467] = 56255, -- "Chief Mek-mek"
     [157183] = 58296, -- "Coagulated Anima"
+    [159087] = 57834, -- "Corrupted Bonestripper"
     [154559] = 56323, -- "Deeplord Zrihj"
     [160872] = 58304, -- "Destroyer Krox'tazar"
     [157287] = 57349, -- "Dokani Obliterator"
@@ -245,6 +254,7 @@ RTV.completion_quest_ids = {
     [157162] = 57346, -- "Rei Lun"
     [154490] = 56302, -- "Rijz'x the Devourer"
     [156083] = 56954, -- "Sanguifang"
+    [160906] = 58309, -- "Skiver"
     [157291] = 57351, -- "Spymaster Hul'ach"
     [157279] = 57348, -- "Stormhowl"
     [156424] = 58507, -- "Tashara"
@@ -266,6 +276,7 @@ RTV.completion_quest_inverse = {
     [58308] = {160893}, -- "Captain Vor'lek"
     [56255] = {154467}, -- "Chief Mek-mek"
     [58296] = {157183}, -- "Coagulated Anima"
+    [57834] = {159087}, -- "Corrupted Bonestripper"
     [56323] = {154559}, -- "Deeplord Zrihj"
     [58304] = {160872}, -- "Destroyer Krox'tazar"
     [57349] = {157287}, -- "Dokani Obliterator"
@@ -289,6 +300,7 @@ RTV.completion_quest_inverse = {
     [57346] = {157162}, -- "Rei Lun"
     [56302] = {154490}, -- "Rijz'x the Devourer"
     [56954] = {156083}, -- "Sanguifang"
+    [58309] = {160906}, -- "Skiver"
     [57351] = {157291}, -- "Spymaster Hul'ach"
     [57348] = {157279}, -- "Stormhowl"
     [58507] = {156424}, -- "Tashara"
@@ -320,6 +332,7 @@ RTV.rare_coordinates = {
     [160893] = {["x"] = 6, ["y"] = 64}, -- "Captain Vor'lek"
     [154467] = {["x"] = 81, ["y"] = 65}, -- "Chief Mek-mek"
     [157183] = {["x"] = 19, ["y"] = 68}, -- "Coagulated Anima"
+    -- [159087], -- Corrupted Bonestripper
     [154559] = {["x"] = 67, ["y"] = 68}, -- "Deeplord Zrihj"
     [160872] = {["x"] = 27, ["y"] = 67}, -- "Destroyer Krox'tazar"
     [157287] = {["x"] = 42, ["y"] = 57}, -- "Dokani Obliterator"
@@ -343,6 +356,7 @@ RTV.rare_coordinates = {
     [157162] = {["x"] = 22, ["y"] = 12}, -- "Rei Lun"
     [154490] = {["x"] = 64, ["y"] = 52}, -- "Rijz'x the Devourer"
     [156083] = {["x"] = 46, ["y"] = 57}, -- "Sanguifang"
+    [160906] = {["x"] = 27, ["y"] = 43}, -- "Skiver"
     [157291] = {["x"] = 18, ["y"] = 38}, -- "Spymaster Hul'ach"
     [157279] = {["x"] = 26, ["y"] = 75}, -- "Stormhowl"
     [156424] = {["x"] = 29, ["y"] = 22}, -- "Tashara"
