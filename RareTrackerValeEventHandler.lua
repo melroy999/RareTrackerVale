@@ -250,7 +250,7 @@ function RTV:OnVignetteMinimapUpdated(vignetteGUID, _)
 	local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
 	local vignetteLocation = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
 
-	if vignetteInfo then
+	if vignetteInfo and vignetteLocation then
 		-- Report the entity.
 		-- unittype, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid
 		local unittype, _, _, _, zone_uid, npc_id, spawn_uid = strsplit("-", vignetteInfo.objectGUID)
