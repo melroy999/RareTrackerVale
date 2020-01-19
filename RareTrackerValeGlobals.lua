@@ -149,7 +149,7 @@ RTV.localization = GetLocale()
 RTV.rare_names = {}
 
 if RTV.localization == "frFR" then
-    -- The names to be displayed in the frames and general chat messages for the French localizations.
+    -- The names to be displayed in the frames and general chat messages for the French localization.
     RTV.rare_names = {
         [160825] = "Sculpte-ambre Esh'ri",
         [157466] = "Anh De le Loyal",
@@ -194,6 +194,53 @@ if RTV.localization == "frFR" then
         [154495] = "Volonté de N'Zoth",
         [157443] = "Xiln la Montagne",
         [154087] = "Zror'um l'Infini",
+    }
+elseif RTV.localization == "deDE" then
+    -- The names to be displayed in the frames and general chat messages for the German localization.
+    RTV.rare_names = {
+        [160825] = "Bernformer Esh'ri",
+        [157466] = "Anh-De der Loyale",
+        [154447] = "Bruder Meller",
+        [160878] = "Buh'gzaki der Blasphemiker",
+        [160893] = "Hauptmann Vor'lek",
+        [154467] = "Häuptling Mek-mek",
+        [157183] = "Geronnene Anima",
+        [159087] = "Verderbter Knochenhäuter",
+        [154559] = "Tiefenfürst Zrihj",
+        [160872] = "Zerstörer Krox'tazar",
+        [157287] = "Auslöscher der Dokani",
+        [160874] = "Drohnenhüter Ak'thet",
+        [160876] = "Wütender Bernelementar",
+        [157267] = "Entflohene Mutation",
+        [157153] = "Ha-Li",
+        [160810] = "Herold Il'koxik",
+        [160868] = "Hetzer Nir'verash",
+        [157171] = "Heixi der Steinfürst",
+        [160826] = "Stockwache Naz'ruzek",
+        [157160] = "Hundmeister Ren",
+        [160930] = "Durchströmter Bernschlamm",
+        [160968] = "Jadekoloss",
+        [157290] = "Jadebeobachter",
+        [160920] = "Kal'tik der Veröder",
+        [157266] = "Kilxl das Klaffende Maul",
+        [160867] = "Kzit'kovok",
+        [160922] = "Nadler Zhesalla",
+        [154106] = "Kwall",
+        [157162] = "Rei Lun",
+        [154490] = "Rijz'x der Verschlinger",
+        [156083] = "Sanguifang",
+        [160906] = "Schlitzer",
+        [157291] = "Meisterspion Hul'ach",
+        [157279] = "Sturmgeheul",
+        [156424] = "Tashara",
+        [154600] = "Teng der Erweckte",
+        [157176] = "Die Vergessenen",
+        [157468] = "Tisiphon",
+        [154394] = "Veskan der Gefallene",
+        [154332] = "Leerenhüter Malketh",
+        [154495] = "Wille von N'Zoth",
+        [157443] = "Xiln der Berg",
+        [154087] = "Zror'um der Unendliche",
     }
 else
     -- The names to be displayed in the frames and general chat messages for the English localizations.
