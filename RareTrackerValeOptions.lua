@@ -99,8 +99,16 @@ function RTV:IntializeMinimapCheckbox(parent_frame)
 			RTVDB.minimap_icon_enabled = not RTVDB.minimap_icon_enabled
 			if not RTVDB.minimap_icon_enabled then
 				self.icon:Hide("RTV_icon")
+                if Bazooka then
+                    Bazooka:disablePlugin(Bazooka.plugins["RTV"])
+                end
 			elseif RTV.target_zones[C_Map.GetBestMapForUnit("player")] then
 				self.icon:Show("RTV_icon")
+                if Bazooka then
+                    local plugin = Bazooka.plugins["RTV"]
+                    plugin.db.enabled = true
+                    plugin:applySettings()
+                end
 			end
 		end
 	);

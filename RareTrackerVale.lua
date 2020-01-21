@@ -118,8 +118,16 @@ function RTV:StartInterface()
 	
 	if RTVDB.minimap_icon_enabled then
 		self.icon:Show("RTV_icon")
+        if Bazooka then
+            local plugin = Bazooka.plugins["RTV"]
+            plugin.db.enabled = true
+            plugin:applySettings()
+        end
 	else
 		self.icon:Hide("RTV_icon")
+        if Bazooka then
+            Bazooka:disablePlugin(Bazooka.plugins["RTV"])
+        end
 	end
 	
 	if C_ChatInfo.RegisterAddonMessagePrefix("RTV") ~= true then
@@ -147,6 +155,9 @@ function RTV:CloseInterface()
 	self:RegisterDeparture(self.current_shard_id)
 	self:UnregisterEvents()
 	self.icon:Hide("RTV_icon")
+    if Bazooka then
+        Bazooka:disablePlugin(Bazooka.plugins["RTV"])
+    end
 	
 	-- Hide the interface.
 	self:Hide()
@@ -156,7 +167,7 @@ end
 -- ##                          Minimap Icon                          ##
 -- ####################################################################
 
-local RTV_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTV_icon_object", {
+local RTV_LDB = LibStub("LibDataBroker-1.1"):NewDataObject("RTV", {
 	type = "data source",
 	text = "RTV",
 	icon = "Interface\\AddOns\\RareTrackerVale\\Icons\\RareTrackerIcon",

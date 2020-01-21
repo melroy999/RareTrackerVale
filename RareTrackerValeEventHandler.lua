@@ -373,7 +373,6 @@ end
 function RTV:OnAddonLoaded()
 	-- OnAddonLoaded might be called multiple times. We only want it to do so once.
 	if not self.is_loaded then
-		
 		if RTVDB.show_window == nil then
 			RTVDB.show_window = true
 		end
