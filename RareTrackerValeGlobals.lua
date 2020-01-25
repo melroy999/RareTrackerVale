@@ -72,7 +72,7 @@ RTV.rare_ids = {
     160906, -- "Skiver"
     157291, -- "Spymaster Hul'ach"
     157279, -- "Stormhowl"
-    156424, -- "Tashara"
+    155958, -- "Tashara"
     154600, -- "Teng the Awakened"
     157176, -- "The Forgotten"
     157468, -- "Tisiphon"
@@ -119,7 +119,7 @@ RTV.assault_rare_ids = {
         156083,
         157291,
         157279,
-        156424,
+        155958,
         154600,
         157468,
         157443,
@@ -185,7 +185,7 @@ if RTV.localization == "frFR" then
         [160906] = "Cossard",
         [157291] = "Maître-espion Hul'ach",
         [157279] = "Tempête-hurlante",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng l'Eveillé",
         [157176] = "L'Oubliée",
         [157468] = "Tisiphon",
@@ -232,7 +232,7 @@ elseif RTV.localization == "deDE" then
         [160906] = "Schlitzer",
         [157291] = "Meisterspion Hul'ach",
         [157279] = "Sturmgeheul",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng der Erweckte",
         [157176] = "Die Vergessenen",
         [157468] = "Tisiphon",
@@ -279,7 +279,7 @@ elseif RTV.localization == "esES" or RTV.localization == "esMX" then
         [160906] = "Picador",
         [157291] = "Maestro de espías Hul'ach",
         [157279] = "Tormenta Aullante",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng el Despierto",
         [157176] = "Los olvidados",
         [157468] = "Tisiphon",
@@ -326,7 +326,7 @@ elseif RTV.localization == "itIT" then
         [160906] = "Tagliapelli",
         [157291] = "Maestro delle Spie Hul'ach",
         [157279] = "Urlatempesta",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng il Risvegliato",
         [157176] = "La Dimenticata",
         [157468] = "Tisifon",
@@ -373,7 +373,7 @@ elseif RTV.localization == "ptPT" or RTV.localization == "ptBR" then
         [160906] = "Skivero",
         [157291] = "Mestre Espião Hul'ach",
         [157279] = "Uivo Tempestuoso",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng, o Desperto",
         [157176] = "Os Esquecidos",
         [157468] = "Tisiphon",
@@ -420,7 +420,7 @@ elseif RTV.localization == "ruRU" then
         [160906] = "Срезатель",
         [157291] = "Мастер шпионажа Хул'ах",
         [157279] = "Рев Бури",
-        [156424] = "Ташара",
+        [155958] = "Ташара",
         [154600] = "Тэн Пробудившийся",
         [157176] = "Забытая",
         [157468] = "Тисифон",
@@ -467,7 +467,7 @@ elseif RTV.localization == "koKR" then
         [160906] = "스카이버",
         [157291] = "첩보단장 훌라크",
         [157279] = "폭풍포효",
-        [156424] = "타샤라",
+        [155958] = "타샤라",
         [154600] = "깨어난 자 텐그",
         [157176] = "망각한 자",
         [157468] = "티시폰",
@@ -514,7 +514,7 @@ else
         [160906] = "Skiver",
         [157291] = "Spymaster Hul'ach",
         [157279] = "Stormhowl",
-        [156424] = "Tashara",
+        [155958] = "Tashara",
         [154600] = "Teng the Awakened",
         [157176] = "The Forgotten",
         [157468] = "Tisiphon",
@@ -588,7 +588,7 @@ RTV.completion_quest_ids = {
     [160906] = 58309, -- "Skiver"
     [157291] = 57351, -- "Spymaster Hul'ach"
     [157279] = 57348, -- "Stormhowl"
-    [156424] = 58507, -- "Tashara"
+    [155958] = 58507, -- "Tashara"
     [154600] = 56332, -- "Teng the Awakened"
     [157176] = 57342, -- "The Forgotten"
     [157468] = 57364, -- "Tisiphon"
@@ -634,7 +634,7 @@ RTV.completion_quest_inverse = {
     [58309] = {160906}, -- "Skiver"
     [57351] = {157291}, -- "Spymaster Hul'ach"
     [57348] = {157279}, -- "Stormhowl"
-    [58507] = {156424}, -- "Tashara"
+    [58507] = {155958}, -- "Tashara"
     [56332] = {154600}, -- "Teng the Awakened"
     [57342] = {157176}, -- "The Forgotten"
     [57364] = {157468}, -- "Tisiphon"
@@ -690,7 +690,7 @@ RTV.rare_coordinates = {
     [160906] = {["x"] = 27, ["y"] = 43}, -- "Skiver"
     [157291] = {["x"] = 18, ["y"] = 38}, -- "Spymaster Hul'ach"
     [157279] = {["x"] = 26, ["y"] = 75}, -- "Stormhowl"
-    [156424] = {["x"] = 29, ["y"] = 22}, -- "Tashara"
+    [155958] = {["x"] = 29, ["y"] = 22}, -- "Tashara"
     [154600] = {["x"] = 47, ["y"] = 64}, -- "Teng the Awakened"
     [157176] = {["x"] = 52, ["y"] = 42}, -- "The Forgotten"
     [157468] = {["x"] = 10, ["y"] = 67}, -- "Tisiphon"
