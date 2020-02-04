@@ -44,6 +44,7 @@ function RTV:AddModuleOptions(options)
                         step = 0.05,
                         isPercent = true,
                         order = RT:GetOrder(),
+                        width = 1.2,
                         get = function()
                             return self.db.global.window_scale
                         end,
@@ -57,6 +58,7 @@ function RTV:AddModuleOptions(options)
                         name = L["Reset Favorites"],
                         desc = L["Reset the list of favorite rares."],
                         order = RT:GetOrder(),
+                        width = 1.2,
                         func = function()
                             self.db.global.favorite_rares = {}
                             self:CorrectFavoriteMarks()

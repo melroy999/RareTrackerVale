@@ -3,7 +3,8 @@
 ## Notes: Track and coordinate rare spawn timers in the Vale of Eternal Blossoms.
 ## Author: Melroy
 ## Version: 6.0.0
-##SavedVariables: RareTrackerValeDB
+## SavedVariables: RareTrackerValeDB
+## Dependencies: RareTrackerCore
 
 libs\AceLocale-3.0\AceLocale-3.0.lua
 libs\AceDB-3.0\AceDB-3.0.xml
