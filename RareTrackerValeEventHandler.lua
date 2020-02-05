@@ -3,6 +3,7 @@ local print = print
 
 -- Redefine often used variables locally.
 local C_MapExplorationInfo = C_MapExplorationInfo
+local string = string
 
 -- ####################################################################
 -- ##                      Localization Support                      ##
@@ -32,7 +33,7 @@ function RTV:CheckForShardChange(zone_uid)
 	local has_changed = false
 
 	if self.current_shard_id ~= zone_uid and zone_uid ~= nil then
-		print(L["<RTV> Moving to shard "]..(zone_uid + 42)..".")
+		print(string.format(L["<%s> Moving to shard "], self.addon_code)..(zone_uid + 42)..".")
 		self:UpdateShardNumber(zone_uid)
 		has_changed = true
 		
