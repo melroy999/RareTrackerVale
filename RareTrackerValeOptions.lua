@@ -12,6 +12,25 @@ local L = LibStub("AceLocale-3.0"):GetLocale("RareTrackerVale", true)
 function RTV:InitializeRareTrackerDatabase()
     self.defaults = RT.GetDefaultModuleDatabaseValues()
     
+    -- Copy over settings from the previous version, if possible.
+    if RTVDB then
+        -- Copy over the favorite rares, ignored rares and window scale.
+        if RTVDB.favorite_rares then
+            self.defaults.global.favorite_rares = RTVDB.favorite_rares
+        end
+        
+        if RTVDB.ignore_rare then
+            self.defaults.global.ignore_rares = RTVDB.ignore_rare
+        end
+        
+        if RTVDB.window_scale then
+            self.defaults.global.window_scale = RTVDB.window_scale
+        end
+        
+        -- Remove the RTUDB table.
+        RTVDB = nil
+    end
+    
     -- Load the database.
     self.db = LibStub("AceDB-3.0"):New("RareTrackerValeDB", self.defaults, true)
 end
