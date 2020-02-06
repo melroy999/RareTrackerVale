@@ -44,7 +44,7 @@ function RTV:AddModuleOptions(options)
         args = {
             description = {
                 type = "description",
-                name = "RareTrackerVale (v"..GetAddOnMetadata("RareTrackerVale", "Version")..")",
+                name = "RareTrackerVale (RTV)",
                 order = RT:GetOrder(),
                 fontSize = "large",
                 width = "full",
