@@ -645,15 +645,6 @@ RTV.completion_quest_inverse = {
     [56084] = {154087}, -- "Zror'um the Infinite"
 }
 
--- Certain npcs have yell emotes to announce their arrival.
-local yell_announcing_rares = {}
-
--- Concert the ids above to the names.
-RTV.yell_announcing_rares = {}
-for key, value in pairs(yell_announcing_rares) do
-    RTV.yell_announcing_rares[RTV.rare_names[key]] = value
-end
-
 -- A set of placeholder icons, which will be used if the rare location is not yet known.
 RTV.rare_coordinates = {
     [160825] = {["x"] = 20, ["y"] = 75}, -- "Amber-Shaper Esh'ri"
