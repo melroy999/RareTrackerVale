@@ -2,7 +2,7 @@
 ## Title: RareTrackerVale
 ## Notes: Track and coordinate rare spawn timers in the Vale of Eternal Blossoms.
 ## Author: Melroy
-## Version: 6.0.3
+## Version: 6.0.4
 ## SavedVariables: RareTrackerValeDB, RTVDB
 ## Dependencies: RareTrackerCore
 
